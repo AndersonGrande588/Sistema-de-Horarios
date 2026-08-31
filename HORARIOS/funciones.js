@@ -27,6 +27,22 @@ const stores = {
 let schedules = {};
 let currentStore = "";
 
+// ═══════════════════════════════════════════════════════════
+//  FOTOS DE EMPLEADOS (carpeta /tecnicos)
+//  Edita aquí para cambiar la imagen de cada empleado.
+//  Si quieres añadir o corregir una foto, actualiza la ruta
+//  y coloca el archivo dentro de la carpeta "tecnicos".
+// ═══════════════════════════════════════════════════════════
+const photos = {
+    "Kevin Alean": "tecnicos/unnamed (1).webp",
+    "Jersoon Gonzalez": "tecnicos/web/jersoon.webp",
+    "Andres Bojaca": "tecnicos/web/bojaca.webp",
+    "Julian Garzon": "tecnicos/web/julian.webp",
+    "Anderson Grande": "tecnicos/web/anderson.webp",
+    "Angel Ortiz": "tecnicos/unnamed (2).webp",
+    "Andres Garzon": "tecnicos/unnamed (3).webp"
+};
+
 async function loadSchedules() {
     try {
         const response = await fetch('horarios.json');
@@ -55,6 +71,10 @@ function filterStoresByCountry() {
     document.getElementById("storeInfo").classList.add("hidden");
     document.getElementById("staffSection").classList.add("hidden");
     document.getElementById("emptyState").classList.remove("hidden");
+    document.getElementById("staffList").innerHTML = "";
+    document.getElementById("filterMonth").value = "";
+    document.getElementById("filterWeek").value = "";
+    document.getElementById("filterType").value = "";
 
     if (!selectedCountry) {
         storeSelect.innerHTML = '<option value="">-- Primero selecciona un país --</option>';
@@ -86,8 +106,15 @@ function renderStore() {
         storeInfo.classList.add("hidden");
         staffSection.classList.add("hidden");
         emptyState.classList.remove("hidden");
+        document.getElementById("staffList").innerHTML = "";
         return;
     }
+
+    // Limpiar lista y filtros al elegir una tienda distinta
+    document.getElementById("staffList").innerHTML = "";
+    document.getElementById("filterMonth").value = "";
+    document.getElementById("filterWeek").value = "";
+    document.getElementById("filterType").value = "";
 
     emptyState.classList.add("hidden");
     storeInfo.classList.remove("hidden");
@@ -100,10 +127,6 @@ function renderStore() {
     document.getElementById("storeAddress").textContent = store.address;
     document.getElementById("countryDisplay").textContent = `${country.flag} ${country.name}`;
     document.getElementById("staffCount").textContent = (schedules[currentStore] || []).length;
-
-    document.getElementById("filterMonth").value = "";
-    document.getElementById("filterWeek").value = "";
-    document.getElementById("filterType").value = "";
 }
 
 function renderStaffList() {
@@ -216,6 +239,12 @@ function renderStaffList() {
             .substring(0, 2)
             .toUpperCase();
 
+        // Foto del empleado: foto arriba del nombre si hay, sino iniciales
+        const photo = photos[person.name];
+        const photoHtml = photo
+            ? `<img class="cal-photo" src="${photo}" alt="${person.name}">`
+            : `<div class="cal-avatar">${initials}</div>`;
+
         // Disponibilidad semanal: días con turno / días laborales
         let diasConTurno = 0;
         days.forEach(day => {
@@ -224,8 +253,8 @@ function renderStaffList() {
 
         let row =
             '<div class="cal-row">' +
-            `<div class="cal-person">
-                <div class="cal-avatar">${initials}</div>
+            `<div class="cal-person cal-person-column">
+                ${photoHtml}
                 <div>
                     <div class="cal-person-name">${person.name}</div>
                     <div class="cal-person-meta">${person.email}<br>${person.phone}</div>

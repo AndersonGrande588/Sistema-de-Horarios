@@ -349,6 +349,34 @@
             gap: 10px;
         }
 
+        /* Columna de persona con foto arriba del nombre (apilado vertical, centrado) */
+        .cal-person-column {
+            flex-direction: column;
+            text-align: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .cal-person-column .cal-person-meta {
+            font-size: 10px;
+        }
+
+        /* Foto que se autoajusta a la proporción de cada imagen
+           (sin deformar ni cortar: ancho fluido, alto proporcional) */
+        .cal-photo {
+            width: 100%;
+            height: auto;
+            max-width: 120px;
+            max-height: 120px;
+            border-radius: 8px;
+            object-fit: contain;
+            border: 1px solid #e5e7eb;
+            background: #e5e7eb;
+            flex-shrink: 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin: 0 auto;
+        }
+
         .cal-person .cal-avatar {
             width: 36px;
             height: 36px;
