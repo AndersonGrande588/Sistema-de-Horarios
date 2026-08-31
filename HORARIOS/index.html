@@ -85,6 +85,15 @@
                     <option>Semana 5</option>
                 </select>
             </div>
+            <div class="filter-group">
+                <label for="filterType">⏰ Tipo de jornada</label>
+                <select id="filterType" onchange="renderStaffList()">
+                    <option value="">Todas</option>
+                    <option value="completa">Jornada completa</option>
+                    <option value="parcial">Jornada parcial</option>
+                    <option value="guardia">Guardia</option>
+                </select>
+            </div>
         </div>
 
         <div id="staffList"></div>

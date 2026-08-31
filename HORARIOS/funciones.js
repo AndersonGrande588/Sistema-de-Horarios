@@ -103,6 +103,7 @@ function renderStore() {
 
     document.getElementById("filterMonth").value = "";
     document.getElementById("filterWeek").value = "";
+    document.getElementById("filterType").value = "";
 }
 
 function renderStaffList() {
@@ -110,6 +111,7 @@ function renderStaffList() {
 
     const filterMonth = document.getElementById("filterMonth").value;
     const filterWeek = document.getElementById("filterWeek").value;
+    const filterType = document.getElementById("filterType").value;
 
     let staff = schedules[currentStore] || [];
 
@@ -119,6 +121,17 @@ function renderStaffList() {
 
     if (filterWeek) {
         staff = staff.filter(s => s.week === filterWeek);
+    }
+
+    if (filterType) {
+        staff = staff.filter(s => {
+            const dur = toMinutes(s.end) - toMinutes(s.start);
+            const esGuardia = String(s.day).indexOf("Guardia") !== -1;
+            if (filterType === "guardia") return esGuardia;
+            if (filterType === "completa") return !esGuardia && dur >= 540;
+            if (filterType === "parcial") return !esGuardia && dur < 540;
+            return true;
+        });
     }
 
     if (staff.length === 0) {
@@ -203,6 +216,12 @@ function renderStaffList() {
             .substring(0, 2)
             .toUpperCase();
 
+        // Disponibilidad semanal: días con turno / días laborales
+        let diasConTurno = 0;
+        days.forEach(day => {
+            if (person.schedules.some(s => normalizeDay(s.day) === day)) diasConTurno++;
+        });
+
         let row =
             '<div class="cal-row">' +
             `<div class="cal-person">
@@ -210,6 +229,7 @@ function renderStaffList() {
                 <div>
                     <div class="cal-person-name">${person.name}</div>
                     <div class="cal-person-meta">${person.email}<br>${person.phone}</div>
+                    <div class="cal-disp-badge">${diasConTurno}/${days.length} días disponibles</div>
                 </div>
             </div>`;
 
@@ -228,7 +248,14 @@ function renderStaffList() {
                         ${sch.start}-${sch.end}
                     </div>`;
             });
-            row += `<div class="cal-cell">${cellInner}</div>`;
+            // Marcador de disponibilidad: clase según cobertura del horario normal
+            let dispClass = 'disponible-parcial';
+            if (daySchedules.some(s => String(s.day).indexOf("Guardia") !== -1)) {
+                dispClass = 'disponible-guardia';
+            } else if (daySchedules.some(s => (toMinutes(s.end) - toMinutes(s.start)) >= 540)) {
+                dispClass = 'disponible-completo';
+            }
+            row += `<div class="cal-cell ${dispClass}">${cellInner}</div>`;
         });
 
         row += '</div>';
