@@ -1,0 +1,450 @@
+:root
+        {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f3f4f6;
+            color: #1f2937;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 6px;
+        }
+
+        header p {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .selector-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            font-size: 14px;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+            background: #fff;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            font-family: inherit;
+        }
+
+        select:focus, input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        select:disabled {
+            background: #e5e7eb;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .store-banner {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .store-banner h2 {
+            margin: 0 0 4px 0;
+            font-size: 20px;
+        }
+
+        .store-banner p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .badge {
+            background: rgba(255,255,255,0.2);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .section-header h3 {
+            font-size: 18px;
+            color: #111827;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .employee-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .employee-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .employee-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .employee-name {
+            font-weight: 700;
+            font-size: 16px;
+            color: #111827;
+        }
+
+        .employee-contact {
+            font-size: 13px;
+            color: #6b7280;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 3px;
+        }
+
+        .schedules {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .schedule-tag {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .schedule-month {
+            font-weight: 700;
+            color: #1e40af;
+            font-size: 13px;
+        }
+
+        .schedule-week {
+            font-weight: 600;
+            color: #059669;
+            font-size: 13px;
+        }
+
+        .schedule-day {
+            font-weight: 600;
+            color: #7c3aed;
+            font-size: 13px;
+        }
+
+        .schedule-time {
+            color: #374151;
+            font-size: 13px;
+        }
+
+        .separator {
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #9ca3af;
+        }
+
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+            margin: 0;
+        }
+
+        .empty-box {
+            text-align: center;
+            padding: 40px 20px;
+            background: #f9fafb;
+            border: 2px dashed #d1d5db;
+            border-radius: 12px;
+            color: #6b7280;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .country-indicator {
+            background: rgba(255,255,255,0.25);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-top: 6px;
+            display: inline-block;
+        }
+
+        /* ═══ VISTA SEMANAL TIPO GOOGLE CALENDAR (NUEVO) ═══ */
+        .cal-wrapper {
+            overflow:visible;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .cal-grid {
+            min-width: 1000px;
+        }
+
+        .cal-header {
+            display: grid;
+            grid-template-columns: 180px repeat(7, 1fr);
+            border-bottom: 2px solid #e5e7eb;
+            background: #f8fafc;
+            position: sticky;
+            top: 0;
+        }
+
+        .cal-header .cal-corner {
+            padding: 10px 12px;
+            font-weight: 700;
+            color: #374151;
+            font-size: 13px;
+            border-right: 1px solid #e5e7eb;
+        }
+
+        .cal-header .cal-day-header {
+            padding: 10px 12px;
+            text-align: center;
+            font-weight: 700;
+            color: #374151;
+            font-size: 13px;
+            border-right: 1px solid #e5e7eb;
+            text-transform: capitalize;
+        }
+
+        .cal-header .cal-day-header .cal-day-date {
+            font-weight: 400;
+            color: #9ca3af;
+            font-size: 11px;
+            display: block;
+        }
+
+        .cal-header .cal-day-header.today {
+            background: #eff6ff;
+            color: #2563eb;
+        }
+
+        .cal-row {
+            display: grid;
+            grid-template-columns: 180px repeat(7, 1fr);
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .cal-row:last-child {
+            border-bottom: none;
+        }
+
+        .cal-person {
+            padding: 12px 12px;
+            border-right: 1px solid #e5e7eb;
+            background: #f9fafb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .cal-person .cal-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .cal-person .cal-person-name {
+            font-weight: 700;
+            font-size: 13px;
+            color: #111827;
+        }
+
+        .cal-person .cal-person-meta {
+            font-size: 11px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        /* Celda de día con timeline de 08:00 - 17:00 */
+        .cal-cell {
+            border-right: 1px solid #e5e7eb;
+            position: relative;
+            height: 300px;
+            background-image: linear-gradient(to bottom, #f3f4f6 1px, transparent 1px);
+            background-size: 100% 50px;
+            background-position: 0 -1px;
+        }
+
+        /* Marcos de horas cada 50px (1px lineas) */
+        .cal-cell::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: linear-gradient(to bottom, transparent 49px, #e5e7eb 49px, #e5e7eb 50px);
+            background-size: 100% 50px;
+            pointer-events: none;
+        }
+
+        .cal-cell.no-day {
+            background: #fafafa;
+        }
+
+        .cal-turno {
+            position: absolute;
+            left: 6px;
+            right: 6px;
+            border-radius: 6px;
+            padding: 4px 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #fff;
+            overflow: hidden;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Colores según duración/tipo */
+        .cal-turno.jornada-completa { background: linear-gradient(135deg, #2563eb, #3b82f6); }
+        .cal-turno.jornada-parcial { background: linear-gradient(135deg, #059669, #10b981); }
+        .cal-turno.guardia { background: linear-gradient(135deg, #7c3aed, #8b5cf6); }
+
+        .cal-turno .turno-hora {
+            display: block;
+            font-size: 10px;
+            font-weight: 400;
+            opacity: 0.9;
+        }
+
+        .cal-empty-row {
+            padding: 16px;
+            text-align: center;
+            color: #9ca3af;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 12px;
+            }
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+            .store-banner {
+                flex-direction: column;
+                text-align: center;
+            }
+        }

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="robots" content="noindex" />
+    <meta name="googlebot" content="noindex">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Horarios por Tienda</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>📋 Gestor de Horarios por Tienda</h1>
+        <p>Selecciona un país, tienda, mes y semana para ver el personal</p>
+    </header>
+
+    <div class="card selector-card">
+        <label for="countrySelect">🌍 Seleccionar País</label>
+        <select id="countrySelect" onchange="filterStoresByCountry()">
+            <option value="">-- Elige un país --</option>
+            <option value="colombia">🇨🇴 Colombia</option>
+            <option value="mexico">🇲🇽 México</option>
+            <option value="argentina">🇦🇷 Argentina</option>
+            <option value="chile">🇨🇱 Chile</option>
+            <option value="peru">🇵🇪 Perú</option>
+            <option value="ecuador">🇪🇨 Ecuador</option>
+            <option value="panama">🇵🇦 Panamá</option>
+        </select>
+    </div>
+
+    <div class="card selector-card">
+        <label for="storeSelect">🏪 Seleccionar Tienda</label>
+        <select id="storeSelect" onchange="renderStore()" disabled>
+            <option value="">-- Primero selecciona un país --</option>
+        </select>
+    </div>
+
+    <div id="storeInfo" class="hidden">
+        <div class="store-banner">
+            <div>
+                <h2 id="storeName"></h2>
+                <p id="storeAddress"></p>
+                <div class="country-indicator" id="countryDisplay"></div>
+            </div>
+            <div class="badge">
+                <span id="staffCount">0</span> empleados asignados
+            </div>
+        </div>
+    </div>
+
+    <div id="staffSection" class="hidden" style="margin-top: 20px;">
+        <div class="section-header">
+            <h3>👥 Personal en Sitio</h3>
+        </div>
+
+        <div class="filter-row">
+            <div class="filter-group">
+                <label for="filterMonth">📅 Mes</label>
+                <select id="filterMonth" onchange="renderStaffList()">
+                    <option value="">Todos los meses</option>
+                    <option>Enero</option>
+                    <option>Febrero</option>
+                    <option>Marzo</option>
+                    <option>Abril</option>
+                    <option>Mayo</option>
+                    <option>Junio</option>
+                    <option>Julio</option>
+                    <option>Agosto</option>
+                    <option>Septiembre</option>
+                    <option>Octubre</option>
+                    <option>Noviembre</option>
+                    <option>Diciembre</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filterWeek">🗓️ Semana</label>
+                <select id="filterWeek" onchange="renderStaffList()">
+                    <option value="">Todas las semanas</option>
+                    <option>Semana 1</option>
+                    <option>Semana 2</option>
+                    <option>Semana 3</option>
+                    <option>Semana 4</option>
+                    <option>Semana 5</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="staffList"></div>
+    </div>
+
+    <div id="emptyState" class="empty-state">
+        <div class="icon">🏪</div>
+        <p>Selecciona un país y una tienda para ver el personal y sus horarios</p>
+    </div>
+</div>
+
+<script src="funciones.js"></script>
+
+</body>
+</html>

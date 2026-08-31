@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Horarios por Tienda</title>
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         SECCIÓN: ESTILOS CSS
+         Función: Define la apariencia visual de toda la página.
+         Aquí se establecen colores, tamaños, márgenes, sombras,
+         comportamiento responsive (adaptable a móviles), etc.
+    ═══════════════════════════════════════════════════════════════ -->
+    <style>
+        /* ─── RESET BÁSICO ───
+           Elimina márgenes y paddings por defecto del navegador
+           para que todos los elementos partan desde cero */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ─── ESTILOS DEL CUERPO (BODY) ───
+           Define la fuente de texto, color de fondo gris claro,
+           color de letra y espaciado general de la página */
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f3f4f6;
+            color: #1f2937;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        /* ─── CONTENEDOR PRINCIPAL ───
+           Limita el ancho máximo a 900px y lo centra en pantalla */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* ─── ENCABEZADO ───
+           Centra el título y subtítulo de la aplicación */
+        header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 6px;
+        }
+
+        header p {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        /* ─── TARJETAS (CARDS) ───
+           Estilo base para todos los recuadros de la interfaz:
+           fondo blanco, bordes redondeados, sombra sutil */
+        .card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        /* ─── TARJETA DEL SELECTOR DE TIENDA ───
+           Fondo ligeramente diferente para destacar el selector */
+        .selector-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* ─── ETIQUETAS DE FORMULARIO ───
+           Estilo para los textos "Nombre", "Correo", etc. */
+        label {
+            display: block;
+            font-weight: 600;
+            font-size: 14px;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        /* ─── CAMPOS DE ENTRADA (INPUTS Y SELECT) ───
+           Estilo unificado para todos los campos donde el usuario
+           escribe o selecciona información */
+        select, input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+            background: #fff;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            font-family: inherit;
+        }
+
+        /* Efecto visual cuando el usuario hace clic en un campo */
+        select:focus, input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* ─── BANNER DE LA TIENDA SELECCIONADA ───
+           Barra de color azul degradado que muestra el nombre
+           de la tienda y la cantidad de empleados */
+        .store-banner {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .store-banner h2 {
+            margin: 0 0 4px 0;
+            font-size: 20px;
+        }
+
+        .store-banner p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        /* ─── ETIQUETA DE CONTADOR ───
+           Círculo blanco semi-transparente con el número de empleados */
+        .badge {
+            background: rgba(255,255,255,0.2);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* ─── ENCABEZADO DE SECCIÓN ───
+           Título "Personal en Sitio" + botón de agregar, alineados */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .section-header h3 {
+            font-size: 18px;
+            color: #111827;
+        }
+
+        /* ─── BOTONES GENERALES ───
+           Estilo base para todos los botones de la aplicación */
+        .btn {
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        /* Botón verde: acciones principales (Agregar, Guardar) */
+        .btn-primary {
+            background: #10b981;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #059669;
+        }
+
+        /* Botón gris: acciones secundarias (Cancelar) */
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+
+        /* Botón de eliminar: solo una X roja */
+        .btn-danger {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 0 0 0 6px;
+            line-height: 1;
+        }
+
+        /* ─── TARJETA DEL FORMULARIO ───
+           Fondo verde claro para el formulario de nuevo horario */
+        .form-card {
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            display: none; /* Oculto por defecto */
+        }
+
+        .form-card h4 {
+            margin: 0 0 16px 0;
+            color: #065f46;
+            font-size: 15px;
+        }
+
+        /* ─── GRID DEL FORMULARIO ───
+           Organiza los campos en columnas automáticas.
+           En pantallas grandes: 2 o 3 columnas.
+           En móviles: 1 columna. */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .form-actions {
+            margin-top: 16px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* ─── TARJETA DE EMPLEADO ───
+           Cada recuadro blanco que muestra un empleado y sus horarios */
+        .employee-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .employee-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .employee-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* ─── AVATAR (INICIALES) ───
+           Círculo de color con las iniciales del nombre del empleado */
+        .avatar {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .employee-name {
+            font-weight: 700;
+            font-size: 16px;
+            color: #111827;
+        }
+
+        .employee-contact {
+            font-size: 13px;
+            color: #6b7280;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 3px;
+        }
+
+        /* ─── ETIQUETAS DE HORARIO ───
+           Cada burbuja azul que muestra "Lunes | 09:00 - 17:00" */
+        .schedules {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .schedule-tag {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .schedule-day {
+            font-weight: 600;
+            color: #1e40af;
+            font-size: 13px;
+        }
+
+        .schedule-time {
+            color: #374151;
+            font-size: 13px;
+        }
+
+        .separator {
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        /* ─── ESTADOS VACÍOS ───
+           Mensajes que aparecen cuando no hay tienda seleccionada
+           o cuando la tienda no tiene empleados */
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #9ca3af;
+        }
+
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+            margin: 0;
+        }
+
+        .empty-box {
+            text-align: center;
+            padding: 40px 20px;
+            background: #f9fafb;
+            border: 2px dashed #d1d5db;
+            border-radius: 12px;
+            color: #6b7280;
+        }
+
+        /* ─── CLASE UTILITARIA ───
+           Oculta cualquier elemento cuando se le aplica */
+        .hidden {
+            display: none !important;
+        }
+
+        /* ─── RESPONSIVE (MÓVILES) ───
+           Ajustes para pantallas pequeñas (menos de 600px) */
+        @media (max-width: 600px) {
+            body {
+                padding: 12px;
+            }
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .store-banner {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SECCIÓN: ESTRUCTURA HTML (LA INTERFAZ VISUAL)
+         Función: Define todos los elementos que el usuario ve y
+         con los que interactúa: selectores, formularios, botones, etc.
+    ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- Contenedor principal que centra todo el contenido -->
+    <div class="container">
+
+        <!-- ─── ENCABEZADO ───
+             Muestra el título y descripción de la aplicación -->
+        <header>
+            <h1>📋 Gestor de Horarios por Tienda</h1>
+            <p>Selecciona una tienda para ver el personal asignado y sus horarios</p>
+        </header>
+
+        <!-- ─── SELECTOR DE TIENDA ───
+             Menú desplegable donde el usuario elige qué tienda quiere ver.
+             Cada opción tiene un valor (value) que se usa en JavaScript
+             para identificar la tienda seleccionada. -->
+        <div class="card selector-card">
+            <label for="storeSelect">🏪 Seleccionar Tienda</label>
+            <select id="storeSelect" onchange="renderStore()">
+                <option value="">-- Elige una tienda --</option>
+                <option value="tienda1">Tienda Centro - Calle Principal #123</option>
+                <option value="tienda2">Tienda Norte - Av. Reforma #456</option>
+                <option value="tienda3">Tienda Sur - Blvd. Juárez #789</option>
+                <option value="tienda4">Tienda Oeste - Plaza Mayor #321</option>
+            </select>
+        </div>
+
+        <!-- ─── BANNER DE INFORMACIÓN DE TIENDA ───
+             Muestra el nombre, dirección y cantidad de empleados
+             de la tienda seleccionada. Inicialmente está oculto. -->
+        <div id="storeInfo" class="hidden">
+            <div class="store-banner">
+                <div>
+                    <h2 id="storeName"></h2>          <!-- Se llena con JS -->
+                    <p id="storeAddress"></p>         <!-- Se llena con JS -->
+                </div>
+                <div class="badge">
+                    <span id="staffCount">0</span> empleados asignados
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── SECCIÓN DE PERSONAL ───
+             Contiene el botón para agregar horarios, el formulario
+             y la lista de empleados. Inicialmente oculta. -->
+        <div id="staffSection" class="hidden" style="margin-top: 20px;">
+            
+            <!-- Encabezado con título y botón -->
+            <div class="section-header">
+                <h3>👥 Personal en Sitio</h3>
+                <button class="btn btn-primary" onclick="toggleAddForm()" id="addBtn">
+                    + Agregar Horario
+                </button>
+            </div>
+
+            <!-- ─── FORMULARIO PARA AGREGAR HORARIO ───
+                 Campos para capturar: nombre, correo, teléfono,
+                 día de la semana, hora de entrada y salida.
+                 Inicialmente oculto; se muestra al dar clic en el botón. -->
+            <div id="addForm" class="card form-card">
+                <h4>➕ Nuevo Horario</h4>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="inputName">Nombre completo *</label>
+                        <input type="text" id="inputName" placeholder="Ej: María López">
+                    </div>
+                    <div class="form-group">
+                        <label for="inputEmail">Correo electrónico *</label>
+                        <input type="email" id="inputEmail" placeholder="ejemplo@correo.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="inputPhone">Número telefónico *</label>
+                        <input type="tel" id="inputPhone" placeholder="Ej: 55 1234 5678">
+                    </div>
+                    <div class="form-group">
+                        <label for="inputDay">Día de la semana</label>
+                        <select id="inputDay">
+                            <option value="Lunes">Lunes</option>
+                            <option value="Martes">Martes</option>
+                            <option value="Miércoles">Miércoles</option>
+                            <option value="Jueves">Jueves</option>
+                            <option value="Viernes">Viernes</option>
+                            <option value="Sábado">Sábado</option>
+                            <option value="Domingo">Domingo</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputStart">Hora entrada</label>
+                        <input type="time" id="inputStart" value="09:00">
+                    </div>
+                    <div class="form-group">
+                        <label for="inputEnd">Hora salida</label>
+                        <input type="time" id="inputEnd" value="17:00">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-primary" onclick="addSchedule()">
+                        💾 Guardar Horario
+                    </button>
+                    <button class="btn btn-secondary" onclick="toggleAddForm()">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+
+            <!-- ─── CONTENEDOR DE LA LISTA DE EMPLEADOS ───
+                 Aquí JavaScript inserta dinámicamente las tarjetas
+                 de cada empleado con sus horarios. -->
+            <div id="staffList"></div>
+        </div>
+
+        <!-- ─── ESTADO VACÍO INICIAL ───
+             Mensaje que aparece antes de seleccionar una tienda.
+             Desaparece cuando el usuario elige una tienda. -->
+        <div id="emptyState" class="empty-state">
+            <div class="icon">🏪</div>
+            <p>Selecciona una tienda para ver el personal y sus horarios</p>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SECCIÓN: JAVASCRIPT (LA LÓGICA DE LA APLICACIÓN)
+         Función: Controla toda la interactividad. Aquí se definen
+         los datos, las funciones que responden a los clics, y la
+         forma en que se muestra la información en pantalla.
+    ═══════════════════════════════════════════════════════════════ -->
+    <script>
+
+        // ═══════════════════════════════════════════════════════════
+        //  BLOQUE 1: DATOS DE LA APLICACIÓN
+        // ═══════════════════════════════════════════════════════════
+        
+        /*
+         * OBJETO: stores
+         * Función: Almacena la información estática de cada tienda.
+         *          Las claves (tienda1, tienda2...) coinciden con los
+         *          valores del <select> en el HTML.
+         */
+        const stores = {
+            tienda1: { name: "C.C Colina", address: "Calle Principal #123, Ciudad de México" },
+            tienda2: { name: "Calle 82", address: "Av. Reforma #456, Ciudad de México" },
+            tienda3: { name: "C.C Felicidad", address: "Blvd. Juárez #789, Ciudad de México" },
+            tienda4: { name: "C.C Centro Mayor", address: "Plaza Mayor #321, Ciudad de México" }
+        };
+
+        /*
+         * OBJETO: schedules
+         * Función: Es la "base de datos" en memoria. Guarda todos los
+         *          horarios organizados por tienda. Cada horario es
+         *          un objeto con: id, name, email, phone, day, start, end.
+         *          Incluye datos de ejemplo precargados.
+         */
+        let schedules = {
+            tienda1: [
+                { id: 1, name: "Carlos Ramírez", email: "carlos.r@empresa.com", phone: "55 1111 2222", day: "Lunes", start: "08:00", end: "16:00" },
+                { id: 2, name: "Ana Martínez", email: "ana.m@empresa.com", phone: "55 3333 4444", day: "Lunes", start: "09:00", end: "17:00" },
+                { id: 3, name: "Carlos Ramírez", email: "carlos.r@empresa.com", phone: "55 1111 2222", day: "Martes", start: "08:00", end: "16:00" }
+            ],
+            tienda2: [
+                { id: 4, name: "Luis Hernández", email: "luis.h@empresa.com", phone: "55 5555 6666", day: "Lunes", start: "10:00", end: "18:00" }
+            ],
+            tienda3: [],  // Tienda sin empleados (vacía)
+            tienda4: []   // Tienda sin empleados (vacía)
+        };
+
+        /*
+         * VARIABLE: currentStore
+         * Función: Guarda el identificador (value) de la tienda que
+         *          el usuario tiene seleccionada en este momento.
+         *          Inicialmente está vacía porque no hay selección.
+         */
+        let currentStore = "";
+
+        /*
+         * VARIABLE: nextId
+         * Función: Contador para asignar un ID único a cada nuevo
+         *          horario que se agrega. Empieza en 5 porque los
+         *          datos de ejemplo ya usan los IDs 1 al 4.
+         */
+        let nextId = 5;
+
+
+        // ═══════════════════════════════════════════════════════════
+        //  BLOQUE 2: FUNCIONES PRINCIPALES
+        // ═════════════════════════════════════════════════════════==
+
+        /*
+         * FUNCIÓN: renderStore()
+         * ─────────────────────────────────────────────────────────
+         * Se ejecuta: Cada vez que el usuario cambia la opción
+         *             del selector de tienda (evento onchange).
+         * 
+         * Función:
+         *   1. Lee qué tienda seleccionó el usuario.
+         *   2. Si no eligió ninguna, muestra el mensaje vacío y
+         *      oculta todo lo demás.
+         *   3. Si sí eligió una tienda:
+         *      - Muestra el banner con nombre y dirección.
+         *      - Actualiza el contador de empleados.
+         *      - Llama a renderStaffList() para dibujar las tarjetas.
+         */
+        function renderStore() {
+            const select = document.getElementById("storeSelect");
+            currentStore = select.value;
+
+            const storeInfo = document.getElementById("storeInfo");
+            const staffSection = document.getElementById("staffSection");
+            const emptyState = document.getElementById("emptyState");
+
+            // Caso A: No hay tienda seleccionada
+            if (!currentStore) {
+                storeInfo.classList.add("hidden");
+                staffSection.classList.add("hidden");
+                emptyState.classList.remove("hidden");
+                return;
+            }
+
+            // Caso B: Hay tienda seleccionada → mostrar todo
+            emptyState.classList.add("hidden");
+            storeInfo.classList.remove("hidden");
+            staffSection.classList.remove("hidden");
+
+            // Rellenar el banner con los datos de la tienda
+            const store = stores[currentStore];
+            document.getElementById("storeName").textContent = store.name;
+            document.getElementById("storeAddress").textContent = store.address;
+            document.getElementById("staffCount").textContent = (schedules[currentStore] || []).length;
+
+            // Dibujar la lista de empleados
+            renderStaffList();
+        }
+
+        /*
+         * FUNCIÓN: renderStaffList()
+         * ─────────────────────────────────────────────────────────
+         * Se ejecuta: Cuando se carga una tienda, cuando se agrega
+         *             un horario nuevo, o cuando se elimina uno.
+         * 
+         * Función:
+         *   1. Obtiene todos los horarios de la tienda actual.
+         *   2. Si no hay horarios, muestra un mensaje de "vacío".
+         *   3. Si hay horarios:
+         *      - AGRUPA los horarios por nombre de persona (para
+         *        que un mismo empleado aparezca una sola vez con
+         *        todos sus días/horarios juntos).
+         *      - Genera el HTML de cada tarjeta de empleado con
+         *        su avatar (iniciales), correo, teléfono y etiquetas
+         *        de horario.
+         *      - Inserta todo ese HTML dentro del contenedor.
+         */
+        function renderStaffList() {
+            const container = document.getElementById("staffList");
+            const staff = schedules[currentStore] || [];
+
+            // Caso: Tienda sin empleados
+            if (staff.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-box">
+                        <div style="font-size: 36px; margin-bottom: 8px;">📭</div>
+                        <p style="margin: 0; font-size: 15px;">No hay personal asignado a esta tienda aún.</p>
+                        <p style="margin: 4px 0 0 0; font-size: 13px;">Haz clic en "Agregar Horario" para comenzar.</p>
+                    </div>`;
+                return;
+            }
+
+            // Paso 1: Agrupar horarios por nombre de persona
+            const byPerson = {};
+            staff.forEach(s => {
+                if (!byPerson[s.name]) {
+                    byPerson[s.name] = {
+                        name: s.name,
+                        email: s.email,
+                        phone: s.phone,
+                        schedules: []
+                    };
+                }
+                byPerson[s.name].schedules.push({
+                    day: s.day,
+                    start: s.start,
+                    end: s.end,
+                    id: s.id
+                });
+            });
+
+            // Paso 2: Generar HTML para cada empleado
+            let html = "";
+            Object.values(byPerson).forEach(person => {
+                // Extrae las iniciales del nombre (ej: "Carlos Ramírez" → "CR")
+                const initials = person.name
+                    .split(' ')
+                    .map(n => n[0])
+                    .join('')
+                    .substring(0, 2)
+                    .toUpperCase();
+
+                html += `
+                    <div class="employee-card">
+                        <div class="employee-header">
+                            <div class="employee-info">
+                                <div class="avatar">${initials}</div>
+                                <div>
+                                    <div class="employee-name">${person.name}</div>
+                                    <div class="employee-contact">
+                                        <span>📧 ${person.email}</span>
+                                        <span>📱 ${person.phone}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="schedules">
+                            ${person.schedules.map(sch => `
+                                <div class="schedule-tag">
+                                    <span class="schedule-day">${sch.day}</span>
+                                    <span class="separator">|</span>
+                                    <span class="schedule-time">🕐 ${sch.start} - ${sch.end}</span>
+                                    <button class="btn-danger" onclick="deleteSchedule(${sch.id})" title="Eliminar">×</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        /*
+         * FUNCIÓN: toggleAddForm()
+         * ─────────────────────────────────────────────────────────
+         * Se ejecuta: Al dar clic en el botón "+ Agregar Horario"
+         *             o en el botón "Cancelar".
+         * 
+         * Función:
+         *   Alterna la visibilidad del formulario. Si está oculto,
+         *   lo muestra y cambia el texto del botón. Si está visible,
+         *   lo oculta y restaura el texto original.
+         */
+        function toggleAddForm() {
+            const form = document.getElementById("addForm");
+            const btn = document.getElementById("addBtn");
+
+            if (form.classList.contains("hidden")) {
+                form.classList.remove("hidden");
+                form.style.display = "block";
+                btn.textContent = "− Ocultar Formulario";
+                btn.style.background = "#6b7280";
+            } else {
+                form.classList.add("hidden");
+                form.style.display = "none";
+                btn.textContent = "+ Agregar Horario";
+                btn.style.background = "#10b981";
+            }
+        }
+
+        /*
+         * FUNCIÓN: addSchedule()
+         * ─────────────────────────────────────────────────────────
+         * Se ejecuta: Al dar clic en el botón "Guardar Horario".
+         * 
+         * Función:
+         *   1. Lee los valores de todos los campos del formulario.
+         *   2. Valida que nombre, correo y teléfono no estén vacíos.
+         *   3. Crea un nuevo objeto de horario con un ID único.
+         *   4. Lo agrega al arreglo de la tienda actual.
+         *   5. Limpia los campos del formulario para una nueva entrada.
+         *   6. Actualiza el contador de empleados en el banner.
+         *   7. Vuelve a dibujar la lista de empleados.
+         *   8. Oculta el formulario.
+         */
+        function addSchedule() {
+            // Leer valores del formulario
+            const name = document.getElementById("inputName").value.trim();
+            const email = document.getElementById("inputEmail").value.trim();
+            const phone = document.getElementById("inputPhone").value.trim();
+            const day = document.getElementById("inputDay").value;
+            const start = document.getElementById("inputStart").value;
+            const end = document.getElementById("inputEnd").value;
+
+            // Validación: campos obligatorios
+            if (!name || !email || !phone) {
+                alert("Por favor completa todos los campos obligatorios (nombre, correo y teléfono).");
+                return;
+            }
+
+            // Crear el nuevo registro
+            if (!schedules[currentStore]) schedules[currentStore] = [];
+            schedules[currentStore].push({
+                id: nextId++,
+                name,
+                email,
+                phone,
+                day,
+                start,
+                end
+            });
+
+            // Limpiar formulario
+            document.getElementById("inputName").value = "";
+            document.getElementById("inputEmail").value = "";
+            document.getElementById("inputPhone").value = "";
+            document.getElementById("inputDay").value = "Lunes";
+            document.getElementById("inputStart").value = "09:00";
+            document.getElementById("inputEnd").value = "17:00";
+
+            // Actualizar interfaz
+            document.getElementById("staffCount").textContent = schedules[currentStore].length;
+            renderStaffList();
+            toggleAddForm();
+        }
+
+        /*
+         * FUNCIÓN: deleteSchedule(id)
+         * ─────────────────────────────────────────────────────────
+         * Parámetro: id → número único del horario a eliminar.
+         * 
+         * Se ejecuta: Al dar clic en la "×" roja de cualquier etiqueta
+         *             de horario.
+         * 
+         * Función:
+         *   1. Pide confirmación al usuario para evitar borrados
+         *      accidentales.
+         *   2. Filtra el arreglo de horarios, eliminando el que
+         *      coincida con el ID recibido.
+         *   3. Actualiza el contador de empleados.
+         *   4. Vuelve a dibujar la lista sin el horario eliminado.
+         */
+        function deleteSchedule(id) {
+            if (!confirm("¿Eliminar este horario?")) return;
+
+            schedules[currentStore] = schedules[currentStore].filter(s => s.id !== id);
+            document.getElementById("staffCount").textContent = schedules[currentStore].length;
+            renderStaffList();
+        }
+
+    </script>
+</body>
+</html>

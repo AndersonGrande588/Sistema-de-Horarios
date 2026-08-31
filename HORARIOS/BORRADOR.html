@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Horarios por Tienda</title>
+    <style>
+        /* ═══════════════════════════════════════════════════════════════
+           SECCIÓN: ESTILOS CSS
+           Define colores, tamaños, bordes redondeados y comportamiento
+           responsive de todos los elementos visuales.
+        ═══════════════════════════════════════════════════════════════ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f3f4f6;
+            color: #1f2937;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* ─── ENCABEZADO ─── */
+        header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 6px;
+        }
+
+        header p {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        /* ─── TARJETAS GENERALES ─── */
+        .card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .selector-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            font-size: 14px;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        /* ─── CAMPOS DE ENTRADA ─── */
+        select, input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+            background: #fff;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            font-family: inherit;
+        }
+
+        select:focus, input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        select:disabled {
+            background: #e5e7eb;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* ─── BANNER AZUL DE LA TIENDA ─── */
+        .store-banner {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .store-banner h2 {
+            margin: 0 0 4px 0;
+            font-size: 20px;
+        }
+
+        .store-banner p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .badge {
+            background: rgba(255,255,255,0.2);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* ─── ENCABEZADO DE SECCIÓN DE PERSONAL ─── */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .section-header h3 {
+            font-size: 18px;
+            color: #111827;
+        }
+
+        /* ═══ FILTROS DE MES Y SEMANA (NUEVO) ═══
+           Grid que coloca los dos selectores lado a lado en desktop
+           y uno debajo del otro en móvil. */
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        /* ─── TARJETA DE CADA EMPLEADO ─── */
+        .employee-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .employee-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .employee-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* ─── CÍRCULO CON INICIALES ─── */
+        .avatar {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .employee-name {
+            font-weight: 700;
+            font-size: 16px;
+            color: #111827;
+        }
+
+        .employee-contact {
+            font-size: 13px;
+            color: #6b7280;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 3px;
+        }
+
+        /* ─── ETIQUETAS DE HORARIO CON MES Y SEMANA ─── */
+        .schedules {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .schedule-tag {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Color azul oscuro para el nombre del mes */
+        .schedule-month {
+            font-weight: 700;
+            color: #1e40af;
+            font-size: 13px;
+        }
+
+        /* Color verde para el número de semana */
+        .schedule-week {
+            font-weight: 600;
+            color: #059669;
+            font-size: 13px;
+        }
+
+        /* Color morado para el día de la semana */
+        .schedule-day {
+            font-weight: 600;
+            color: #7c3aed;
+            font-size: 13px;
+        }
+
+        .schedule-time {
+            color: #374151;
+            font-size: 13px;
+        }
+
+        .separator {
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        /* ─── ESTADOS VACÍOS ─── */
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #9ca3af;
+        }
+
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+            margin: 0;
+        }
+
+        .empty-box {
+            text-align: center;
+            padding: 40px 20px;
+            background: #f9fafb;
+            border: 2px dashed #d1d5db;
+            border-radius: 12px;
+            color: #6b7280;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .country-indicator {
+            background: rgba(255,255,255,0.25);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-top: 6px;
+            display: inline-block;
+        }
+
+        /* ─── RESPONSIVE (MÓVILES) ─── */
+        @media (max-width: 600px) {
+            body {
+                padding: 12px;
+            }
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+            .store-banner {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SECCIÓN: HTML (INTERFAZ VISUAL)
+         Estructura de selectores, banner, filtros de mes/semana
+         y contenedor de la lista de empleados.
+    ═══════════════════════════════════════════════════════════════ -->
+    <div class="container">
+
+        <!-- ─── TÍTULO ─── -->
+        <header>
+            <h1>📋 Gestor de Horarios por Tienda</h1>
+            <p>Selecciona un país, tienda, mes y semana para ver el personal</p>
+        </header>
+
+        <!-- ─── SELECTOR DE PAÍS ─── -->
+        <div class="card selector-card">
+            <label for="countrySelect">🌍 Seleccionar País</label>
+            <select id="countrySelect" onchange="filterStoresByCountry()">
+                <option value="">-- Elige un país --</option>
+                <option value="colombia">🇨🇴 Colombia</option>
+                <option value="mexico">🇲🇽 México</option>
+                <option value="argentina">🇦🇷 Argentina</option>
+                <option value="chile">🇨🇱 Chile</option>
+                <option value="peru">🇵🇪 Perú</option>
+                <option value="ecuador">🇪🇨 Ecuador</option>
+                <option value="panama">🇵🇦 Panamá</option>
+            </select>
+        </div>
+
+        <!-- ─── SELECTOR DE TIENDA ─── -->
+        <div class="card selector-card">
+            <label for="storeSelect">🏪 Seleccionar Tienda</label>
+            <select id="storeSelect" onchange="renderStore()" disabled>
+                <option value="">-- Primero selecciona un país --</option>
+            </select>
+        </div>
+
+        <!-- ─── BANNER DE INFORMACIÓN DE TIENDA ─── -->
+        <div id="storeInfo" class="hidden">
+            <div class="store-banner">
+                <div>
+                    <h2 id="storeName"></h2>
+                    <p id="storeAddress"></p>
+                    <div class="country-indicator" id="countryDisplay"></div>
+                </div>
+                <div class="badge">
+                    <span id="staffCount">0</span> empleados asignados
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── SECCIÓN DE PERSONAL CON FILTROS ─── -->
+        <div id="staffSection" class="hidden" style="margin-top: 20px;">
+            <div class="section-header">
+                <h3>👥 Personal en Sitio</h3>
+            </div>
+
+            <!-- ═══ FILTROS DE MES Y SEMANA (NUEVO) ═══
+                 Dos selectores que permiten filtrar la lista de
+                 empleados según el mes y la semana deseados. -->
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="filterMonth">📅 Mes</label>
+                    <select id="filterMonth" onchange="renderStaffList()">
+                        <option value="">Todos los meses</option>
+                        <option>Enero</option>
+                        <option>Febrero</option>
+                        <option>Marzo</option>
+                        <option>Abril</option>
+                        <option>Mayo</option>
+                        <option>Junio</option>
+                        <option>Julio</option>
+                        <option>Agosto</option>
+                        <option>Septiembre</option>
+                        <option>Octubre</option>
+                        <option>Noviembre</option>
+                        <option>Diciembre</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterWeek">🗓️ Semana</label>
+                    <select id="filterWeek" onchange="renderStaffList()">
+                        <option value="">Todas las semanas</option>
+                        <option>Semana 1</option>
+                        <option>Semana 2</option>
+                        <option>Semana 3</option>
+                        <option>Semana 4</option>
+                        <option>Semana 5</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Contenedor donde se inyectan las tarjetas de empleados -->
+            <div id="staffList"></div>
+        </div>
+
+        <!-- ─── MENSAJE INICIAL ─── -->
+        <div id="emptyState" class="empty-state">
+            <div class="icon">🏪</div>
+            <p>Selecciona un país y una tienda para ver el personal y sus horarios</p>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SECCIÓN: JAVASCRIPT (LÓGICA)
+         Datos, funciones de filtrado por país, renderizado de tienda
+         y filtrado dinámico por mes y semana.
+    ═══════════════════════════════════════════════════════════════ -->
+    <script>
+
+        // ═══════════════════════════════════════════════════════════
+        //  BLOQUE 1: DATOS
+        // ═══════════════════════════════════════════════════════════
+
+        /*
+         * OBJETO: countries
+         * Información de los 7 países disponibles con su bandera.
+         */
+        const countries = {
+            colombia: { name: "Colombia", flag: "🇨🇴" },
+            mexico: { name: "México", flag: "🇲🇽" },
+            argentina: { name: "Argentina", flag: "🇦🇷" },
+            chile: { name: "Chile", flag: "🇨🇱" },
+            peru: { name: "Perú", flag: "🇵🇪" },
+            ecuador: { name: "Ecuador", flag: "🇪🇨" },
+            panama: { name: "Panamá", flag: "🇵🇦" }
+        };
+
+        /*
+         * OBJETO: stores
+         * Cada tienda vinculada a un país mediante la propiedad 'country'.
+         */
+        const stores = {
+            tienda1: { name: "C.C Colina", address: "Centro Comercial Parque la colina", country: "colombia" },
+            tienda2: { name: "Zona Calle 82", address: "Zona Comercial Calle 82", country: "colombia" },
+            tienda3: { name: "C.C Felicidad", address: "Centro Comercial La Felicidad", country: "colombia" },
+            tienda4: { name: "C.C Plaza Central", address: "Centro Comercial Plaza Central", country: "colombia" },
+            tienda5: { name: "C.C Unicentro", address: "Centro Comercial Unicentro", country: "colombia" },
+            tienda6: { name: "Oficina Colina", address: "Oficinas Corporativas Colina", country: "colombia" },
+            tienda7: { name: "C.C Titan", address: "Centro Comercial Titan Plaza", country: "colombia" },
+            tienda8: { name: "C.C Fontanar", address: "Centro Comercial Fontanar", country: "colombia" },
+            tienda9: { name: "Bima", address: "Bodega Bima", country: "panama" }
+        };
+
+        /*
+         * OBJETO: schedules
+         * "Base de datos" de horarios.
+         * NUEVO: Cada registro ahora incluye 'month' (mes) y 'week' (semana)
+         *        además del día y las horas.
+         */
+        let schedules = {
+            tienda1: [ // CC Colina - Kevin Alean
+        { id: 1, name: "Kevin Alean", email: "kevin.alean@rsg.com.co", phone: "324 5210384", month: "Septiembre", week: "Semana 1", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 2, name: "Kevin Alean", email: "kevin.alean@rsg.com.co", phone: "324 5210384", month: "Septiembre", week: "Semana 1", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 3, name: "Kevin Alean", email: "kevin.alean@rsg.com.co", phone: "324 5210384", month: "Septiembre", week: "Semana 1", day: "Jueves", start: "08:00", end: "17:00" },
+        { id: 4, name: "Kevin Alean", email: "kevin.alean@rsg.com.co", phone: "324 5210384", month: "Septiembre", week: "Semana 1", day: "Viernes", start: "08:00", end: "17:00" },
+        { id: 5, name: "Kevin Alean", email: "kevin.alean@rsg.com.co", phone: "324 5210384", month: "Septiembre", week: "Semana 1", day: "Sábado", start: "08:00", end: "12:00" },
+        { id: 6, name: "Kevin Alean", email: "kevin.alean@rsg.com.co", phone: "324 5210384", month: "Septiembre", week: "Semana 2", day: "Lunes", start: "08:00", end: "17:00" },
+        { id: 7, name: "Kevin Alean", email: "kevin.alean@rsg.com.co", phone: "324 5210384", month: "Septiembre", week: "Semana 2", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 8, name: "Kevin Alean", email: "kevin.alean@rsg.com.co", phone: "324 5210384", month: "Septiembre", week: "Semana 2", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 9, name: "Kevin Alean", email: "kevin.alean@rsg.com.co", phone: "324 5210384", month: "Septiembre", week: "Semana 2", day: "Jueves", start: "08:00", end: "17:00" },
+        { id: 10, name: "Kevin Alean", email: "kevin.alean@rsg.com.co", phone: "324 5210384", month: "Septiembre", week: "Semana 2", day: "Viernes", start: "08:00", end: "17:00" },
+        { id: 11, name: "Kevin Alean", email: "kevin.alean@rsg.com.co", phone: "324 5210384", month: "Septiembre", week: "Semana 2", day: "Sábado", start: "08:00", end: "12:00" },
+        { id: 12, name: "Kevin Alean", email: "kevin.alean@rsg.com.co", phone: "324 5210384", month: "Septiembre", week: "Semana 3", day: "Lunes", start: "08:00", end: "17:00" },
+        { id: 13, name: "Kevin Alean", email: "kevin.alean@rsg.com.co", phone: "324 5210384", month: "Septiembre", week: "Semana 3", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 14, name: "Kevin Alean", email: "kevin.alean@rsg.com.co", phone: "324 5210384", month: "Septiembre", week: "Semana 3", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 15, name: "Kevin Alean", email: "kevin.alean@rsg.com.co", phone: "324 5210384", month: "Septiembre", week: "Semana 3", day: "Jueves", start: "08:00", end: "17:00" },
+        { id: 16, name: "Kevin Alean", email: "kevin.alean@rsg.com.co", phone: "324 5210384", month: "Septiembre", week: "Semana 3", day: "Viernes", start: "08:00", end: "17:00" },
+        { id: 17, name: "Kevin Alean", email: "kevin.alean@rsg.com.co", phone: "324 5210384", month: "Septiembre", week: "Semana 3", day: "Sábado", start: "08:00", end: "12:00" },
+        { id: 18, name: "Kevin Alean", email: "kevin.alean@rsg.com.co", phone: "324 5210384", month: "Septiembre", week: "Semana 3", day: "Domingo (Guardia)", start: "08:00", end: "12:00" },
+        { id: 19, name: "Kevin Alean", email: "kevin.alean@rsg.com.co", phone: "324 5210384", month: "Septiembre", week: "Semana 4", day: "Lunes", start: "08:00", end: "17:00" },
+        { id: 20, name: "Kevin Alean", email: "kevin.alean@rsg.com.co", phone: "324 5210384", month: "Septiembre", week: "Semana 4", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 21, name: "Kevin Alean", email: "kevin.alean@rsg.com.co", phone: "324 5210384", month: "Septiembre", week: "Semana 4", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 22, name: "Kevin Alean", email: "kevin.alean@rsg.com.co", phone: "324 5210384", month: "Septiembre", week: "Semana 4", day: "Jueves", start: "08:00", end: "17:00" },
+        { id: 23, name: "Kevin Alean", email: "kevin.alean@rsg.com.co", phone: "324 5210384", month: "Septiembre", week: "Semana 4", day: "Viernes", start: "08:00", end: "17:00" },
+        { id: 24, name: "Kevin Alean", email: "kevin.alean@rsg.com.co", phone: "324 5210384", month: "Septiembre", week: "Semana 4", day: "Sábado", start: "08:00", end: "12:00" },
+        { id: 25, name: "Kevin Alean", email: "kevin.alean@rsg.com.co", phone: "324 5210384", month: "Septiembre", week: "Semana 5", day: "Lunes", start: "08:00", end: "17:00" },
+        { id: 26, name: "Kevin Alean", email: "kevin.alean@rsg.com.co", phone: "324 5210384", month: "Septiembre", week: "Semana 5", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 27, name: "Kevin Alean", email: "kevin.alean@rsg.com.co", phone: "324 5210384", month: "Septiembre", week: "Semana 5", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 28, name: "Kevin Alean", email: "kevin.alean@rsg.com.co", phone: "324 5210384", month: "Septiembre", week: "Semana 5", day: "Jueves", start: "08:00", end: "17:00" }
+    ],
+    tienda2: [ // Zona Calle 82 - Angel Ortiz
+        { id: 29, name: "Angel Ortiz", email: "angel.ortiz@rsg.com.co", phone: "318 4080894", month: "Septiembre", week: "Semana 1", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 30, name: "Angel Ortiz", email: "angel.ortiz@rsg.com.co", phone: "318 4080894", month: "Septiembre", week: "Semana 1", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 31, name: "Angel Ortiz", email: "angel.ortiz@rsg.com.co", phone: "318 4080894", month: "Septiembre", week: "Semana 1", day: "Jueves", start: "08:00", end: "17:00" },
+        { id: 32, name: "Angel Ortiz", email: "angel.ortiz@rsg.com.co", phone: "318 4080894", month: "Septiembre", week: "Semana 1", day: "Viernes", start: "08:00", end: "17:00" },
+        { id: 33, name: "Angel Ortiz", email: "angel.ortiz@rsg.com.co", phone: "318 4080894", month: "Septiembre", week: "Semana 2", day: "Lunes", start: "08:00", end: "17:00" },
+        { id: 34, name: "Angel Ortiz", email: "angel.ortiz@rsg.com.co", phone: "318 4080894", month: "Septiembre", week: "Semana 2", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 35, name: "Angel Ortiz", email: "angel.ortiz@rsg.com.co", phone: "318 4080894", month: "Septiembre", week: "Semana 2", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 36, name: "Angel Ortiz", email: "angel.ortiz@rsg.com.co", phone: "318 4080894", month: "Septiembre", week: "Semana 2", day: "Jueves", start: "08:00", end: "17:00" },
+        { id: 37, name: "Angel Ortiz", email: "angel.ortiz@rsg.com.co", phone: "318 4080894", month: "Septiembre", week: "Semana 2", day: "Viernes", start: "08:00", end: "17:00" },
+        { id: 38, name: "Angel Ortiz", email: "angel.ortiz@rsg.com.co", phone: "318 4080894", month: "Septiembre", week: "Semana 2", day: "Sábado", start: "08:00", end: "12:00" },
+        { id: 39, name: "Angel Ortiz", email: "angel.ortiz@rsg.com.co", phone: "318 4080894", month: "Septiembre", week: "Semana 3", day: "Lunes", start: "08:00", end: "17:00" },
+        { id: 40, name: "Angel Ortiz", email: "angel.ortiz@rsg.com.co", phone: "318 4080894", month: "Septiembre", week: "Semana 3", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 41, name: "Angel Ortiz", email: "angel.ortiz@rsg.com.co", phone: "318 4080894", month: "Septiembre", week: "Semana 3", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 42, name: "Angel Ortiz", email: "angel.ortiz@rsg.com.co", phone: "318 4080894", month: "Septiembre", week: "Semana 3", day: "Jueves", start: "08:00", end: "17:00" },
+        { id: 43, name: "Angel Ortiz", email: "angel.ortiz@rsg.com.co", phone: "318 4080894", month: "Septiembre", week: "Semana 3", day: "Viernes", start: "08:00", end: "17:00" },
+        { id: 44, name: "Angel Ortiz", email: "angel.ortiz@rsg.com.co", phone: "318 4080894", month: "Septiembre", week: "Semana 4", day: "Lunes", start: "08:00", end: "17:00" },
+        { id: 45, name: "Angel Ortiz", email: "angel.ortiz@rsg.com.co", phone: "318 4080894", month: "Septiembre", week: "Semana 4", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 46, name: "Angel Ortiz", email: "angel.ortiz@rsg.com.co", phone: "318 4080894", month: "Septiembre", week: "Semana 4", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 47, name: "Angel Ortiz", email: "angel.ortiz@rsg.com.co", phone: "318 4080894", month: "Septiembre", week: "Semana 4", day: "Jueves", start: "08:00", end: "17:00" },
+        { id: 48, name: "Angel Ortiz", email: "angel.ortiz@rsg.com.co", phone: "318 4080894", month: "Septiembre", week: "Semana 4", day: "Viernes", start: "08:00", end: "17:00" },
+        { id: 49, name: "Angel Ortiz", email: "angel.ortiz@rsg.com.co", phone: "318 4080894", month: "Septiembre", week: "Semana 4", day: "Sábado", start: "08:00", end: "12:00" },
+        { id: 50, name: "Angel Ortiz", email: "angel.ortiz@rsg.com.co", phone: "318 4080894", month: "Septiembre", week: "Semana 4", day: "Domingo (Guardia)", start: "08:00", end: "12:00" },
+        { id: 51, name: "Angel Ortiz", email: "angel.ortiz@rsg.com.co", phone: "318 4080894", month: "Septiembre", week: "Semana 5", day: "Lunes", start: "08:00", end: "17:00" },
+        { id: 52, name: "Angel Ortiz", email: "angel.ortiz@rsg.com.co", phone: "318 4080894", month: "Septiembre", week: "Semana 5", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 53, name: "Angel Ortiz", email: "angel.ortiz@rsg.com.co", phone: "318 4080894", month: "Septiembre", week: "Semana 5", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 54, name: "Angel Ortiz", email: "angel.ortiz@rsg.com.co", phone: "318 4080894", month: "Septiembre", week: "Semana 5", day: "Jueves", start: "08:00", end: "17:00" }
+    ],
+    tienda3: [ // CC Felicidad - Julian Garzon
+        { id: 55, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 1", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 56, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 1", day: "Viernes", start: "08:00", end: "17:00" },
+        { id: 57, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 1", day: "Sábado", start: "08:00", end: "12:00" },
+        { id: 58, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 2", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 59, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 2", day: "Jueves", start: "08:00", end: "17:00" },
+        { id: 60, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 2", day: "Sábado", start: "08:00", end: "12:00" },
+        { id: 61, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 2", day: "Domingo (Guardia)", start: "08:00", end: "12:00" },
+        { id: 62, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 3", day: "Lunes", start: "08:00", end: "17:00" },
+        { id: 63, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 3", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 64, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 3", day: "Viernes", start: "08:00", end: "17:00" },
+        { id: 65, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 3", day: "Sábado", start: "08:00", end: "12:00" },
+        { id: 66, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 4", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 67, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 4", day: "Jueves", start: "08:00", end: "17:00" },
+        { id: 68, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 4", day: "Sábado", start: "08:00", end: "12:00" },
+        { id: 69, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 5", day: "Lunes", start: "08:00", end: "17:00" },
+        { id: 70, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 5", day: "Miércoles", start: "08:00", end: "16:00" }
+    ],
+    tienda4: [ // CC Plaza Central - Julian Garzon
+        { id: 71, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 1", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 72, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 1", day: "Jueves", start: "08:00", end: "17:00" },
+        { id: 73, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 1", day: "Sábado", start: "08:00", end: "12:00" },
+        { id: 74, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 2", day: "Lunes", start: "08:00", end: "17:00" },
+        { id: 75, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 2", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 76, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 2", day: "Viernes", start: "08:00", end: "17:00" },
+        { id: 77, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 2", day: "Sábado", start: "08:00", end: "12:00" },
+        { id: 78, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 3", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 79, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 3", day: "Jueves", start: "08:00", end: "17:00" },
+        { id: 80, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 3", day: "Sábado", start: "08:00", end: "12:00" },
+        { id: 81, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 4", day: "Lunes", start: "08:00", end: "17:00" },
+        { id: 82, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 4", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 83, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 4", day: "Viernes", start: "08:00", end: "17:00" },
+        { id: 84, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 4", day: "Sábado", start: "08:00", end: "12:00" },
+        { id: 85, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 5", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 86, name: "Julian Garzon", email: "julian.garzon@rsg.com.co", phone: "316 9017657", month: "Septiembre", week: "Semana 5", day: "Jueves", start: "08:00", end: "17:00" }
+    ],
+    tienda5: [ // CC Unicentro - Jersoon Gonzalez
+        { id: 87, name: "Jersoon Gonzalez", email: "jersoon.gonzalez@rsg.com.co", phone: "302 2531384", month: "Septiembre", week: "Semana 1", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 88, name: "Jersoon Gonzalez", email: "jersoon.gonzalez@rsg.com.co", phone: "302 2531384", month: "Septiembre", week: "Semana 1", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 89, name: "Jersoon Gonzalez", email: "jersoon.gonzalez@rsg.com.co", phone: "302 2531384", month: "Septiembre", week: "Semana 1", day: "Jueves", start: "08:00", end: "17:00" },
+        { id: 90, name: "Jersoon Gonzalez", email: "jersoon.gonzalez@rsg.com.co", phone: "302 2531384", month: "Septiembre", week: "Semana 1", day: "Viernes", start: "08:00", end: "17:00" },
+        { id: 91, name: "Jersoon Gonzalez", email: "jersoon.gonzalez@rsg.com.co", phone: "302 2531384", month: "Septiembre", week: "Semana 1", day: "Sábado", start: "08:00", end: "12:00" },
+        { id: 92, name: "Jersoon Gonzalez", email: "jersoon.gonzalez@rsg.com.co", phone: "302 2531384", month: "Septiembre", week: "Semana 1", day: "Domingo (Guardia)", start: "08:00", end: "12:00" },
+        { id: 93, name: "Jersoon Gonzalez", email: "jersoon.gonzalez@rsg.com.co", phone: "302 2531384", month: "Septiembre", week: "Semana 2", day: "Lunes", start: "08:00", end: "17:00" },
+        { id: 94, name: "Jersoon Gonzalez", email: "jersoon.gonzalez@rsg.com.co", phone: "302 2531384", month: "Septiembre", week: "Semana 2", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 95, name: "Jersoon Gonzalez", email: "jersoon.gonzalez@rsg.com.co", phone: "302 2531384", month: "Septiembre", week: "Semana 2", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 96, name: "Jersoon Gonzalez", email: "jersoon.gonzalez@rsg.com.co", phone: "302 2531384", month: "Septiembre", week: "Semana 2", day: "Jueves", start: "08:00", end: "17:00" },
+        { id: 97, name: "Jersoon Gonzalez", email: "jersoon.gonzalez@rsg.com.co", phone: "302 2531384", month: "Septiembre", week: "Semana 2", day: "Viernes", start: "08:00", end: "17:00" },
+        { id: 98, name: "Jersoon Gonzalez", email: "jersoon.gonzalez@rsg.com.co", phone: "302 2531384", month: "Septiembre", week: "Semana 2", day: "Sábado", start: "08:00", end: "12:00" },
+        { id: 99, name: "Jersoon Gonzalez", email: "jersoon.gonzalez@rsg.com.co", phone: "302 2531384", month: "Septiembre", week: "Semana 3", day: "Lunes", start: "08:00", end: "17:00" },
+        { id: 100, name: "Jersoon Gonzalez", email: "jersoon.gonzalez@rsg.com.co", phone: "302 2531384", month: "Septiembre", week: "Semana 3", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 101, name: "Jersoon Gonzalez", email: "jersoon.gonzalez@rsg.com.co", phone: "302 2531384", month: "Septiembre", week: "Semana 3", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 102, name: "Jersoon Gonzalez", email: "jersoon.gonzalez@rsg.com.co", phone: "302 2531384", month: "Septiembre", week: "Semana 3", day: "Jueves", start: "08:00", end: "17:00" },
+        { id: 103, name: "Jersoon Gonzalez", email: "jersoon.gonzalez@rsg.com.co", phone: "302 2531384", month: "Septiembre", week: "Semana 3", day: "Viernes", start: "08:00", end: "17:00" },
+        { id: 104, name: "Jersoon Gonzalez", email: "jersoon.gonzalez@rsg.com.co", phone: "302 2531384", month: "Septiembre", week: "Semana 3", day: "Sábado", start: "08:00", end: "12:00" },
+        { id: 105, name: "Jersoon Gonzalez", email: "jersoon.gonzalez@rsg.com.co", phone: "302 2531384", month: "Septiembre", week: "Semana 4", day: "Lunes", start: "08:00", end: "17:00" },
+        { id: 106, name: "Jersoon Gonzalez", email: "jersoon.gonzalez@rsg.com.co", phone: "302 2531384", month: "Septiembre", week: "Semana 4", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 107, name: "Jersoon Gonzalez", email: "jersoon.gonzalez@rsg.com.co", phone: "302 2531384", month: "Septiembre", week: "Semana 4", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 108, name: "Jersoon Gonzalez", email: "jersoon.gonzalez@rsg.com.co", phone: "302 2531384", month: "Septiembre", week: "Semana 4", day: "Jueves", start: "08:00", end: "17:00" },
+        { id: 109, name: "Jersoon Gonzalez", email: "jersoon.gonzalez@rsg.com.co", phone: "302 2531384", month: "Septiembre", week: "Semana 4", day: "Viernes", start: "08:00", end: "17:00" },
+        { id: 110, name: "Jersoon Gonzalez", email: "jersoon.gonzalez@rsg.com.co", phone: "302 2531384", month: "Septiembre", week: "Semana 4", day: "Sábado", start: "08:00", end: "12:00" },
+        { id: 111, name: "Jersoon Gonzalez", email: "jersoon.gonzalez@rsg.com.co", phone: "302 2531384", month: "Septiembre", week: "Semana 5", day: "Lunes", start: "08:00", end: "17:00" },
+        { id: 112, name: "Jersoon Gonzalez", email: "jersoon.gonzalez@rsg.com.co", phone: "302 2531384", month: "Septiembre", week: "Semana 5", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 113, name: "Jersoon Gonzalez", email: "jersoon.gonzalez@rsg.com.co", phone: "302 2531384", month: "Septiembre", week: "Semana 5", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 114, name: "Jersoon Gonzalez", email: "jersoon.gonzalez@rsg.com.co", phone: "302 2531384", month: "Septiembre", week: "Semana 5", day: "Jueves", start: "08:00", end: "17:00" }
+    ],
+    tienda6: [ // Oficina Colina - Anderson Grande
+        { id: 115, name: "Anderson Grande", email: "anderson.grande@rsg.com.co", phone: "312 5373173", month: "Septiembre", week: "Semana 1", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 116, name: "Anderson Grande", email: "anderson.grande@rsg.com.co", phone: "312 5373173", month: "Septiembre", week: "Semana 1", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 117, name: "Anderson Grande", email: "anderson.grande@rsg.com.co", phone: "312 5373173", month: "Septiembre", week: "Semana 1", day: "Jueves", start: "08:00", end: "17:00" },
+        { id: 118, name: "Anderson Grande", email: "anderson.grande@rsg.com.co", phone: "312 5373173", month: "Septiembre", week: "Semana 1", day: "Viernes", start: "08:00", end: "17:00" },
+        { id: 119, name: "Anderson Grande", email: "anderson.grande@rsg.com.co", phone: "312 5373173", month: "Septiembre", week: "Semana 1", day: "Sábado", start: "09:00", end: "13:00" },
+        { id: 120, name: "Anderson Grande", email: "anderson.grande@rsg.com.co", phone: "312 5373173", month: "Septiembre", week: "Semana 2", day: "Lunes", start: "08:00", end: "17:00" },
+        { id: 121, name: "Anderson Grande", email: "anderson.grande@rsg.com.co", phone: "312 5373173", month: "Septiembre", week: "Semana 2", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 122, name: "Anderson Grande", email: "anderson.grande@rsg.com.co", phone: "312 5373173", month: "Septiembre", week: "Semana 2", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 123, name: "Anderson Grande", email: "anderson.grande@rsg.com.co", phone: "312 5373173", month: "Septiembre", week: "Semana 2", day: "Jueves", start: "08:00", end: "17:00" },
+        { id: 124, name: "Anderson Grande", email: "anderson.grande@rsg.com.co", phone: "312 5373173", month: "Septiembre", week: "Semana 2", day: "Viernes", start: "08:00", end: "17:00" },
+        { id: 125, name: "Anderson Grande", email: "anderson.grande@rsg.com.co", phone: "312 5373173", month: "Septiembre", week: "Semana 2", day: "Sábado", start: "09:00", end: "13:00" },
+        { id: 126, name: "Anderson Grande", email: "anderson.grande@rsg.com.co", phone: "312 5373173", month: "Septiembre", week: "Semana 3", day: "Lunes", start: "08:00", end: "17:00" },
+        { id: 127, name: "Anderson Grande", email: "anderson.grande@rsg.com.co", phone: "312 5373173", month: "Septiembre", week: "Semana 3", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 128, name: "Anderson Grande", email: "anderson.grande@rsg.com.co", phone: "312 5373173", month: "Septiembre", week: "Semana 3", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 129, name: "Anderson Grande", email: "anderson.grande@rsg.com.co", phone: "312 5373173", month: "Septiembre", week: "Semana 3", day: "Viernes", start: "08:00", end: "17:00" },
+        { id: 130, name: "Anderson Grande", email: "anderson.grande@rsg.com.co", phone: "312 5373173", month: "Septiembre", week: "Semana 3", day: "Sábado", start: "09:00", end: "13:00" },
+        { id: 131, name: "Anderson Grande", email: "anderson.grande@rsg.com.co", phone: "312 5373173", month: "Septiembre", week: "Semana 4", day: "Lunes", start: "08:00", end: "17:00" },
+        { id: 132, name: "Anderson Grande", email: "anderson.grande@rsg.com.co", phone: "312 5373173", month: "Septiembre", week: "Semana 4", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 133, name: "Anderson Grande", email: "anderson.grande@rsg.com.co", phone: "312 5373173", month: "Septiembre", week: "Semana 4", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 134, name: "Anderson Grande", email: "anderson.grande@rsg.com.co", phone: "312 5373173", month: "Septiembre", week: "Semana 4", day: "Jueves", start: "08:00", end: "17:00" },
+        { id: 135, name: "Anderson Grande", email: "anderson.grande@rsg.com.co", phone: "312 5373173", month: "Septiembre", week: "Semana 4", day: "Viernes", start: "08:00", end: "17:00" },
+        { id: 136, name: "Anderson Grande", email: "anderson.grande@rsg.com.co", phone: "312 5373173", month: "Septiembre", week: "Semana 4", day: "Sábado", start: "09:00", end: "13:00" },
+        { id: 137, name: "Anderson Grande", email: "anderson.grande@rsg.com.co", phone: "312 5373173", month: "Septiembre", week: "Semana 5", day: "Lunes", start: "08:00", end: "17:00" },
+        { id: 138, name: "Anderson Grande", email: "anderson.grande@rsg.com.co", phone: "312 5373173", month: "Septiembre", week: "Semana 5", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 139, name: "Anderson Grande", email: "anderson.grande@rsg.com.co", phone: "312 5373173", month: "Septiembre", week: "Semana 5", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 140, name: "Anderson Grande", email: "anderson.grande@rsg.com.co", phone: "312 5373173", month: "Septiembre", week: "Semana 5", day: "Jueves", start: "08:00", end: "17:00" }
+    ],
+    tienda7: [ // CC Titan - Andres Garzon
+        { id: 141, name: "Andres Garzon", email: "andres.garzon@rsg.com.co", phone: "312 3492975", month: "Septiembre", week: "Semana 1", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 142, name: "Andres Garzon", email: "andres.garzon@rsg.com.co", phone: "312 3492975", month: "Septiembre", week: "Semana 1", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 143, name: "Andres Garzon", email: "andres.garzon@rsg.com.co", phone: "312 3492975", month: "Septiembre", week: "Semana 1", day: "Jueves", start: "08:00", end: "17:00" },
+        { id: 144, name: "Andres Garzon", email: "andres.garzon@rsg.com.co", phone: "312 3492975", month: "Septiembre", week: "Semana 1", day: "Viernes", start: "08:00", end: "17:00" },
+        { id: 145, name: "Andres Garzon", email: "andres.garzon@rsg.com.co", phone: "312 3492975", month: "Septiembre", week: "Semana 1", day: "Sábado", start: "08:00", end: "12:00" },
+        { id: 146, name: "Andres Garzon", email: "andres.garzon@rsg.com.co", phone: "312 3492975", month: "Septiembre", week: "Semana 2", day: "Lunes", start: "08:00", end: "17:00" },
+        { id: 147, name: "Andres Garzon", email: "andres.garzon@rsg.com.co", phone: "312 3492975", month: "Septiembre", week: "Semana 2", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 148, name: "Andres Garzon", email: "andres.garzon@rsg.com.co", phone: "312 3492975", month: "Septiembre", week: "Semana 2", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 149, name: "Andres Garzon", email: "andres.garzon@rsg.com.co", phone: "312 3492975", month: "Septiembre", week: "Semana 2", day: "Jueves", start: "08:00", end: "17:00" },
+        { id: 150, name: "Andres Garzon", email: "andres.garzon@rsg.com.co", phone: "312 3492975", month: "Septiembre", week: "Semana 2", day: "Viernes", start: "08:00", end: "17:00" },
+        { id: 151, name: "Andres Garzon", email: "andres.garzon@rsg.com.co", phone: "312 3492975", month: "Septiembre", week: "Semana 2", day: "Sábado", start: "08:00", end: "12:00" },
+        { id: 152, name: "Andres Garzon", email: "andres.garzon@rsg.com.co", phone: "312 3492975", month: "Septiembre", week: "Semana 3", day: "Lunes", start: "08:00", end: "17:00" },
+        { id: 153, name: "Andres Garzon", email: "andres.garzon@rsg.com.co", phone: "312 3492975", month: "Septiembre", week: "Semana 3", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 154, name: "Andres Garzon", email: "andres.garzon@rsg.com.co", phone: "312 3492975", month: "Septiembre", week: "Semana 3", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 155, name: "Andres Garzon", email: "andres.garzon@rsg.com.co", phone: "312 3492975", month: "Septiembre", week: "Semana 3", day: "Jueves", start: "08:00", end: "17:00" },
+        { id: 156, name: "Andres Garzon", email: "andres.garzon@rsg.com.co", phone: "312 3492975", month: "Septiembre", week: "Semana 3", day: "Viernes", start: "08:00", end: "17:00" },
+        { id: 157, name: "Andres Garzon", email: "andres.garzon@rsg.com.co", phone: "312 3492975", month: "Septiembre", week: "Semana 3", day: "Sábado", start: "08:00", end: "12:00" },
+        { id: 158, name: "Andres Garzon", email: "andres.garzon@rsg.com.co", phone: "312 3492975", month: "Septiembre", week: "Semana 4", day: "Lunes", start: "08:00", end: "17:00" },
+        { id: 159, name: "Andres Garzon", email: "andres.garzon@rsg.com.co", phone: "312 3492975", month: "Septiembre", week: "Semana 4", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 160, name: "Andres Garzon", email: "andres.garzon@rsg.com.co", phone: "312 3492975", month: "Septiembre", week: "Semana 4", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 161, name: "Andres Garzon", email: "andres.garzon@rsg.com.co", phone: "312 3492975", month: "Septiembre", week: "Semana 4", day: "Jueves", start: "08:00", end: "17:00" },
+        { id: 162, name: "Andres Garzon", email: "andres.garzon@rsg.com.co", phone: "312 3492975", month: "Septiembre", week: "Semana 4", day: "Viernes", start: "08:00", end: "17:00" },
+        { id: 163, name: "Andres Garzon", email: "andres.garzon@rsg.com.co", phone: "312 3492975", month: "Septiembre", week: "Semana 4", day: "Sábado", start: "08:00", end: "12:00" },
+        { id: 164, name: "Andres Garzon", email: "andres.garzon@rsg.com.co", phone: "312 3492975", month: "Septiembre", week: "Semana 5", day: "Lunes", start: "08:00", end: "17:00" },
+        { id: 165, name: "Andres Garzon", email: "andres.garzon@rsg.com.co", phone: "312 3492975", month: "Septiembre", week: "Semana 5", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 166, name: "Andres Garzon", email: "andres.garzon@rsg.com.co", phone: "312 3492975", month: "Septiembre", week: "Semana 5", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 167, name: "Andres Garzon", email: "andres.garzon@rsg.com.co", phone: "312 3492975", month: "Septiembre", week: "Semana 5", day: "Jueves", start: "08:00", end: "17:00" }
+    ],
+    tienda8: [ // CC Fontanar - Andres Bojaca
+        { id: 168, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 1", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 169, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 1", day: "Viernes", start: "08:00", end: "17:00" },
+        { id: 170, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 1", day: "Sábado", start: "08:00", end: "12:00" },
+        { id: 171, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 1", day: "Domingo (Guardia)", start: "08:00", end: "12:00" },
+        { id: 172, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 2", day: "Lunes", start: "08:00", end: "17:00" },
+        { id: 173, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 2", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 174, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 2", day: "Viernes", start: "08:00", end: "17:00" },
+        { id: 175, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 2", day: "Sábado", start: "08:00", end: "12:00" },
+        { id: 176, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 2", day: "Domingo (Guardia)", start: "08:00", end: "12:00" },
+        { id: 177, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 3", day: "Lunes", start: "08:00", end: "17:00" },
+        { id: 178, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 3", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 179, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 3", day: "Viernes", start: "08:00", end: "17:00" },
+        { id: 180, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 3", day: "Sábado", start: "08:00", end: "12:00" },
+        { id: 181, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 3", day: "Domingo (Guardia)", start: "08:00", end: "12:00" },
+        { id: 182, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 4", day: "Lunes", start: "08:00", end: "17:00" },
+        { id: 183, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 4", day: "Miércoles", start: "08:00", end: "16:00" },
+        { id: 184, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 4", day: "Viernes", start: "08:00", end: "17:00" },
+        { id: 185, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 4", day: "Sábado", start: "08:00", end: "12:00" },
+        { id: 186, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 4", day: "Domingo (Guardia)", start: "08:00", end: "12:00" },
+        { id: 187, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 5", day: "Lunes", start: "08:00", end: "17:00" },
+        { id: 188, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 5", day: "Miércoles", start: "08:00", end: "16:00" }
+    ],
+    tienda9: [ // Bima - Andres Bojaca
+        { id: 189, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 1", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 190, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 1", day: "Jueves", start: "08:00", end: "17:00" },
+        { id: 191, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 2", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 192, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 2", day: "Jueves", start: "08:00", end: "17:00" },
+        { id: 193, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 3", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 194, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 3", day: "Jueves", start: "08:00", end: "17:00" },
+        { id: 195, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 4", day: "Martes", start: "08:00", end: "16:00" },
+        { id: 196, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 4", day: "Jueves", start: "08:00", end: "17:00" },
+        { id: 197, name: "Andres Bojaca", email: "jesus.bojaca@rsg.com.co", phone: "320 4841099", month: "Septiembre", week: "Semana 5", day: "Martes", start: "08:00", end: "16:00" }
+    ]
+        };
+
+        // Variable que guarda la tienda actualmente seleccionada
+        let currentStore = "";
+
+
+        // ═══════════════════════════════════════════════════════════
+        //  BLOQUE 2: FUNCIONES
+        // ═══════════════════════════════════════════════════════════
+
+        /*
+         * FUNCIÓN: filterStoresByCountry()
+         * Se ejecuta al cambiar el selector de país.
+         * Filtra las tiendas disponibles y habilita/deshabilita
+         * el selector de tienda según corresponda.
+         */
+        function filterStoresByCountry() {
+            const countrySelect = document.getElementById("countrySelect");
+            const storeSelect = document.getElementById("storeSelect");
+            const selectedCountry = countrySelect.value;
+
+            // Resetea la tienda seleccionada y oculta las secciones
+            currentStore = "";
+            storeSelect.value = "";
+            document.getElementById("storeInfo").classList.add("hidden");
+            document.getElementById("staffSection").classList.add("hidden");
+            document.getElementById("emptyState").classList.remove("hidden");
+
+            // Si no hay país seleccionado, deshabilita el selector de tienda
+            if (!selectedCountry) {
+                storeSelect.innerHTML = '<option value="">-- Primero selecciona un país --</option>';
+                storeSelect.disabled = true;
+                return;
+            }
+
+            // Genera las opciones de tienda filtradas por país
+            let options = '<option value="">-- Elige una tienda --</option>';
+            
+            for (const [storeId, storeData] of Object.entries(stores)) {
+                if (storeData.country === selectedCountry) {
+                    options += `<option value="${storeId}">${storeData.name}</option>`;
+                }
+            }
+
+            storeSelect.innerHTML = options;
+            storeSelect.disabled = false;
+        }
+
+        /*
+         * FUNCIÓN: renderStore()
+         * Se ejecuta al cambiar el selector de tienda.
+         * Muestra el banner con info de la tienda y llama a
+         * renderStaffList() para pintar los empleados.
+         * NUEVO: Reinicia los filtros de mes y semana a "Todos".
+         */
+        function renderStore() {
+            const select = document.getElementById("storeSelect");
+            currentStore = select.value;
+
+            const storeInfo = document.getElementById("storeInfo");
+            const staffSection = document.getElementById("staffSection");
+            const emptyState = document.getElementById("emptyState");
+
+            // Si no hay tienda seleccionada, muestra el estado vacío
+            if (!currentStore) {
+                storeInfo.classList.add("hidden");
+                staffSection.classList.add("hidden");
+                emptyState.classList.remove("hidden");
+                return;
+            }
+
+            // Muestra las secciones de tienda y personal
+            emptyState.classList.add("hidden");
+            storeInfo.classList.remove("hidden");
+            staffSection.classList.remove("hidden");
+
+            // Rellena el banner con nombre, dirección y país
+            const store = stores[currentStore];
+            const country = countries[store.country];
+
+            document.getElementById("storeName").textContent = store.name;
+            document.getElementById("storeAddress").textContent = store.address;
+            document.getElementById("countryDisplay").textContent = `${country.flag} ${country.name}`;
+            document.getElementById("staffCount").textContent = (schedules[currentStore] || []).length;
+
+            // NUEVO: Reinicia los filtros de mes y semana cada vez que
+            // se cambia de tienda, para mostrar todo el personal
+            document.getElementById("filterMonth").value = "";
+            document.getElementById("filterWeek").value = "";
+
+            // Dibuja la lista de empleados
+            renderStaffList();
+        }
+
+        /*
+         * FUNCIÓN: renderStaffList()
+         * Se ejecuta al cargar una tienda o al cambiar los filtros
+         * de mes/semana.
+         * 
+         * NUEVO: Lee los valores de los selectores de mes y semana.
+         * Si tienen valor, filtra el arreglo 'staff' para mostrar
+         * únicamente los horarios que coincidan.
+         */
+        function renderStaffList() {
+            const container = document.getElementById("staffList");
+
+            // NUEVO: Obtiene los valores de los filtros de mes y semana
+            const filterMonth = document.getElementById("filterMonth").value;
+            const filterWeek = document.getElementById("filterWeek").value;
+
+            // Obtiene todos los horarios de la tienda actual
+            let staff = schedules[currentStore] || [];
+
+            // NUEVO: Filtra por mes si el usuario seleccionó uno
+            if (filterMonth) {
+                staff = staff.filter(s => s.month === filterMonth);
+            }
+
+            // NUEVO: Filtra por semana si el usuario seleccionó una
+            if (filterWeek) {
+                staff = staff.filter(s => s.week === filterWeek);
+            }
+
+            // Si después de filtrar no queda nada, muestra mensaje vacío
+            if (staff.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-box">
+                        <div style="font-size: 36px; margin-bottom: 8px;">📭</div>
+                        <p style="margin: 0; font-size: 15px;">No hay personal para los filtros seleccionados.</p>
+                    </div>`;
+                return;
+            }
+
+            // Agrupa los horarios por nombre de persona
+            const byPerson = {};
+            staff.forEach(s => {
+                if (!byPerson[s.name]) {
+                    byPerson[s.name] = {
+                        name: s.name,
+                        email: s.email,
+                        phone: s.phone,
+                        schedules: []
+                    };
+                }
+                byPerson[s.name].schedules.push({
+                    month: s.month,   // NUEVO: se guarda el mes
+                    week: s.week,     // NUEVO: se guarda la semana
+                    day: s.day,
+                    start: s.start,
+                    end: s.end,
+                    id: s.id
+                });
+            });
+
+            // Genera el HTML de cada tarjeta de empleado
+            let html = "";
+            Object.values(byPerson).forEach(person => {
+                // Extrae las iniciales del nombre (ej: "Kevin Alean" → "KA")
+                const initials = person.name
+                    .split(' ')
+                    .map(n => n[0])
+                    .join('')
+                    .substring(0, 2)
+                    .toUpperCase();
+
+                html += `
+                    <div class="employee-card">
+                        <div class="employee-header">
+                            <div class="employee-info">
+                                <div class="avatar">${initials}</div>
+                                <div>
+                                    <div class="employee-name">${person.name}</div>
+                                    <div class="employee-contact">
+                                        <span>📧 ${person.email}</span>
+                                        <span>📱 ${person.phone}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="schedules">
+                            ${person.schedules.map(sch => `
+                                <div class="schedule-tag">
+                                    <!-- NUEVO: Muestra mes, semana, día y hora -->
+                                    <span class="schedule-month">${sch.month}</span>
+                                    <span class="separator">|</span>
+                                    <span class="schedule-week">${sch.week}</span>
+                                    <span class="separator">|</span>
+                                    <span class="schedule-day">${sch.day}</span>
+                                    <span class="separator">|</span>
+                                    <span class="schedule-time">🕐 ${sch.start} - ${sch.end}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+    </script>
+
+</body>
+</html>

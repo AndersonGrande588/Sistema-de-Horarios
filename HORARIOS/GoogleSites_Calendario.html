@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Horarios por Tienda</title>
+    <style>
+:root
+        {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f3f4f6;
+            color: #1f2937;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 6px;
+        }
+
+        header p {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .selector-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            font-size: 14px;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+            background: #fff;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            font-family: inherit;
+        }
+
+        select:focus, input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        select:disabled {
+            background: #e5e7eb;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .store-banner {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .store-banner h2 {
+            margin: 0 0 4px 0;
+            font-size: 20px;
+        }
+
+        .store-banner p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .badge {
+            background: rgba(255,255,255,0.2);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .section-header h3 {
+            font-size: 18px;
+            color: #111827;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .employee-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .employee-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .employee-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .employee-name {
+            font-weight: 700;
+            font-size: 16px;
+            color: #111827;
+        }
+
+        .employee-contact {
+            font-size: 13px;
+            color: #6b7280;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 3px;
+        }
+
+        .schedules {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .schedule-tag {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .schedule-month {
+            font-weight: 700;
+            color: #1e40af;
+            font-size: 13px;
+        }
+
+        .schedule-week {
+            font-weight: 600;
+            color: #059669;
+            font-size: 13px;
+        }
+
+        .schedule-day {
+            font-weight: 600;
+            color: #7c3aed;
+            font-size: 13px;
+        }
+
+        .schedule-time {
+            color: #374151;
+            font-size: 13px;
+        }
+
+        .separator {
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #9ca3af;
+        }
+
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+            margin: 0;
+        }
+
+        .empty-box {
+            text-align: center;
+            padding: 40px 20px;
+            background: #f9fafb;
+            border: 2px dashed #d1d5db;
+            border-radius: 12px;
+            color: #6b7280;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .country-indicator {
+            background: rgba(255,255,255,0.25);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-top: 6px;
+            display: inline-block;
+        }
+
+        /* ═══ VISTA SEMANAL TIPO GOOGLE CALENDAR (NUEVO) ═══ */
+        .cal-wrapper {
+            overflow-x: auto;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .cal-grid {
+            min-width: 1000px;
+        }
+
+        .cal-header {
+            display: grid;
+            grid-template-columns: 180px repeat(7, 1fr);
+            border-bottom: 2px solid #e5e7eb;
+            background: #f8fafc;
+            position: sticky;
+            top: 0;
+        }
+
+        .cal-header .cal-corner {
+            padding: 10px 12px;
+            font-weight: 700;
+            color: #374151;
+            font-size: 13px;
+            border-right: 1px solid #e5e7eb;
+        }
+
+        .cal-header .cal-day-header {
+            padding: 10px 12px;
+            text-align: center;
+            font-weight: 700;
+            color: #374151;
+            font-size: 13px;
+            border-right: 1px solid #e5e7eb;
+            text-transform: capitalize;
+        }
+
+        .cal-header .cal-day-header .cal-day-date {
+            font-weight: 400;
+            color: #9ca3af;
+            font-size: 11px;
+            display: block;
+        }
+
+        .cal-header .cal-day-header.today {
+            background: #eff6ff;
+            color: #2563eb;
+        }
+
+        .cal-row {
+            display: grid;
+            grid-template-columns: 180px repeat(7, 1fr);
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .cal-row:last-child {
+            border-bottom: none;
+        }
+
+        .cal-person {
+            padding: 12px 12px;
+            border-right: 1px solid #e5e7eb;
+            background: #f9fafb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .cal-person .cal-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .cal-person .cal-person-name {
+            font-weight: 700;
+            font-size: 13px;
+            color: #111827;
+        }
+
+        .cal-person .cal-person-meta {
+            font-size: 11px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        /* Celda de día con timeline de 08:00 - 17:00 */
+        .cal-cell {
+            border-right: 1px solid #e5e7eb;
+            position: relative;
+            height: 300px;
+            background-image: linear-gradient(to bottom, #f3f4f6 1px, transparent 1px);
+            background-size: 100% 50px;
+            background-position: 0 -1px;
+        }
+
+        /* Marcos de horas cada 50px (1px lineas) */
+        .cal-cell::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: linear-gradient(to bottom, transparent 49px, #e5e7eb 49px, #e5e7eb 50px);
+            background-size: 100% 50px;
+            pointer-events: none;
+        }
+
+        .cal-cell.no-day {
+            background: #fafafa;
+        }
+
+        .cal-turno {
+            position: absolute;
+            left: 6px;
+            right: 6px;
+            border-radius: 6px;
+            padding: 4px 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #fff;
+            overflow: hidden;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Colores según duración/tipo */
+        .cal-turno.jornada-completa { background: linear-gradient(135deg, #2563eb, #3b82f6); }
+        .cal-turno.jornada-parcial { background: linear-gradient(135deg, #059669, #10b981); }
+        .cal-turno.guardia { background: linear-gradient(135deg, #7c3aed, #8b5cf6); }
+
+        .cal-turno .turno-hora {
+            display: block;
+            font-size: 10px;
+            font-weight: 400;
+            opacity: 0.9;
+        }
+
+        .cal-empty-row {
+            padding: 16px;
+            text-align: center;
+            color: #9ca3af;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 12px;
+            }
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+            .store-banner {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Gestor de Horarios por Tienda</h1>
+        <p>Selecciona un pais, tienda, mes y semana para ver el personal</p>
+    </header>
+    <div class="card selector-card">
+        <label for="countrySelect">Seleccionar Pais</label>
+        <select id="countrySelect" onchange="filterStoresByCountry()">
+            <option value="">-- Elige un pais --</option>
+            <option value="colombia">Colombia</option>
+            <option value="mexico">Mexico</option>
+            <option value="argentina">Argentina</option>
+            <option value="chile">Chile</option>
+            <option value="peru">Peru</option>
+            <option value="ecuador">Ecuador</option>
+            <option value="panama">Panama</option>
+        </select>
+    </div>
+    <div class="card selector-card">
+        <label for="storeSelect">Seleccionar Tienda</label>
+        <select id="storeSelect" onchange="renderStore()" disabled>
+            <option value="">-- Primero selecciona un pais --</option>
+        </select>
+    </div>
+    <div id="storeInfo" class="hidden">
+        <div class="store-banner">
+            <div>
+                <h2 id="storeName"></h2>
+                <p id="storeAddress"></p>
+                <div class="country-indicator" id="countryDisplay"></div>
+            </div>
+            <div class="badge"><span id="staffCount">0</span> empleados asignados</div>
+        </div>
+    </div>
+    <div id="staffSection" class="hidden" style="margin-top: 20px;">
+        <div class="section-header"><h3>Personal en Sitio</h3></div>
+        <div class="filter-row">
+            <div class="filter-group">
+                <label for="filterMonth">Mes</label>
+                <select id="filterMonth" onchange="renderStaffList()">
+                    <option value="">Todos los meses</option>
+                    <option>Enero</option><option>Febrero</option><option>Marzo</option>
+                    <option>Abril</option><option>Mayo</option><option>Junio</option>
+                    <option>Julio</option><option>Agosto</option><option>Septiembre</option>
+                    <option>Octubre</option><option>Noviembre</option><option>Diciembre</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filterWeek">Semana</label>
+                <select id="filterWeek" onchange="renderStaffList()">
+                    <option value="">Todas las semanas</option>
+                    <option>Semana 1</option><option>Semana 2</option><option>Semana 3</option>
+                    <option>Semana 4</option><option>Semana 5</option>
+                </select>
+            </div>
+        </div>
+        <div id="staffList"></div>
+    </div>
+    <div id="emptyState" class="empty-state">
+        <div class="icon"></div>
+        <p>Selecciona un pais y una tienda para ver el personal y sus horarios</p>
+    </div>
+</div>
+
+<script>
+
+const SCHEDULES_DATA ={
+  "tienda1": [
+    { "id": 1, "name": "Kevin Alean", "email": "kevin.alean@rsg.com.co", "phone": "324 5210384", "month": "Septiembre", "week": "Semana 1", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 2, "name": "Kevin Alean", "email": "kevin.alean@rsg.com.co", "phone": "324 5210384", "month": "Septiembre", "week": "Semana 1", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 3, "name": "Kevin Alean", "email": "kevin.alean@rsg.com.co", "phone": "324 5210384", "month": "Septiembre", "week": "Semana 1", "day": "Jueves", "start": "08:00", "end": "17:00" },
+    { "id": 4, "name": "Kevin Alean", "email": "kevin.alean@rsg.com.co", "phone": "324 5210384", "month": "Septiembre", "week": "Semana 1", "day": "Viernes", "start": "08:00", "end": "17:00" },
+    { "id": 5, "name": "Kevin Alean", "email": "kevin.alean@rsg.com.co", "phone": "324 5210384", "month": "Septiembre", "week": "Semana 1", "day": "Sábado", "start": "08:00", "end": "12:00" },
+    { "id": 6, "name": "Kevin Alean", "email": "kevin.alean@rsg.com.co", "phone": "324 5210384", "month": "Septiembre", "week": "Semana 2", "day": "Lunes", "start": "08:00", "end": "17:00" },
+    { "id": 7, "name": "Kevin Alean", "email": "kevin.alean@rsg.com.co", "phone": "324 5210384", "month": "Septiembre", "week": "Semana 2", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 8, "name": "Kevin Alean", "email": "kevin.alean@rsg.com.co", "phone": "324 5210384", "month": "Septiembre", "week": "Semana 2", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 9, "name": "Kevin Alean", "email": "kevin.alean@rsg.com.co", "phone": "324 5210384", "month": "Septiembre", "week": "Semana 2", "day": "Jueves", "start": "08:00", "end": "17:00" },
+    { "id": 10, "name": "Kevin Alean", "email": "kevin.alean@rsg.com.co", "phone": "324 5210384", "month": "Septiembre", "week": "Semana 2", "day": "Viernes", "start": "08:00", "end": "17:00" },
+    { "id": 11, "name": "Kevin Alean", "email": "kevin.alean@rsg.com.co", "phone": "324 5210384", "month": "Septiembre", "week": "Semana 2", "day": "Sábado", "start": "08:00", "end": "12:00" },
+    { "id": 12, "name": "Kevin Alean", "email": "kevin.alean@rsg.com.co", "phone": "324 5210384", "month": "Septiembre", "week": "Semana 3", "day": "Lunes", "start": "08:00", "end": "17:00" },
+    { "id": 13, "name": "Kevin Alean", "email": "kevin.alean@rsg.com.co", "phone": "324 5210384", "month": "Septiembre", "week": "Semana 3", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 14, "name": "Kevin Alean", "email": "kevin.alean@rsg.com.co", "phone": "324 5210384", "month": "Septiembre", "week": "Semana 3", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 15, "name": "Kevin Alean", "email": "kevin.alean@rsg.com.co", "phone": "324 5210384", "month": "Septiembre", "week": "Semana 3", "day": "Jueves", "start": "08:00", "end": "17:00" },
+    { "id": 16, "name": "Kevin Alean", "email": "kevin.alean@rsg.com.co", "phone": "324 5210384", "month": "Septiembre", "week": "Semana 3", "day": "Viernes", "start": "08:00", "end": "17:00" },
+    { "id": 17, "name": "Kevin Alean", "email": "kevin.alean@rsg.com.co", "phone": "324 5210384", "month": "Septiembre", "week": "Semana 3", "day": "Sábado", "start": "08:00", "end": "12:00" },
+    { "id": 18, "name": "Kevin Alean", "email": "kevin.alean@rsg.com.co", "phone": "324 5210384", "month": "Septiembre", "week": "Semana 3", "day": "Domingo (Guardia)", "start": "08:00", "end": "12:00" },
+    { "id": 19, "name": "Kevin Alean", "email": "kevin.alean@rsg.com.co", "phone": "324 5210384", "month": "Septiembre", "week": "Semana 4", "day": "Lunes", "start": "08:00", "end": "17:00" },
+    { "id": 20, "name": "Kevin Alean", "email": "kevin.alean@rsg.com.co", "phone": "324 5210384", "month": "Septiembre", "week": "Semana 4", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 21, "name": "Kevin Alean", "email": "kevin.alean@rsg.com.co", "phone": "324 5210384", "month": "Septiembre", "week": "Semana 4", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 22, "name": "Kevin Alean", "email": "kevin.alean@rsg.com.co", "phone": "324 5210384", "month": "Septiembre", "week": "Semana 4", "day": "Jueves", "start": "08:00", "end": "17:00" },
+    { "id": 23, "name": "Kevin Alean", "email": "kevin.alean@rsg.com.co", "phone": "324 5210384", "month": "Septiembre", "week": "Semana 4", "day": "Viernes", "start": "08:00", "end": "17:00" },
+    { "id": 24, "name": "Kevin Alean", "email": "kevin.alean@rsg.com.co", "phone": "324 5210384", "month": "Septiembre", "week": "Semana 4", "day": "Sábado", "start": "08:00", "end": "12:00" },
+    { "id": 25, "name": "Kevin Alean", "email": "kevin.alean@rsg.com.co", "phone": "324 5210384", "month": "Septiembre", "week": "Semana 5", "day": "Lunes", "start": "08:00", "end": "17:00" },
+    { "id": 26, "name": "Kevin Alean", "email": "kevin.alean@rsg.com.co", "phone": "324 5210384", "month": "Septiembre", "week": "Semana 5", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 27, "name": "Kevin Alean", "email": "kevin.alean@rsg.com.co", "phone": "324 5210384", "month": "Septiembre", "week": "Semana 5", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 28, "name": "Kevin Alean", "email": "kevin.alean@rsg.com.co", "phone": "324 5210384", "month": "Septiembre", "week": "Semana 5", "day": "Jueves", "start": "08:00", "end": "17:00" }
+  ],
+  "tienda2": [
+    { "id": 29, "name": "Angel Ortiz", "email": "angel.ortiz@rsg.com.co", "phone": "318 4080894", "month": "Septiembre", "week": "Semana 1", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 30, "name": "Angel Ortiz", "email": "angel.ortiz@rsg.com.co", "phone": "318 4080894", "month": "Septiembre", "week": "Semana 1", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 31, "name": "Angel Ortiz", "email": "angel.ortiz@rsg.com.co", "phone": "318 4080894", "month": "Septiembre", "week": "Semana 1", "day": "Jueves", "start": "08:00", "end": "17:00" },
+    { "id": 32, "name": "Angel Ortiz", "email": "angel.ortiz@rsg.com.co", "phone": "318 4080894", "month": "Septiembre", "week": "Semana 1", "day": "Viernes", "start": "08:00", "end": "17:00" },
+    { "id": 33, "name": "Angel Ortiz", "email": "angel.ortiz@rsg.com.co", "phone": "318 4080894", "month": "Septiembre", "week": "Semana 2", "day": "Lunes", "start": "08:00", "end": "17:00" },
+    { "id": 34, "name": "Angel Ortiz", "email": "angel.ortiz@rsg.com.co", "phone": "318 4080894", "month": "Septiembre", "week": "Semana 2", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 35, "name": "Angel Ortiz", "email": "angel.ortiz@rsg.com.co", "phone": "318 4080894", "month": "Septiembre", "week": "Semana 2", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 36, "name": "Angel Ortiz", "email": "angel.ortiz@rsg.com.co", "phone": "318 4080894", "month": "Septiembre", "week": "Semana 2", "day": "Jueves", "start": "08:00", "end": "17:00" },
+    { "id": 37, "name": "Angel Ortiz", "email": "angel.ortiz@rsg.com.co", "phone": "318 4080894", "month": "Septiembre", "week": "Semana 2", "day": "Viernes", "start": "08:00", "end": "17:00" },
+    { "id": 38, "name": "Angel Ortiz", "email": "angel.ortiz@rsg.com.co", "phone": "318 4080894", "month": "Septiembre", "week": "Semana 2", "day": "Sábado", "start": "08:00", "end": "12:00" },
+    { "id": 39, "name": "Angel Ortiz", "email": "angel.ortiz@rsg.com.co", "phone": "318 4080894", "month": "Septiembre", "week": "Semana 3", "day": "Lunes", "start": "08:00", "end": "17:00" },
+    { "id": 40, "name": "Angel Ortiz", "email": "angel.ortiz@rsg.com.co", "phone": "318 4080894", "month": "Septiembre", "week": "Semana 3", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 41, "name": "Angel Ortiz", "email": "angel.ortiz@rsg.com.co", "phone": "318 4080894", "month": "Septiembre", "week": "Semana 3", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 42, "name": "Angel Ortiz", "email": "angel.ortiz@rsg.com.co", "phone": "318 4080894", "month": "Septiembre", "week": "Semana 3", "day": "Jueves", "start": "08:00", "end": "17:00" },
+    { "id": 43, "name": "Angel Ortiz", "email": "angel.ortiz@rsg.com.co", "phone": "318 4080894", "month": "Septiembre", "week": "Semana 3", "day": "Viernes", "start": "08:00", "end": "17:00" },
+    { "id": 44, "name": "Angel Ortiz", "email": "angel.ortiz@rsg.com.co", "phone": "318 4080894", "month": "Septiembre", "week": "Semana 4", "day": "Lunes", "start": "08:00", "end": "17:00" },
+    { "id": 45, "name": "Angel Ortiz", "email": "angel.ortiz@rsg.com.co", "phone": "318 4080894", "month": "Septiembre", "week": "Semana 4", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 46, "name": "Angel Ortiz", "email": "angel.ortiz@rsg.com.co", "phone": "318 4080894", "month": "Septiembre", "week": "Semana 4", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 47, "name": "Angel Ortiz", "email": "angel.ortiz@rsg.com.co", "phone": "318 4080894", "month": "Septiembre", "week": "Semana 4", "day": "Jueves", "start": "08:00", "end": "17:00" },
+    { "id": 48, "name": "Angel Ortiz", "email": "angel.ortiz@rsg.com.co", "phone": "318 4080894", "month": "Septiembre", "week": "Semana 4", "day": "Viernes", "start": "08:00", "end": "17:00" },
+    { "id": 49, "name": "Angel Ortiz", "email": "angel.ortiz@rsg.com.co", "phone": "318 4080894", "month": "Septiembre", "week": "Semana 4", "day": "Sábado", "start": "08:00", "end": "12:00" },
+    { "id": 50, "name": "Angel Ortiz", "email": "angel.ortiz@rsg.com.co", "phone": "318 4080894", "month": "Septiembre", "week": "Semana 4", "day": "Domingo (Guardia)", "start": "08:00", "end": "12:00" },
+    { "id": 51, "name": "Angel Ortiz", "email": "angel.ortiz@rsg.com.co", "phone": "318 4080894", "month": "Septiembre", "week": "Semana 5", "day": "Lunes", "start": "08:00", "end": "17:00" },
+    { "id": 52, "name": "Angel Ortiz", "email": "angel.ortiz@rsg.com.co", "phone": "318 4080894", "month": "Septiembre", "week": "Semana 5", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 53, "name": "Angel Ortiz", "email": "angel.ortiz@rsg.com.co", "phone": "318 4080894", "month": "Septiembre", "week": "Semana 5", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 54, "name": "Angel Ortiz", "email": "angel.ortiz@rsg.com.co", "phone": "318 4080894", "month": "Septiembre", "week": "Semana 5", "day": "Jueves", "start": "08:00", "end": "17:00" }
+  ],
+  "tienda3": [
+    { "id": 55, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 1", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 56, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 1", "day": "Viernes", "start": "08:00", "end": "17:00" },
+    { "id": 57, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 1", "day": "Sábado", "start": "08:00", "end": "12:00" },
+    { "id": 58, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 2", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 59, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 2", "day": "Jueves", "start": "08:00", "end": "17:00" },
+    { "id": 60, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 2", "day": "Sábado", "start": "08:00", "end": "12:00" },
+    { "id": 61, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 2", "day": "Domingo (Guardia)", "start": "08:00", "end": "12:00" },
+    { "id": 62, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 3", "day": "Lunes", "start": "08:00", "end": "17:00" },
+    { "id": 63, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 3", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 64, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 3", "day": "Viernes", "start": "08:00", "end": "17:00" },
+    { "id": 65, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 3", "day": "Sábado", "start": "08:00", "end": "12:00" },
+    { "id": 66, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 4", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 67, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 4", "day": "Jueves", "start": "08:00", "end": "17:00" },
+    { "id": 68, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 4", "day": "Sábado", "start": "08:00", "end": "12:00" },
+    { "id": 69, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 5", "day": "Lunes", "start": "08:00", "end": "17:00" },
+    { "id": 70, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 5", "day": "Miércoles", "start": "08:00", "end": "16:00" }
+  ],
+  "tienda4": [
+    { "id": 71, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 1", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 72, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 1", "day": "Jueves", "start": "08:00", "end": "17:00" },
+    { "id": 73, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 1", "day": "Sábado", "start": "08:00", "end": "12:00" },
+    { "id": 74, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 2", "day": "Lunes", "start": "08:00", "end": "17:00" },
+    { "id": 75, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 2", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 76, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 2", "day": "Viernes", "start": "08:00", "end": "17:00" },
+    { "id": 77, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 2", "day": "Sábado", "start": "08:00", "end": "12:00" },
+    { "id": 78, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 3", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 79, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 3", "day": "Jueves", "start": "08:00", "end": "17:00" },
+    { "id": 80, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 3", "day": "Sábado", "start": "08:00", "end": "12:00" },
+    { "id": 81, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 4", "day": "Lunes", "start": "08:00", "end": "17:00" },
+    { "id": 82, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 4", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 83, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 4", "day": "Viernes", "start": "08:00", "end": "17:00" },
+    { "id": 84, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 4", "day": "Sábado", "start": "08:00", "end": "12:00" },
+    { "id": 85, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 5", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 86, "name": "Julian Garzon", "email": "julian.garzon@rsg.com.co", "phone": "316 9017657", "month": "Septiembre", "week": "Semana 5", "day": "Jueves", "start": "08:00", "end": "17:00" }
+  ],
+  "tienda5": [
+    { "id": 87, "name": "Jersoon Gonzalez", "email": "jersoon.gonzalez@rsg.com.co", "phone": "302 2531384", "month": "Septiembre", "week": "Semana 1", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 88, "name": "Jersoon Gonzalez", "email": "jersoon.gonzalez@rsg.com.co", "phone": "302 2531384", "month": "Septiembre", "week": "Semana 1", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 89, "name": "Jersoon Gonzalez", "email": "jersoon.gonzalez@rsg.com.co", "phone": "302 2531384", "month": "Septiembre", "week": "Semana 1", "day": "Jueves", "start": "08:00", "end": "17:00" },
+    { "id": 90, "name": "Jersoon Gonzalez", "email": "jersoon.gonzalez@rsg.com.co", "phone": "302 2531384", "month": "Septiembre", "week": "Semana 1", "day": "Viernes", "start": "08:00", "end": "17:00" },
+    { "id": 91, "name": "Jersoon Gonzalez", "email": "jersoon.gonzalez@rsg.com.co", "phone": "302 2531384", "month": "Septiembre", "week": "Semana 1", "day": "Sábado", "start": "08:00", "end": "12:00" },
+    { "id": 92, "name": "Jersoon Gonzalez", "email": "jersoon.gonzalez@rsg.com.co", "phone": "302 2531384", "month": "Septiembre", "week": "Semana 1", "day": "Domingo (Guardia)", "start": "08:00", "end": "12:00" },
+    { "id": 93, "name": "Jersoon Gonzalez", "email": "jersoon.gonzalez@rsg.com.co", "phone": "302 2531384", "month": "Septiembre", "week": "Semana 2", "day": "Lunes", "start": "08:00", "end": "17:00" },
+    { "id": 94, "name": "Jersoon Gonzalez", "email": "jersoon.gonzalez@rsg.com.co", "phone": "302 2531384", "month": "Septiembre", "week": "Semana 2", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 95, "name": "Jersoon Gonzalez", "email": "jersoon.gonzalez@rsg.com.co", "phone": "302 2531384", "month": "Septiembre", "week": "Semana 2", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 96, "name": "Jersoon Gonzalez", "email": "jersoon.gonzalez@rsg.com.co", "phone": "302 2531384", "month": "Septiembre", "week": "Semana 2", "day": "Jueves", "start": "08:00", "end": "17:00" },
+    { "id": 97, "name": "Jersoon Gonzalez", "email": "jersoon.gonzalez@rsg.com.co", "phone": "302 2531384", "month": "Septiembre", "week": "Semana 2", "day": "Viernes", "start": "08:00", "end": "17:00" },
+    { "id": 98, "name": "Jersoon Gonzalez", "email": "jersoon.gonzalez@rsg.com.co", "phone": "302 2531384", "month": "Septiembre", "week": "Semana 2", "day": "Sábado", "start": "08:00", "end": "12:00" },
+    { "id": 99, "name": "Jersoon Gonzalez", "email": "jersoon.gonzalez@rsg.com.co", "phone": "302 2531384", "month": "Septiembre", "week": "Semana 3", "day": "Lunes", "start": "08:00", "end": "17:00" },
+    { "id": 100, "name": "Jersoon Gonzalez", "email": "jersoon.gonzalez@rsg.com.co", "phone": "302 2531384", "month": "Septiembre", "week": "Semana 3", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 101, "name": "Jersoon Gonzalez", "email": "jersoon.gonzalez@rsg.com.co", "phone": "302 2531384", "month": "Septiembre", "week": "Semana 3", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 102, "name": "Jersoon Gonzalez", "email": "jersoon.gonzalez@rsg.com.co", "phone": "302 2531384", "month": "Septiembre", "week": "Semana 3", "day": "Jueves", "start": "08:00", "end": "17:00" },
+    { "id": 103, "name": "Jersoon Gonzalez", "email": "jersoon.gonzalez@rsg.com.co", "phone": "302 2531384", "month": "Septiembre", "week": "Semana 3", "day": "Viernes", "start": "08:00", "end": "17:00" },
+    { "id": 104, "name": "Jersoon Gonzalez", "email": "jersoon.gonzalez@rsg.com.co", "phone": "302 2531384", "month": "Septiembre", "week": "Semana 3", "day": "Sábado", "start": "08:00", "end": "12:00" },
+    { "id": 105, "name": "Jersoon Gonzalez", "email": "jersoon.gonzalez@rsg.com.co", "phone": "302 2531384", "month": "Septiembre", "week": "Semana 4", "day": "Lunes", "start": "08:00", "end": "17:00" },
+    { "id": 106, "name": "Jersoon Gonzalez", "email": "jersoon.gonzalez@rsg.com.co", "phone": "302 2531384", "month": "Septiembre", "week": "Semana 4", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 107, "name": "Jersoon Gonzalez", "email": "jersoon.gonzalez@rsg.com.co", "phone": "302 2531384", "month": "Septiembre", "week": "Semana 4", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 108, "name": "Jersoon Gonzalez", "email": "jersoon.gonzalez@rsg.com.co", "phone": "302 2531384", "month": "Septiembre", "week": "Semana 4", "day": "Jueves", "start": "08:00", "end": "17:00" },
+    { "id": 109, "name": "Jersoon Gonzalez", "email": "jersoon.gonzalez@rsg.com.co", "phone": "302 2531384", "month": "Septiembre", "week": "Semana 4", "day": "Viernes", "start": "08:00", "end": "17:00" },
+    { "id": 110, "name": "Jersoon Gonzalez", "email": "jersoon.gonzalez@rsg.com.co", "phone": "302 2531384", "month": "Septiembre", "week": "Semana 4", "day": "Sábado", "start": "08:00", "end": "12:00" },
+    { "id": 111, "name": "Jersoon Gonzalez", "email": "jersoon.gonzalez@rsg.com.co", "phone": "302 2531384", "month": "Septiembre", "week": "Semana 5", "day": "Lunes", "start": "08:00", "end": "17:00" },
+    { "id": 112, "name": "Jersoon Gonzalez", "email": "jersoon.gonzalez@rsg.com.co", "phone": "302 2531384", "month": "Septiembre", "week": "Semana 5", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 113, "name": "Jersoon Gonzalez", "email": "jersoon.gonzalez@rsg.com.co", "phone": "302 2531384", "month": "Septiembre", "week": "Semana 5", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 114, "name": "Jersoon Gonzalez", "email": "jersoon.gonzalez@rsg.com.co", "phone": "302 2531384", "month": "Septiembre", "week": "Semana 5", "day": "Jueves", "start": "08:00", "end": "17:00" }
+  ],
+  "tienda6": [
+    { "id": 115, "name": "Anderson Grande", "email": "anderson.grande@rsg.com.co", "phone": "312 5373173", "month": "Septiembre", "week": "Semana 1", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 116, "name": "Anderson Grande", "email": "anderson.grande@rsg.com.co", "phone": "312 5373173", "month": "Septiembre", "week": "Semana 1", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 117, "name": "Anderson Grande", "email": "anderson.grande@rsg.com.co", "phone": "312 5373173", "month": "Septiembre", "week": "Semana 1", "day": "Jueves", "start": "08:00", "end": "17:00" },
+    { "id": 118, "name": "Anderson Grande", "email": "anderson.grande@rsg.com.co", "phone": "312 5373173", "month": "Septiembre", "week": "Semana 1", "day": "Viernes", "start": "08:00", "end": "17:00" },
+    { "id": 119, "name": "Anderson Grande", "email": "anderson.grande@rsg.com.co", "phone": "312 5373173", "month": "Septiembre", "week": "Semana 1", "day": "Sábado", "start": "09:00", "end": "13:00" },
+    { "id": 120, "name": "Anderson Grande", "email": "anderson.grande@rsg.com.co", "phone": "312 5373173", "month": "Septiembre", "week": "Semana 2", "day": "Lunes", "start": "08:00", "end": "17:00" },
+    { "id": 121, "name": "Anderson Grande", "email": "anderson.grande@rsg.com.co", "phone": "312 5373173", "month": "Septiembre", "week": "Semana 2", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 122, "name": "Anderson Grande", "email": "anderson.grande@rsg.com.co", "phone": "312 5373173", "month": "Septiembre", "week": "Semana 2", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 123, "name": "Anderson Grande", "email": "anderson.grande@rsg.com.co", "phone": "312 5373173", "month": "Septiembre", "week": "Semana 2", "day": "Jueves", "start": "08:00", "end": "17:00" },
+    { "id": 124, "name": "Anderson Grande", "email": "anderson.grande@rsg.com.co", "phone": "312 5373173", "month": "Septiembre", "week": "Semana 2", "day": "Viernes", "start": "08:00", "end": "17:00" },
+    { "id": 125, "name": "Anderson Grande", "email": "anderson.grande@rsg.com.co", "phone": "312 5373173", "month": "Septiembre", "week": "Semana 2", "day": "Sábado", "start": "09:00", "end": "13:00" },
+    { "id": 126, "name": "Anderson Grande", "email": "anderson.grande@rsg.com.co", "phone": "312 5373173", "month": "Septiembre", "week": "Semana 3", "day": "Lunes", "start": "08:00", "end": "17:00" },
+    { "id": 127, "name": "Anderson Grande", "email": "anderson.grande@rsg.com.co", "phone": "312 5373173", "month": "Septiembre", "week": "Semana 3", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 128, "name": "Anderson Grande", "email": "anderson.grande@rsg.com.co", "phone": "312 5373173", "month": "Septiembre", "week": "Semana 3", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 129, "name": "Anderson Grande", "email": "anderson.grande@rsg.com.co", "phone": "312 5373173", "month": "Septiembre", "week": "Semana 3", "day": "Viernes", "start": "08:00", "end": "17:00" },
+    { "id": 130, "name": "Anderson Grande", "email": "anderson.grande@rsg.com.co", "phone": "312 5373173", "month": "Septiembre", "week": "Semana 3", "day": "Sábado", "start": "09:00", "end": "13:00" },
+    { "id": 131, "name": "Anderson Grande", "email": "anderson.grande@rsg.com.co", "phone": "312 5373173", "month": "Septiembre", "week": "Semana 4", "day": "Lunes", "start": "08:00", "end": "17:00" },
+    { "id": 132, "name": "Anderson Grande", "email": "anderson.grande@rsg.com.co", "phone": "312 5373173", "month": "Septiembre", "week": "Semana 4", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 133, "name": "Anderson Grande", "email": "anderson.grande@rsg.com.co", "phone": "312 5373173", "month": "Septiembre", "week": "Semana 4", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 134, "name": "Anderson Grande", "email": "anderson.grande@rsg.com.co", "phone": "312 5373173", "month": "Septiembre", "week": "Semana 4", "day": "Jueves", "start": "08:00", "end": "17:00" },
+    { "id": 135, "name": "Anderson Grande", "email": "anderson.grande@rsg.com.co", "phone": "312 5373173", "month": "Septiembre", "week": "Semana 4", "day": "Viernes", "start": "08:00", "end": "17:00" },
+    { "id": 136, "name": "Anderson Grande", "email": "anderson.grande@rsg.com.co", "phone": "312 5373173", "month": "Septiembre", "week": "Semana 4", "day": "Sábado", "start": "09:00", "end": "13:00" },
+    { "id": 137, "name": "Anderson Grande", "email": "anderson.grande@rsg.com.co", "phone": "312 5373173", "month": "Septiembre", "week": "Semana 5", "day": "Lunes", "start": "08:00", "end": "17:00" },
+    { "id": 138, "name": "Anderson Grande", "email": "anderson.grande@rsg.com.co", "phone": "312 5373173", "month": "Septiembre", "week": "Semana 5", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 139, "name": "Anderson Grande", "email": "anderson.grande@rsg.com.co", "phone": "312 5373173", "month": "Septiembre", "week": "Semana 5", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 140, "name": "Anderson Grande", "email": "anderson.grande@rsg.com.co", "phone": "312 5373173", "month": "Septiembre", "week": "Semana 5", "day": "Jueves", "start": "08:00", "end": "17:00" }
+  ],
+  "tienda7": [
+    { "id": 141, "name": "Andres Garzon", "email": "andres.garzon@rsg.com.co", "phone": "312 3492975", "month": "Septiembre", "week": "Semana 1", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 142, "name": "Andres Garzon", "email": "andres.garzon@rsg.com.co", "phone": "312 3492975", "month": "Septiembre", "week": "Semana 1", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 143, "name": "Andres Garzon", "email": "andres.garzon@rsg.com.co", "phone": "312 3492975", "month": "Septiembre", "week": "Semana 1", "day": "Jueves", "start": "08:00", "end": "17:00" },
+    { "id": 144, "name": "Andres Garzon", "email": "andres.garzon@rsg.com.co", "phone": "312 3492975", "month": "Septiembre", "week": "Semana 1", "day": "Viernes", "start": "08:00", "end": "17:00" },
+    { "id": 145, "name": "Andres Garzon", "email": "andres.garzon@rsg.com.co", "phone": "312 3492975", "month": "Septiembre", "week": "Semana 1", "day": "Sábado", "start": "08:00", "end": "12:00" },
+    { "id": 146, "name": "Andres Garzon", "email": "andres.garzon@rsg.com.co", "phone": "312 3492975", "month": "Septiembre", "week": "Semana 2", "day": "Lunes", "start": "08:00", "end": "17:00" },
+    { "id": 147, "name": "Andres Garzon", "email": "andres.garzon@rsg.com.co", "phone": "312 3492975", "month": "Septiembre", "week": "Semana 2", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 148, "name": "Andres Garzon", "email": "andres.garzon@rsg.com.co", "phone": "312 3492975", "month": "Septiembre", "week": "Semana 2", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 149, "name": "Andres Garzon", "email": "andres.garzon@rsg.com.co", "phone": "312 3492975", "month": "Septiembre", "week": "Semana 2", "day": "Jueves", "start": "08:00", "end": "17:00" },
+    { "id": 150, "name": "Andres Garzon", "email": "andres.garzon@rsg.com.co", "phone": "312 3492975", "month": "Septiembre", "week": "Semana 2", "day": "Viernes", "start": "08:00", "end": "17:00" },
+    { "id": 151, "name": "Andres Garzon", "email": "andres.garzon@rsg.com.co", "phone": "312 3492975", "month": "Septiembre", "week": "Semana 2", "day": "Sábado", "start": "08:00", "end": "12:00" },
+    { "id": 152, "name": "Andres Garzon", "email": "andres.garzon@rsg.com.co", "phone": "312 3492975", "month": "Septiembre", "week": "Semana 3", "day": "Lunes", "start": "08:00", "end": "17:00" },
+    { "id": 153, "name": "Andres Garzon", "email": "andres.garzon@rsg.com.co", "phone": "312 3492975", "month": "Septiembre", "week": "Semana 3", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 154, "name": "Andres Garzon", "email": "andres.garzon@rsg.com.co", "phone": "312 3492975", "month": "Septiembre", "week": "Semana 3", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 155, "name": "Andres Garzon", "email": "andres.garzon@rsg.com.co", "phone": "312 3492975", "month": "Septiembre", "week": "Semana 3", "day": "Jueves", "start": "08:00", "end": "17:00" },
+    { "id": 156, "name": "Andres Garzon", "email": "andres.garzon@rsg.com.co", "phone": "312 3492975", "month": "Septiembre", "week": "Semana 3", "day": "Viernes", "start": "08:00", "end": "17:00" },
+    { "id": 157, "name": "Andres Garzon", "email": "andres.garzon@rsg.com.co", "phone": "312 3492975", "month": "Septiembre", "week": "Semana 3", "day": "Sábado", "start": "08:00", "end": "12:00" },
+    { "id": 158, "name": "Andres Garzon", "email": "andres.garzon@rsg.com.co", "phone": "312 3492975", "month": "Septiembre", "week": "Semana 4", "day": "Lunes", "start": "08:00", "end": "17:00" },
+    { "id": 159, "name": "Andres Garzon", "email": "andres.garzon@rsg.com.co", "phone": "312 3492975", "month": "Septiembre", "week": "Semana 4", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 160, "name": "Andres Garzon", "email": "andres.garzon@rsg.com.co", "phone": "312 3492975", "month": "Septiembre", "week": "Semana 4", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 161, "name": "Andres Garzon", "email": "andres.garzon@rsg.com.co", "phone": "312 3492975", "month": "Septiembre", "week": "Semana 4", "day": "Jueves", "start": "08:00", "end": "17:00" },
+    { "id": 162, "name": "Andres Garzon", "email": "andres.garzon@rsg.com.co", "phone": "312 3492975", "month": "Septiembre", "week": "Semana 4", "day": "Viernes", "start": "08:00", "end": "17:00" },
+    { "id": 163, "name": "Andres Garzon", "email": "andres.garzon@rsg.com.co", "phone": "312 3492975", "month": "Septiembre", "week": "Semana 4", "day": "Sábado", "start": "08:00", "end": "12:00" },
+    { "id": 164, "name": "Andres Garzon", "email": "andres.garzon@rsg.com.co", "phone": "312 3492975", "month": "Septiembre", "week": "Semana 5", "day": "Lunes", "start": "08:00", "end": "17:00" },
+    { "id": 165, "name": "Andres Garzon", "email": "andres.garzon@rsg.com.co", "phone": "312 3492975", "month": "Septiembre", "week": "Semana 5", "day": "Martes", "start": "08:00", "end": "16:00" },
+    { "id": 166, "name": "Andres Garzon", "email": "andres.garzon@rsg.com.co", "phone": "312 3492975", "month": "Septiembre", "week": "Semana 5", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 167, "name": "Andres Garzon", "email": "andres.garzon@rsg.com.co", "phone": "312 3492975", "month": "Septiembre", "week": "Semana 5", "day": "Jueves", "start": "08:00", "end": "17:00" }
+  ],
+  "tienda8": [
+    { "id": 168, "name": "Andres Bojaca", "email": "jesus.bojaca@rsg.com.co", "phone": "320 4841099", "month": "Septiembre", "week": "Semana 1", "day": "Miércoles", "start": "08:00", "end": "16:00" },
+    { "id": 169, "name": "Andres Bojaca", "email": "jesus.bojaca@rsg.com.co", "phone": "320 4841099", "month": "Septiembre", "week": "Semana 1", "day": "Viernes", "start": "08:00", "end": "17:00" },
+    { "id": 170, "name": "Andres Bojaca", "email": "jesus.bojaca@rsg.com.co", "phone": "320 4841099", "month": "Septiembre", "week": "Semana 1", "day": "Sábado", "start": "08:00", "end": "12:00" }
+  ]
+};
+
+const countries = {
+    colombia: { name: "Colombia", flag: "\uD83C\uDDE8\uD83C\uDDF4" },
+    mexico: { name: "Mexico", flag: "\uD83C\uDDF2\uD83C\uDDFD" },
+    argentina: { name: "Argentina", flag: "\uD83C\uDDE6\uD83C\uDDF7" },
+    chile: { name: "Chile", flag: "\uD83C\uDDE8\uD83C\uDDF1" },
+    peru: { name: "Peru", flag: "\uD83C\uDDF5\uD83C\uDDEA" },
+    ecuador: { name: "Ecuador", flag: "\uD83C\uDDEA\uD83C\uDDEC" },
+    panama: { name: "Panama", flag: "\uD83C\uDDF5\uD83C\uDDF8" }
+};
+
+const stores = {
+    tienda1: { name: "C.C Colina", address: "Centro Comercial Parque la colina", country: "colombia" },
+    tienda2: { name: "Zona Calle 82", address: "Zona Comercial Calle 82", country: "colombia" },
+    tienda3: { name: "C.C Felicidad", address: "Centro Comercial La Felicidad", country: "colombia" },
+    tienda4: { name: "C.C Plaza Central", address: "Centro Comercial Plaza Central", country: "colombia" },
+    tienda5: { name: "C.C Unicentro", address: "Centro Comercial Unicentro", country: "colombia" },
+    tienda6: { name: "Oficina Colina", address: "Oficinas Corporativas Colina", country: "colombia" },
+    tienda7: { name: "C.C Titan", address: "Centro Comercial Titan Plaza", country: "colombia" },
+    tienda8: { name: "C.C Fontanar", address: "Centro Comercial Fontanar", country: "colombia" },
+    tienda9: { name: "Bima", address: "Bodega Bima", country: "panama" }
+};
+
+let schedules = JSON.parse(JSON.stringify(SCHEDULES_DATA));
+let currentStore = "";
+
+function filterStoresByCountry() {
+    const countrySelect = document.getElementById("countrySelect");
+    const storeSelect = document.getElementById("storeSelect");
+    const selectedCountry = countrySelect.value;
+    currentStore = "";
+    storeSelect.value = "";
+    document.getElementById("storeInfo").classList.add("hidden");
+    document.getElementById("staffSection").classList.add("hidden");
+    document.getElementById("emptyState").classList.remove("hidden");
+    if (!selectedCountry) {
+        storeSelect.innerHTML = "<option value=\"\">-- Primero selecciona un pais --</option>";
+        storeSelect.disabled = true;
+        return;
+    }
+    let options = "<option value=\"\">-- Elige una tienda --</option>";
+    for (const [storeId, storeData] of Object.entries(stores)) {
+        if (storeData.country === selectedCountry) {
+            options += "<option value=\"" + storeId + "\">" + storeData.name + "</option>";
+        }
+    }
+    storeSelect.innerHTML = options;
+    storeSelect.disabled = false;
+}
+
+function renderStore() {
+    const select = document.getElementById("storeSelect");
+    currentStore = select.value;
+    const storeInfo = document.getElementById("storeInfo");
+    const staffSection = document.getElementById("staffSection");
+    const emptyState = document.getElementById("emptyState");
+    if (!currentStore) {
+        storeInfo.classList.add("hidden");
+        staffSection.classList.add("hidden");
+        emptyState.classList.remove("hidden");
+        return;
+    }
+    emptyState.classList.add("hidden");
+    storeInfo.classList.remove("hidden");
+    staffSection.classList.remove("hidden");
+    const store = stores[currentStore];
+    const country = countries[store.country];
+    document.getElementById("storeName").textContent = store.name;
+    document.getElementById("storeAddress").textContent = store.address;
+    document.getElementById("countryDisplay").textContent = country.flag + " " + country.name;
+    document.getElementById("staffCount").textContent = (schedules[currentStore] || []).length;
+    document.getElementById("filterMonth").value = "";
+    document.getElementById("filterWeek").value = "";
+}
+
+function renderStaffList() {
+    const container = document.getElementById("staffList");
+    const filterMonth = document.getElementById("filterMonth").value;
+    const filterWeek = document.getElementById("filterWeek").value;
+    let staff = schedules[currentStore] || [];
+    if (filterMonth) staff = staff.filter(s => s.month === filterMonth);
+    if (filterWeek) staff = staff.filter(s => s.week === filterWeek);
+    if (staff.length === 0) {
+        container.innerHTML = "<div class=\"empty-box\"><div style=\"font-size:36px;margin-bottom:8px;\">VACIO</div><p style=\"margin:0;font-size:15px;\">No hay personal para los filtros seleccionados.</p></div>";
+        return;
+    }
+    const byPerson = {};
+    staff.forEach(s => {
+        if (!byPerson[s.name]) {
+            byPerson[s.name] = { name: s.name, email: s.email, phone: s.phone, schedules: [] };
+        }
+        byPerson[s.name].schedules.push(s);
+    });
+    const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sabado", "Domingo"];
+    const DAY_START = "08:00";
+    const DAY_END = "17:00";
+    const CELL_HEIGHT = 300;
+    function toMinutes(time) { const p = time.split(":"); return parseInt(p[0]) * 60 + parseInt(p[1]); }
+    function normalizeDay(day) { return days.find(d => day.indexOf(d) === 0) || day; }
+    const startMin = toMinutes(DAY_START);
+    const endMin = toMinutes(DAY_END);
+    const totalMin = endMin - startMin;
+    function turnoStyle(sch) {
+        const topMin = Math.max(toMinutes(sch.start), startMin);
+        const bottomMin = Math.min(toMinutes(sch.end), endMin);
+        if (bottomMin <= topMin) return null;
+        const top = ((topMin - startMin) / totalMin) * CELL_HEIGHT;
+        const height = ((bottomMin - topMin) / totalMin) * CELL_HEIGHT;
+        return "top:" + top + "px;height:" + height + "px;";
+    }
+    function turnoClass(sch) {
+        const dur = toMinutes(sch.end) - toMinutes(sch.start);
+        if (String(sch.day).indexOf("Guardia") !== -1) return "guardia";
+        if (dur >= 540) return "jornada-completa";
+        return "jornada-parcial";
+    }
+    function buildHeader() {
+        let h = "<div class=\"cal-header\"><div class=\"cal-corner\">Personal</div>";
+        days.forEach(d => { h += "<div class=\"cal-day-header\">" + d + "<span class=\"cal-day-date\">Horario</span></div>"; });
+        h += "</div>";
+        return h;
+    }
+    function buildRow(person) {
+        const parts = person.name.split(" ");
+        const initials = (parts.map(n => n ? n[0] : "").join("").substring(0, 2)).toUpperCase();
+        let row = "<div class=\"cal-row\"><div class=\"cal-person\"><div class=\"cal-avatar\">" + initials + "</div><div><div class=\"cal-person-name\">" + person.name + "</div><div class=\"cal-person-meta\">" + person.email + "<br>" + person.phone + "</div></div></div>";
+        days.forEach(day => {
+            const daySchedules = person.schedules.filter(s => normalizeDay(s.day) === day);
+            if (daySchedules.length === 0) { row += "<div class=\"cal-cell no-day\"></div>"; return; }
+            let cellInner = "";
+            daySchedules.forEach(sch => {
+                const style = turnoStyle(sch);
+                if (!style) return;
+                cellInner += "<div class=\"cal-turno " + turnoClass(sch) + "\" style=\"" + style + "\" title=\"" + sch.day + " " + sch.start + "-" + sch.end + "\">" + sch.start + "-" + sch.end + "</div>";
+            });
+            row += "<div class=\"cal-cell\">" + cellInner + "</div>";
+        });
+        row += "</div>";
+        return row;
+    }
+    let rows = "";
+    Object.values(byPerson).forEach(p => { rows += buildRow(p); });
+    container.innerHTML = "<div class=\"cal-wrapper\"><div class=\"cal-grid\">" + buildHeader() + rows + "</div></div>";
+}
+
+</script>
+</body>
+</html>
