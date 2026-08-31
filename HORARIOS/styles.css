@@ -280,7 +280,7 @@
 
         /* ═══ VISTA SEMANAL TIPO GOOGLE CALENDAR (NUEVO) ═══ */
         .cal-wrapper {
-            overflow:visible;
+            overflow-x: auto;
             background: #fff;
             border: 1px solid #e5e7eb;
             border-radius: 12px;
@@ -334,6 +334,8 @@
             display: grid;
             grid-template-columns: 180px repeat(7, 1fr);
             border-bottom: 1px solid #e5e7eb;
+            height: 300px;
+            overflow: hidden;
         }
 
         .cal-row:last-child {
@@ -355,6 +357,8 @@
             text-align: center;
             justify-content: center;
             gap: 6px;
+            height: 100%;
+            box-sizing: border-box;
         }
 
         .cal-person-column .cal-person-meta {
@@ -366,8 +370,8 @@
         .cal-photo {
             width: 100%;
             height: auto;
-            max-width: 120px;
-            max-height: 120px;
+            max-width: 90px;
+            max-height: 90px;
             border-radius: 8px;
             object-fit: contain;
             border: 1px solid #e5e7eb;
@@ -375,6 +379,7 @@
             flex-shrink: 0;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             margin: 0 auto;
+            display: block;
         }
 
         .cal-person .cal-avatar {
@@ -432,7 +437,7 @@
         .cal-cell {
             border-right: 1px solid #e5e7eb;
             position: relative;
-            height: 300px;
+            height: 100%;
             background-image: linear-gradient(to bottom, #f3f4f6 1px, transparent 1px);
             background-size: 100% 50px;
             background-position: 0 -1px;
@@ -474,7 +479,7 @@
         /* Colores según duración/tipo */
         .cal-turno.jornada-completa { background: linear-gradient(135deg, #2563eb, #3b82f6); }
         .cal-turno.jornada-parcial { background: linear-gradient(135deg, #059669, #10b981); }
-        .cal-turno.guardia { background: linear-gradient(135deg, #7c3aed, #8b5cf6); }
+        .cal-turno.guardia { background: linear-gradient(135deg, #f97316, #ea580c); }
 
         .cal-turno .turno-hora {
             display: block;

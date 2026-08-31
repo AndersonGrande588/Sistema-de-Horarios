@@ -138,6 +138,16 @@ function renderStaffList() {
 
     let staff = schedules[currentStore] || [];
 
+    // No mostrar el horario hasta que se elija una semana
+    if (!filterWeek) {
+        container.innerHTML = `
+            <div class="empty-box">
+                <div style="font-size: 36px; margin-bottom: 8px;">&#x1F4C5;</div>
+                <p style="margin: 0; font-size: 15px;">Selecciona una semana para ver el horario del personal.</p>
+            </div>`;
+        return;
+    }
+
     if (filterMonth) {
         staff = staff.filter(s => s.month === filterMonth);
     }
@@ -148,11 +158,9 @@ function renderStaffList() {
 
     if (filterType) {
         staff = staff.filter(s => {
-            const dur = toMinutes(s.end) - toMinutes(s.start);
             const esGuardia = String(s.day).indexOf("Guardia") !== -1;
             if (filterType === "guardia") return esGuardia;
-            if (filterType === "completa") return !esGuardia && dur >= 540;
-            if (filterType === "parcial") return !esGuardia && dur < 540;
+            if (filterType === "normal") return !esGuardia;
             return true;
         });
     }
@@ -180,8 +188,13 @@ function renderStaffList() {
         byPerson[s.name].schedules.push(s);
     });
 
-    // Días de la semana en orden
-    const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+    // Orden fijo de la semana (para normalizar y ordenar)
+    const ordenSemana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+
+    // Solo los días que se trabajan en la selección actual (en orden semanal)
+    const days = ordenSemana.filter(d =>
+        staff.some(s => String(s.day).indexOf(d) === 0)
+    );
 
     // Constantes del calendario (coinciden con el CSS)
     const DAY_START = "08:00";   // hora de inicio del día
@@ -195,7 +208,7 @@ function renderStaffList() {
 
     // Normaliza un día para que coincida con la lista (ej. quita " (Guardia)")
     function normalizeDay(day) {
-        return days.find(d => day.indexOf(d) === 0) || day;
+        return ordenSemana.find(d => day.indexOf(d) === 0) || day;
     }
 
     const startMin = toMinutes(DAY_START);
@@ -203,6 +216,10 @@ function renderStaffList() {
     const totalMin = endMin - startMin;
 
     function turnoStyle(sch) {
+        // Guardia: ocupa todo el día, igual que un turno normal (08:00 - 17:00)
+        if (String(sch.day).indexOf("Guardia") !== -1) {
+            return `top:0;height:${CELL_HEIGHT}px;`;
+        }
         const topMin = Math.max(toMinutes(sch.start), startMin);
         const bottomMin = Math.min(toMinutes(sch.end), endMin);
         if (bottomMin <= topMin) return null;
@@ -218,10 +235,11 @@ function renderStaffList() {
         return "jornada-parcial";
     }
 
-    // Encabezado con los 7 días
+    // Encabezado con los días que se trabajan
     function buildHeader() {
+        const cols = `180px repeat(${days.length}, 1fr)`;
         let h =
-            '<div class="cal-header">' +
+            `<div class="cal-header" style="grid-template-columns:${cols}">` +
             '<div class="cal-corner">Personal</div>';
         days.forEach((d, i) => {
             h += `<div class="cal-day-header">${d}<span class="cal-day-date">Horario</span></div>`;
@@ -252,7 +270,7 @@ function renderStaffList() {
         });
 
         let row =
-            '<div class="cal-row">' +
+            `<div class="cal-row" style="grid-template-columns:180px repeat(${days.length}, 1fr)">` +
             `<div class="cal-person cal-person-column">
                 ${photoHtml}
                 <div>
@@ -279,9 +297,7 @@ function renderStaffList() {
             });
             // Marcador de disponibilidad: clase según cobertura del horario normal
             let dispClass = 'disponible-parcial';
-            if (daySchedules.some(s => String(s.day).indexOf("Guardia") !== -1)) {
-                dispClass = 'disponible-guardia';
-            } else if (daySchedules.some(s => (toMinutes(s.end) - toMinutes(s.start)) >= 540)) {
+            if (daySchedules.some(s => (toMinutes(s.end) - toMinutes(s.start)) >= 540)) {
                 dispClass = 'disponible-completo';
             }
             row += `<div class="cal-cell ${dispClass}">${cellInner}</div>`;
