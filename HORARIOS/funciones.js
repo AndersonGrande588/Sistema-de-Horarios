@@ -278,7 +278,6 @@ function renderCalendar() {
     const monthIndex = MONTH_NAMES.indexOf(currentMonth);
     const yearNum = parseInt(currentYear, 10) || new Date().getFullYear();
     const firstDate = new Date(yearNum, monthIndex, 1);
-    const daysInMonth = new Date(yearNum, monthIndex + 1, 0).getDate();
     const firstWeekday = (firstDate.getDay() + 6) % 7; // 0 = lunes
 
     // Fila de una semana
@@ -287,15 +286,18 @@ function renderCalendar() {
         diasSemana.forEach((dia, dIdx) => {
             const dayNum = semanaIndex * 7 + dIdx - firstWeekday + 1;
             const turnos = records.filter(r => r.week === semana && normalizeDay(r.day) === dia && visible(r));
-            cells += buildDayCell(turnos, personaById, dayNum, daysInMonth);
+            cells += buildDayCell(turnos, personaById, dayNum);
         });
         return `<div class="cal-row cal-week-row"><div class="cal-week-label">${semana}</div>${cells}</div>`;
     }
 
-    // Celda de un día: número del día + lista de turnos de las personas
-    function buildDayCell(turnos, personaById, dayNum, daysInMonth) {
-        const inMonth = dayNum >= 1 && dayNum <= daysInMonth;
-        const dayLabel = `<div class="cal-day-num${inMonth ? "" : " out-month"}">${dayNum}</div>`;
+    // Celda de un día: número del día real + lista de turnos de las personas
+    // new Date(año, mes, N) se ajusta solo: N<=0 -> día del mes anterior,
+    // N > días del mes -> día del mes siguiente (así no hay día 0 ni 32).
+    function buildDayCell(turnos, personaById, dayNum) {
+        const cellDate = new Date(yearNum, monthIndex, dayNum);
+        const inMonth = cellDate.getMonth() === monthIndex && cellDate.getFullYear() === yearNum;
+        const dayLabel = `<div class="cal-day-num${inMonth ? "" : " out-month"}">${cellDate.getDate()}</div>`;
         if (turnos.length === 0) {
             return `<div class="cal-cell no-day">${dayLabel}<span class="libre">—</span></div>`;
         }
