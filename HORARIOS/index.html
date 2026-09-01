@@ -16,6 +16,18 @@
         <p>Selecciona un país y una tienda para ver el calendario del personal</p>
     </header>
 
+    <div class="guards-bar">
+        <button class="guards-btn" id="btnAllGuards" onclick="toggleAllGuards()">🛡️ Ver todas las guardias</button>
+    </div>
+
+    <div id="allGuardsPanel" class="guards-panel hidden">
+        <div class="guards-head">
+            <h3>Todas las guardias de los técnicos</h3>
+            <select id="guardsMonthSelect" onchange="selectGuardsMonth()"></select>
+        </div>
+        <div id="allGuardsList"></div>
+    </div>
+
     <div class="card selector-card">
         <label for="countrySelect">🌍 Seleccionar País</label>
         <select id="countrySelect" onchange="filterStoresByCountry()">
@@ -55,20 +67,10 @@
             <h3>👥 Calendario Mensual</h3>
         </div>
 
-        <div class="mode-bar">
-            <button class="mode-btn active" id="btn-todas" onclick="selectMode('todas')">Todas</button>
-            <button class="mode-btn" id="btn-normal" onclick="selectMode('normal')">Jornada normal</button>
-            <button class="mode-btn" id="btn-guardia" onclick="selectMode('guardia')">Guardia</button>
-        </div>
-
-        <div class="filter-row hidden" id="dateFilters">
+        <div class="filter-row" id="dateFilters">
             <div class="filter-group">
                 <label>📅 Mes</label>
                 <select id="monthSelect" onchange="selectMonth()"></select>
-            </div>
-            <div class="filter-group">
-                <label>🗓️ Año</label>
-                <select id="yearSelect" onchange="selectYear()"></select>
             </div>
         </div>
 

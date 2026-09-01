@@ -9,8 +9,8 @@
 Es una página web que muestra los **horarios del personal técnico en las tiendas**. Sirve para:
 
 - Ver de un vistazo **quién trabaja en cada tienda**, **en qué día/semana** y **con qué jornada**.
-- **Coordinar cobertura**: saber si una tienda tiene personal todos los días y si hay guardias asignadas.
-- Consultar el **dato de contacto** de cada técnico (correo y teléfono, al pasar el cursor sobre el turno se muestra su info).
+- **Coordinar cobertura**: saber si una tienda tiene personal todos los días y quién tiene la **guardia** en cada tienda (ver todas las guardias juntas).
+- Consultar el **dato de contacto** de cada técnico: al **pasar el cursor** sobre un turno se muestra su **foto**, correo, teléfono y tienda.
 
 Todo se muestra en un **calendario mensual**, similar al de Google Calendar, pero por filas de semana.
 
@@ -28,9 +28,13 @@ Todo se muestra en un **calendario mensual**, similar al de Google Calendar, per
 
 ## 3. Pantalla paso a paso
 
+### Paso 0 — El botón de guardias 🛡️ (está siempre arriba)
+
+Debajo del título hay un botón naranja: **"🛡️ Ver todas las guardias"**. Lo explicamos en la sección 5; sirve para ver **todas las guardias de todas las tiendas a la vez**.
+
 ### Paso 1 — Elegir el país 🌍
-Desplegable **"Seleccionar País"** (arriba). Al elegir un país, se activa el menú de tiendas con solo las tiendas de ese país.
-- Países disponibles: Colombia, México, Argentina, Chile, Perú, Ecuador y Panamá. *(Solo Colombia y Panamá tienen tiendas definidas a día de hoy.)*
+Desplegable **"Seleccionar País"**. Al elegir un país, se activa el menú de tiendas con solo las tiendas de ese país.
+- Países disponibles: Colombia, México, Argentina, Chile, Perú, Ecuador y Panamá. *(Hoy todas las tiendas definidas están en Colombia; "Bima" también es de Colombia.)*
 
 ### Paso 2 — Elegir la tienda 🏪
 Desplegable **"Seleccionar Tienda"**. Al elegir una tienda:
@@ -41,7 +45,7 @@ Desplegable **"Seleccionar Tienda"**. Al elegir una tienda:
    - **nº de empleados asignados** (personas únicas con horarios en esa tienda).
 2. Aparece la sección **"Calendario Mensual"** con el calendario del personal.
 
-> Si solo quieres volver a empezar: elige "Elige una tienda" o cambia de país y todo se reinicia.
+> Si quieres volver a empezar: elige "Elige una tienda" o cambia de país y todo se reinicia.
 
 ---
 
@@ -59,7 +63,13 @@ Cada turno muestra:
 - 👤 El **nombre**.
 - 🕐 La **hora** (p. ej. `08:00 – 16:00`).
 - 🛡️ La etiqueta **"Guardia"** cuando es un turno de guardia (sin horario).
-- 🔎 Al **pasar el cursor** sobre un turno, aparece un recuadro con el nombre y la hora (tooltip).
+
+### Pasar el cursor sobre un turno 🔎
+Aparece un **recuadro flotante** (tooltip) con:
+- **Foto** grande del técnico (o iniciales).
+- **Nombre**.
+- **Correo** y **teléfono**.
+- La **tienda** (solo aparece en el calendario de guardias, para saber de qué tienda es cada guardia).
 
 ### Colores de los turnos (importante) 🎨
 
@@ -71,30 +81,33 @@ Cada turno muestra:
 
 ---
 
-## 5. Botones de señalización 👥
+## 5. El botón "Ver todas las guardias" 🛡️ (modo guardias)
 
-Barra encima del calendario con 3 botones:
+Este botón está **siempre visible** justo debajo del título. Al pulsarlo:
 
-| Botón | Qué hace |
-|---|---|
-| **Todas** *(activo por defecto)* | Muestra todos los turnos (normales y guardias). |
-| **Jornada normal** | Muestra SOLO las jornadas normales; oculta las guardias. |
-| **Guardia** | Muestra SOLO las guardias; oculta las jornadas normales. |
+1. **Se ocultan** los filtros de **país y tienda** (y el calendario de la tienda).
+2. **Aparece el calendario de guardias**: un calendario mensual con **todas las guardias de todas las tiendas**.
+   - Cada turno naranja indica **la tienda** (línea inferior) y **quién está asignado** (nombre con su foto).
+   - Al pasar el cursor sobre una guardia se ve la **foto, nombre, correo y teléfono** del técnico y la **tienda**.
+3. El panel de guardias tiene su **propio selector de mes** (para ver las guardias de otro mes sin salir del modo).
 
-Útil para, por ejemplo, revisar rápidamente qué días hay guardia o qué días no.
+Para **volver a las tiendas**: pulsa de nuevo el botón, que ahora dice **"✖ Cerrar guardias"**. Se restauran los filtros de país/tienda (y el calendario de la tienda que tenías abierta).
+
+> 🎯 Uso típico: ver quién está de guardia hoy, en qué tienda, y contactarlo con un solo hover.
 
 ---
 
-## 6. Filtros de Mes y Año 🗓️
+## 6. Filtro de Mes 🗓️
 
-Debajo de los botones hay dos desplegables (aparecen al elegir tienda):
+Arriba del calendario de la tienda hay un desplegable **📅 Mes** (aparece al elegir tienda):
 
-- **📅 Mes:** contiene los **12 meses del año**. Al entrar a una tienda se preselecciona el **mes actual** (hoy es Septiembre). Puedes cambiarlo para ver otro mes.
-- **🗓️ Año:** el año de los horarios (si los datos no indican año, se usa el año actual).
+- Contiene los **12 meses del año**.
+- Al entrar a una tienda se preselecciona el **mes actual** (hoy es Septiembre). Puedes cambiarlo para ver otro mes.
 
 **Importante:**
-- Cada vez que cambias el mes o el año, **la información anterior se limpia** y se renderiza el calendario del mes/año elegido.
+- Cada vez que cambias el mes, **la información anterior se limpia** y se renderiza el calendario del mes elegido.
 - Si eliges un mes **sin horarios**, verás el aviso *"No hay horarios para esta tienda."*
+- No hay filtro de año: los horarios usan el año actual (o el indicado en los datos).
 
 > Hoy solo hay datos de **Septiembre**; los demás meses saldrán vacíos hasta que se carguen horarios para ellos.
 
@@ -141,8 +154,9 @@ Dentro del objeto de la tienda (p. ej. `"tienda1"`), añade un registro:
 - `personaId` **debe** coincidir con un `id` de `personas.json`.
 - `type` es `"normal"` o `"guardia"` (en guardia la app muestra la etiqueta "Guardia", no la hora).
 - Para otro mes cambia `month` (p. ej. `"Octubre"`); opcionalmente añade `"year": "2026"`.
+- Si una tienda no existe, crea su clave (p. ej. `"tienda10"`) y añade la tienda al objeto `stores` en `funciones.js` con su `country` y `address`.
 
-> Al editar, guarda el archivo con **codificación UTF-8** (para que se vean bien acentos como "Miércoles").
+> Al editar, guarda el archivo con **codificación UTF-8** (para que se vean bien acentos como "Miércoles", "Sábado").
 
 ---
 
@@ -157,20 +171,29 @@ No. Se preselecciona el **mes actual del sistema**. Cuando haya datos de otros m
 **¿Por qué veo números en gris como "31" o "1"?**
 Son días de otro mes que encajan en la rejilla del calendario real (posición de la semana).
 
+**¿Dónde está la información del técnico? ¿Hay algún panel lateral?**
+No hay panel lateral. Al **pasar el cursor** sobre cualquier turno (del calendario de la tienda o del de guardias) aparece su **foto, nombre, correo, teléfono y tienda**.
+
+**¿Qué significa el botón "Ver todas las guardias"?**
+Abre el **modo guardias**: se ocultan los filtros de tienda y se muestra un calendario con todas las guardias de todas las tiendas (mes elegible). El botón pasa a "Cerrar guardias" para volver.
+
+**¿Cómo sé qué tienda tiene una guardia en el modo guardias?**
+Cada turno naranja muestra el **nombre de la tienda** en la línea de la hora (y en el tooltip al pasar el cursor).
+
 **Las guardias muestran "Guardia" en vez de la hora: ¿es un error?**
 Es intencional: las guardias no tienen una jornada fija de horas, se marcan como turno de guardia 24/7.
 
 **¿Cuántos empleados y tiendas hay?**
-7 empleados únicos; 9 tiendas definidas; 8 tiendas con horarios cargados (todas de Septiembre).
+7 empleados únicos; 9 tiendas con horarios cargados (incl. Bima en Colombia), ≈205 registros (9 guardias), todos de Septiembre.
 
 ---
 
 ## 10. Resumen rápido
 
-1. Países → Tienda.
+1. Países → Tienda (o pulsa directamente **"🛡️ Ver todas las guardias"**).
 2. Banner muestra datos de la tienda y nº de empleados.
-3. Calendario mensual: semanas abajo, días a la derecha, números + turnos por celda.
-4. Botones: Todas / Jornada normal / Guardia.
-5. Filtros: Mes (12) y Año, se limpian y recargan al cambiar.
-6. Azul = completa, Verde = parcial, Naranja = guardia.
-7. Pasa el cursor sobre un turno para ver su detalle.
+3. Calendario mensual: semanas a la izquierda, días arriba, números + turnos por celda.
+4. Filtro: **Mes** (12 meses), preselecciona el mes actual; se limpia y recarga al cambiar.
+5. Azul = completa, Verde = parcial, Naranja = guardia.
+6. **Pasa el cursor sobre un turno** para ver foto + datos del técnico (y la tienda en el modo guardias).
+7. Para ver todas las guardias de todas las tiendas: botón **"Ver todas las guardias"** → calendario con tienda + técnico asignado → "Cerrar guardias" para volver.

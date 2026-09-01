@@ -21,7 +21,7 @@ const stores = {
     tienda6: { name: "Oficina Colina", address: "Oficinas Corporativas Colina", country: "colombia" },
     tienda7: { name: "C.C Titan", address: "Centro Comercial Titan Plaza", country: "colombia" },
     tienda8: { name: "C.C Fontanar", address: "Centro Comercial Fontanar", country: "colombia" },
-    tienda9: { name: "Bima", address: "Bodega Bima", country: "panama" }
+    tienda9: { name: "Bima", address: "Bodega Bima, Bojacá", country: "colombia" }
 };
 
 // Datos cargados desde los JSON separados
@@ -29,12 +29,8 @@ let personas = [];
 let horarios = {};   // { tiendaId: [ { personaId, month, week, day, start, end, type } ] }
 let currentStore = "";
 
-// Modo de señalización en el calendario: todas | normal | guardia
-let filterMode = "todas";
-
-// Filtros de fecha (mes/año) del calendario
+// Filtro de fecha (mes) del calendario
 let currentMonth = "";
-let currentYear = "";
 
 async function loadData() {
     try {
@@ -71,7 +67,6 @@ function filterStoresByCountry() {
     document.getElementById("staffSection").classList.add("hidden");
     document.getElementById("emptyState").classList.remove("hidden");
     document.getElementById("staffList").innerHTML = "";
-    document.getElementById("dateFilters").classList.add("hidden");
 
     if (!selectedCountry) {
         storeSelect.innerHTML = '<option value="">-- Primero selecciona un país --</option>';
@@ -104,13 +99,10 @@ function renderStore() {
         staffSection.classList.add("hidden");
         emptyState.classList.remove("hidden");
         document.getElementById("staffList").innerHTML = "";
-        document.getElementById("dateFilters").classList.add("hidden");
         return;
     }
 
     document.getElementById("staffList").innerHTML = "";
-    filterMode = "todas";
-    updateButtons();
     populateDateFilters();
 
     emptyState.classList.add("hidden");
@@ -131,61 +123,19 @@ function renderStore() {
 
 
 // ═══════════════════════════════════════════════════════════
-//  BLOQUE 3: BOTONES DE SEÑALIZACIÓN
-// ═══════════════════════════════════════════════════════════
-
-function selectMode(mode) {
-    filterMode = mode;
-    updateButtons();
-    renderCalendar();
-}
-
-function updateButtons() {
-    ["todas", "normal", "guardia"].forEach(m => {
-        const btn = document.getElementById("btn-" + m);
-        if (btn) {
-            if (m === filterMode) {
-                btn.classList.add("active");
-            } else {
-                btn.classList.remove("active");
-            }
-        }
-    });
-}
-
-
-// ═══════════════════════════════════════════════════════════
-//  BLOQUE 3.5: FILTROS DE MES Y AÑO
+//  BLOQUE 3.5: FILTRO DE MES
 // ═══════════════════════════════════════════════════════════
 
 const MONTH_NAMES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 
 function populateDateFilters() {
-    const recs = horarios[currentStore] || [];
-    const mesSet = new Set();
-    const anioSet = new Set();
-    recs.forEach(r => {
-        if (r.month) mesSet.add(String(r.month));
-        if (r.year) anioSet.add(String(r.year));
-    });
-    if (anioSet.size === 0) anioSet.add(String(new Date().getFullYear()));
-
     const mesSel = document.getElementById("monthSelect");
-    const anoSel = document.getElementById("yearSelect");
-    if (!mesSel || !anoSel) return;
+    if (!mesSel) return;
 
     mesSel.innerHTML = '<option value="">-- Mes --</option>' +
         MONTH_NAMES.map(m => `<option value="${m}">${m}</option>`).join("");
-    anoSel.innerHTML = '<option value="">-- Año --</option>' +
-        [...anioSet].sort((a, b) => a - b)
-                    .map(y => `<option value="${y}">${y}</option>`).join("");
-
-currentMonth = MONTH_NAMES[new Date().getMonth()] || "";
-currentYear = [...anioSet].sort((a, b) => a - b)[0] || "";
+    currentMonth = MONTH_NAMES[new Date().getMonth()] || "";
     mesSel.value = currentMonth;
-    anoSel.value = currentYear;
-
-    document.getElementById("dateFilters").classList.remove("hidden");
 }
 
 function selectMonth() {
@@ -195,11 +145,43 @@ function selectMonth() {
     renderCalendar();
 }
 
-function selectYear() {
-    currentYear = document.getElementById("yearSelect").value;
-    document.getElementById("staffList").innerHTML = "";
-    if (!currentYear) return;
-    renderCalendar();
+
+// ═══════════════════════════════════════════════════════════
+//  BLOQUE 3.8: TURNOS ESTÁNDAR (optimización)
+// ═══════════════════════════════════════════════════════════
+
+const SHIFTS = {
+    "08-17": { start: "08:00", end: "17:00", label: "08:00–17:00" },
+    "08-16": { start: "08:00", end: "16:00", label: "08:00–16:00" },
+    "09-18": { start: "09:00", end: "18:00", label: "09:00–18:00" },
+    "09-17": { start: "09:00", end: "17:00", label: "09:00–17:00" }
+};
+
+function turnoLabel(sch) {
+    if (sch.type === "guardia") return "Guardia";
+    if (sch.start && sch.end) {
+        const f = Object.values(SHIFTS).find(x => x.start === sch.start && x.end === sch.end);
+        return f ? f.label : `${sch.start}–${sch.end}`;
+    }
+    return "—";
+}
+
+const diasSemana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+
+function normalizeDay(d) {
+    return diasSemana.find(x => String(d).indexOf(x) === 0) || String(d);
+}
+
+function toMin(t) {
+    const [h, m] = String(t).split(":").map(Number);
+    return (isNaN(h) ? 0 : h) * 60 + (isNaN(m) ? 0 : m);
+}
+
+function turnoColor(sch) {
+    if (sch.type === "guardia") return "guardia";
+    const dur = toMin(sch.end) - toMin(sch.start);
+    if (dur >= 540) return "jornada-completa";
+    return "jornada-parcial";
 }
 
 
@@ -210,8 +192,7 @@ function selectYear() {
 function renderCalendar() {
     const container = document.getElementById("staffList");
     const records = (horarios[currentStore] || []).filter(r =>
-        (!currentMonth || String(r.month) === currentMonth) &&
-        (!currentYear || !r.year || String(r.year) === currentYear)
+        !currentMonth || String(r.month) === currentMonth
     );
 
     if (records.length === 0) {
@@ -227,9 +208,6 @@ function renderCalendar() {
     const personaById = {};
     personas.forEach(p => { personaById[p.id] = p; });
 
-    // Días de la semana en orden
-    const diasSemana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
-
     // Semanas que aparecen (en orden natural Semana 1..5)
     const semanaSet = new Set();
     records.forEach(r => semanaSet.add(r.week));
@@ -238,30 +216,6 @@ function renderCalendar() {
         const nb = parseInt(b.replace(/\D/g, ""), 10) || 0;
         return na - nb;
     });
-
-    // Normaliza un día ("Domingo (Guardia)" -> "Domingo")
-    function normalizeDay(d) {
-        return diasSemana.find(x => String(d).indexOf(x) === 0) || String(d);
-    }
-
-    // Color de un turno según su tipo
-    function turnoColor(sch) {
-        if (sch.type === "guardia") return "guardia";
-        const dur = toMin(sch.end) - toMin(sch.start);
-        if (dur >= 540) return "jornada-completa";
-        return "jornada-parcial";
-    }
-
-    function toMin(t) {
-        const [h, m] = String(t).split(":").map(Number);
-        return (isNaN(h) ? 0 : h) * 60 + (isNaN(m) ? 0 : m);
-    }
-
-    // ¿Debe mostrarse un turno según el modo de señalización?
-    function visible(sch) {
-        if (filterMode === "todas") return true;
-        return sch.type === filterMode;
-    }
 
     // Encabezado de días
     function buildHeader() {
@@ -276,7 +230,8 @@ function renderCalendar() {
 
     // Fecha real del mes mostrado (para numerar los días)
     const monthIndex = MONTH_NAMES.indexOf(currentMonth);
-    const yearNum = parseInt(currentYear, 10) || new Date().getFullYear();
+    const dataYear = records.find(r => r.year);
+    const yearNum = dataYear ? (parseInt(dataYear.year, 10) || new Date().getFullYear()) : new Date().getFullYear();
     const firstDate = new Date(yearNum, monthIndex, 1);
     const firstWeekday = (firstDate.getDay() + 6) % 7; // 0 = lunes
 
@@ -285,7 +240,7 @@ function renderCalendar() {
         let cells = '';
         diasSemana.forEach((dia, dIdx) => {
             const dayNum = semanaIndex * 7 + dIdx - firstWeekday + 1;
-            const turnos = records.filter(r => r.week === semana && normalizeDay(r.day) === dia && visible(r));
+            const turnos = records.filter(r => r.week === semana && normalizeDay(r.day) === dia);
             cells += buildDayCell(turnos, personaById, dayNum);
         });
         return `<div class="cal-row cal-week-row"><div class="cal-week-label">${semana}</div>${cells}</div>`;
@@ -305,15 +260,14 @@ function renderCalendar() {
         turnos.forEach(sch => {
             const p = personaById[sch.personaId] || {};
             const name = p.name || "?";
-            const initials = name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase();
-            const hora = sch.type === "guardia" ? "Guardia" : ((sch.start && sch.end) ? `${sch.start}–${sch.end}` : "—");
-            const photo = p.photo;
-            const avatar = photo
-                ? `<img class="cal-cell-photo" src="${photo}" alt="${name}">`
-                : `<span class="cal-cell-initials">${initials}</span>`;
+            const hora = turnoLabel(sch);
+            const foto = p.photo
+                ? `<img class="cal-cell-photo" src="${p.photo}" alt="${name}">`
+                : `<span class="cal-cell-initials">${initials(name)}</span>`;
+            const tienda = (stores[currentStore] || {}).name || "";
             inner += `
-                <div class="cal-event ${turnoColor(sch)}" title="${name} ${hora}">
-                    ${avatar}
+                <div class="cal-event ${turnoColor(sch)}" data-tip-id="${sch.personaId}" data-tip-store="${tienda}">
+                    ${foto}
                     <div class="cal-event-info">
                         <span class="cal-event-name">${name}</span>
                         <span class="cal-event-time">${hora}</span>
@@ -328,10 +282,227 @@ function renderCalendar() {
 
     container.innerHTML = `
         <div class="cal-wrapper">
-            <div class="cal-month-title">${currentMonth} ${currentYear}</div>
+            <div class="cal-month-title">${currentMonth} ${yearNum}</div>
             <div class="cal-grid">
                 ${buildHeader()}
                 ${rows}
             </div>
         </div>`;
 }
+
+
+// ═══════════════════════════════════════════════════════════
+//  BLOQUE 5: HELPERS
+// ═══════════════════════════════════════════════════════════
+
+function initials(name) {
+    return String(name).split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase();
+}
+
+
+// ═══════════════════════════════════════════════════════════
+//  BLOQUE 6: PANEL DE GUARDIAS DE TODOS LOS TÉCNICOS (CALENDARIO)
+// ═══════════════════════════════════════════════════════════
+
+let guardsMode = false;
+
+function guardsMonth() {
+    const sel = document.getElementById("guardsMonthSelect");
+    return sel ? sel.value : currentMonth;
+}
+
+function toggleAllGuards() {
+    guardsMode = !guardsMode;
+    const panel = document.getElementById("allGuardsPanel");
+    const btn = document.getElementById("btnAllGuards");
+    if (!panel) return;
+
+    if (btn) btn.textContent = guardsMode ? "✖ Cerrar guardias" : "🛡️ Ver todas las guardias";
+
+    if (guardsMode) {
+        document.querySelectorAll(".selector-card").forEach(c => c.classList.add("hidden"));
+        document.getElementById("storeInfo").classList.add("hidden");
+        document.getElementById("staffSection").classList.add("hidden");
+        document.getElementById("emptyState").classList.add("hidden");
+
+        const sel = document.getElementById("guardsMonthSelect");
+        if (sel) {
+            sel.innerHTML = '<option value="">-- Mes --</option>' +
+                MONTH_NAMES.map(m => `<option value="${m}">${m}</option>`).join("");
+            sel.value = currentMonth || MONTH_NAMES[new Date().getMonth()];
+        }
+        panel.classList.remove("hidden");
+        renderAllGuards();
+    } else {
+        panel.classList.add("hidden");
+        document.querySelectorAll(".selector-card").forEach(c => c.classList.remove("hidden"));
+        if (currentStore) {
+            renderStore();
+        } else {
+            document.getElementById("storeInfo").classList.add("hidden");
+            document.getElementById("staffSection").classList.add("hidden");
+            document.getElementById("emptyState").classList.remove("hidden");
+        }
+    }
+}
+
+function selectGuardsMonth() {
+    const list = document.getElementById("allGuardsList");
+    if (list) list.innerHTML = "";
+    renderAllGuards();
+}
+
+// Rejilla de un mes con los registros dados (guardias de todos los técnicos)
+function buildMonthGrid(records) {
+    const personaById = {};
+    personas.forEach(p => { personaById[p.id] = p; });
+
+    const semanaSet = new Set();
+    records.forEach(r => semanaSet.add(r.week));
+    const semanas = [...semanaSet].sort((a, b) => {
+        const na = parseInt(a.replace(/\D/g, ""), 10) || 0;
+        const nb = parseInt(b.replace(/\D/g, ""), 10) || 0;
+        return na - nb;
+    });
+
+    const monthIndex = MONTH_NAMES.indexOf(guardsMonth());
+    const dataYear = records.find(r => r.year);
+    const yearNum = dataYear ? (parseInt(dataYear.year, 10) || new Date().getFullYear()) : new Date().getFullYear();
+    const firstDate = new Date(yearNum, monthIndex, 1);
+    const firstWeekday = (firstDate.getDay() + 6) % 7;
+
+    function header() {
+        let h = '<div class="cal-row cal-header-row"><div class="cal-corner">Semana</div>';
+        diasSemana.forEach(d => { h += `<div class="cal-day-header">${d}</div>`; });
+        return h + '</div>';
+    }
+
+    function dayCell(turnos, dayNum) {
+        const cellDate = new Date(yearNum, monthIndex, dayNum);
+        const inMonth = cellDate.getMonth() === monthIndex && cellDate.getFullYear() === yearNum;
+        const dayLabel = `<div class="cal-day-num${inMonth ? "" : " out-month"}">${cellDate.getDate()}</div>`;
+        if (turnos.length === 0) {
+            return `<div class="cal-cell no-day">${dayLabel}<span class="libre">—</span></div>`;
+        }
+        let inner = dayLabel;
+        turnos.forEach(sch => {
+            const p = personaById[sch.personaId] || {};
+            const name = p.name || "?";
+            const t = stores[sch.tiendaId] || {};
+            const tl = t.name || sch.tiendaId;
+            const foto = p.photo
+                ? `<img class="cal-cell-photo" src="${p.photo}" alt="${name}">`
+                : `<span class="cal-cell-initials">${initials(name)}</span>`;
+            inner += `
+                <div class="cal-event ${turnoColor(sch)}" data-tip-id="${sch.personaId}" data-tip-store="${tl}">
+                    ${foto}
+                    <div class="cal-event-info">
+                        <span class="cal-event-name">${name}</span>
+                        <span class="cal-event-time">${tl}</span>
+                    </div>
+                </div>`;
+        });
+        return `<div class="cal-cell">${inner}</div>`;
+    }
+
+    let rows = '';
+    semanas.forEach((s, i) => {
+        let cells = '';
+        diasSemana.forEach((dia, dIdx) => {
+            const dayNum = i * 7 + dIdx - firstWeekday + 1;
+            const turnos = records.filter(r => r.week === s && normalizeDay(r.day) === dia);
+            cells += dayCell(turnos, dayNum);
+        });
+        rows += `<div class="cal-row cal-week-row"><div class="cal-week-label">${s}</div>${cells}</div>`;
+    });
+
+    return `
+        <div class="cal-wrapper">
+            <div class="cal-month-title">${MONTH_NAMES[monthIndex]} ${yearNum}</div>
+            <div class="cal-grid">
+                ${header()}
+                ${rows}
+            </div>
+        </div>`;
+}
+
+function renderAllGuards() {
+    const list = document.getElementById("allGuardsList");
+    if (!list) return;
+
+    const monthSel = guardsMonth();
+    const guardias = [];
+    for (const [tiendaId, recs] of Object.entries(horarios)) {
+        recs.forEach(r => {
+            if (r.type !== "guardia") return;
+            if (monthSel && String(r.month) !== monthSel) return;
+            guardias.push({ tiendaId: tiendaId, ...r });
+        });
+    }
+
+    if (guardias.length === 0) {
+        list.innerHTML = '<p class="tech-empty">No hay guardias en este mes.</p>';
+        return;
+    }
+
+    list.innerHTML = buildMonthGrid(guardias);
+}
+
+
+// ═══════════════════════════════════════════════════════════
+//  BLOQUE 7: TOOLTIP CON FOTO + INFO DEL TÉCNICO (HOVER)
+// ═══════════════════════════════════════════════════════════
+
+function getTechTip() {
+    let tip = document.getElementById("techTooltip");
+    if (!tip) {
+        tip = document.createElement("div");
+        tip.id = "techTooltip";
+        tip.className = "tech-tooltip";
+        document.body.appendChild(tip);
+    }
+    return tip;
+}
+
+function positionTip(event) {
+    const tip = getTechTip();
+    const pad = 14;
+    let x = event.clientX + pad;
+    let y = event.clientY + pad;
+    const r = tip.getBoundingClientRect();
+    if (x + r.width > window.innerWidth) x = event.clientX - r.width - pad;
+    if (y + r.height > window.innerHeight) y = event.clientY - r.height - pad;
+    tip.style.left = Math.max(0, x) + "px";
+    tip.style.top = Math.max(0, y) + "px";
+}
+
+document.addEventListener("mouseover", (event) => {
+    const el = event.target.closest ? event.target.closest("[data-tip-id]") : null;
+    const tip = getTechTip();
+    if (!el) {
+        tip.style.display = "none";
+        return;
+    }
+    const p = personas.find(x => x.id === el.dataset.tipId) || {};
+    const store = el.dataset.tipStore || "";
+    tip.innerHTML =
+        (p.photo
+            ? `<img class="tip-photo" src="${p.photo}" alt="">`
+            : `<span class="tip-photo tip-photo-fallback">${initials(p.name || "?")}</span>`) +
+        `<div class="tip-name">${p.name || "?"}</div>` +
+        (p.email ? `<div class="tip-meta">📧 ${p.email}</div>` : "") +
+        (p.phone ? `<div class="tip-meta">📱 ${p.phone}</div>` : "") +
+        (store ? `<div class="tip-meta">🏪 ${store}</div>` : "");
+    tip.style.display = "block";
+    positionTip(event);
+});
+
+document.addEventListener("mousemove", (event) => {
+    const tip = getTechTip();
+    if (tip.style.display === "block") positionTip(event);
+});
+
+document.addEventListener("mouseout", (event) => {
+    const el = event.target.closest ? event.target.closest("[data-tip-id]") : null;
+    if (!el) getTechTip().style.display = "none";
+});
