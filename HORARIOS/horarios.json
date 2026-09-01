@@ -240,15 +240,6 @@
       "start": "08:00",
       "end": "16:00",
       "type": "normal"
-    },
-    {
-      "personaId": "kevin-alean",
-      "month": "Septiembre",
-      "week": "Semana 5",
-      "day": "Jueves",
-      "start": "08:00",
-      "end": "17:00",
-      "type": "normal"
     }
   ],
   "tienda2": [
@@ -473,15 +464,6 @@
       "day": "Miércoles",
       "start": "08:00",
       "end": "16:00",
-      "type": "normal"
-    },
-    {
-      "personaId": "angel-ortiz",
-      "month": "Septiembre",
-      "week": "Semana 5",
-      "day": "Jueves",
-      "start": "08:00",
-      "end": "17:00",
       "type": "normal"
     }
   ],
@@ -764,15 +746,6 @@
       "start": "08:00",
       "end": "16:00",
       "type": "normal"
-    },
-    {
-      "personaId": "julian-garzon",
-      "month": "Septiembre",
-      "week": "Semana 5",
-      "day": "Jueves",
-      "start": "08:00",
-      "end": "17:00",
-      "type": "normal"
     }
   ],
   "tienda5": [
@@ -1016,15 +989,6 @@
       "start": "08:00",
       "end": "16:00",
       "type": "normal"
-    },
-    {
-      "personaId": "jersoon-gonzalez",
-      "month": "Septiembre",
-      "week": "Semana 5",
-      "day": "Jueves",
-      "start": "08:00",
-      "end": "17:00",
-      "type": "normal"
     }
   ],
   "tienda6": [
@@ -1251,15 +1215,6 @@
       "day": "Miércoles",
       "start": "08:00",
       "end": "16:00",
-      "type": "normal"
-    },
-    {
-      "personaId": "anderson-grande",
-      "month": "Septiembre",
-      "week": "Semana 5",
-      "day": "Jueves",
-      "start": "08:00",
-      "end": "17:00",
       "type": "normal"
     }
   ],
@@ -1496,15 +1451,6 @@
       "day": "Miércoles",
       "start": "08:00",
       "end": "16:00",
-      "type": "normal"
-    },
-    {
-      "personaId": "andres-garzon",
-      "month": "Septiembre",
-      "week": "Semana 5",
-      "day": "Jueves",
-      "start": "08:00",
-      "end": "17:00",
       "type": "normal"
     }
   ],
