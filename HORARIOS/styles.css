@@ -352,9 +352,11 @@
         /* Celda de un día */
         .cal-cell {
             border-right: 1px solid #e5e7eb;
+            position: relative;
             height: 96px;
             min-height: 96px;
             padding: 5px;
+            padding-top: 24px;
             background: #fff;
             display: flex;
             flex-direction: column;
@@ -363,6 +365,26 @@
             overflow-x: hidden;
             scrollbar-width: thin;
             scrollbar-color: #d1d5db transparent;
+        }
+        .cal-day-num {
+            position: absolute;
+            top: 4px;
+            right: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #374151;
+            background: #f3f4f6;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+        .cal-day-num.out-month {
+            color: #d1d5db;
+            background: transparent;
         }
         .cal-cell.no-day {
             background: #fafafa;

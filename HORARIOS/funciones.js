@@ -274,22 +274,32 @@ function renderCalendar() {
         return h;
     }
 
+    // Fecha real del mes mostrado (para numerar los días)
+    const monthIndex = MONTH_NAMES.indexOf(currentMonth);
+    const yearNum = parseInt(currentYear, 10) || new Date().getFullYear();
+    const firstDate = new Date(yearNum, monthIndex, 1);
+    const daysInMonth = new Date(yearNum, monthIndex + 1, 0).getDate();
+    const firstWeekday = (firstDate.getDay() + 6) % 7; // 0 = lunes
+
     // Fila de una semana
-    function buildWeekRow(semana) {
+    function buildWeekRow(semana, semanaIndex) {
         let cells = '';
-        diasSemana.forEach(dia => {
+        diasSemana.forEach((dia, dIdx) => {
+            const dayNum = semanaIndex * 7 + dIdx - firstWeekday + 1;
             const turnos = records.filter(r => r.week === semana && normalizeDay(r.day) === dia && visible(r));
-            cells += buildDayCell(turnos, personaById);
+            cells += buildDayCell(turnos, personaById, dayNum, daysInMonth);
         });
         return `<div class="cal-row cal-week-row"><div class="cal-week-label">${semana}</div>${cells}</div>`;
     }
 
-    // Celda de un día: lista de turnos de las personas
-    function buildDayCell(turnos, personaById) {
+    // Celda de un día: número del día + lista de turnos de las personas
+    function buildDayCell(turnos, personaById, dayNum, daysInMonth) {
+        const inMonth = dayNum >= 1 && dayNum <= daysInMonth;
+        const dayLabel = `<div class="cal-day-num${inMonth ? "" : " out-month"}">${dayNum}</div>`;
         if (turnos.length === 0) {
-            return '<div class="cal-cell no-day"><span class="libre">—</span></div>';
+            return `<div class="cal-cell no-day">${dayLabel}<span class="libre">—</span></div>`;
         }
-        let inner = '';
+        let inner = dayLabel;
         turnos.forEach(sch => {
             const p = personaById[sch.personaId] || {};
             const name = p.name || "?";
@@ -312,7 +322,7 @@ function renderCalendar() {
     }
 
     let rows = '';
-    semanas.forEach(s => { rows += buildWeekRow(s); });
+    semanas.forEach((s, i) => { rows += buildWeekRow(s, i); });
 
     container.innerHTML = `
         <div class="cal-wrapper">
