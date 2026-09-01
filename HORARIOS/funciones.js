@@ -352,85 +352,15 @@ function selectGuardsMonth() {
     renderAllGuards();
 }
 
-// Rejilla de un mes con los registros dados (guardias de todos los técnicos)
-function buildMonthGrid(records) {
-    const personaById = {};
-    personas.forEach(p => { personaById[p.id] = p; });
-
-    const semanaSet = new Set();
-    records.forEach(r => semanaSet.add(r.week));
-    const semanas = [...semanaSet].sort((a, b) => {
-        const na = parseInt(a.replace(/\D/g, ""), 10) || 0;
-        const nb = parseInt(b.replace(/\D/g, ""), 10) || 0;
-        return na - nb;
-    });
-
-    const monthIndex = MONTH_NAMES.indexOf(guardsMonth());
-    const dataYear = records.find(r => r.year);
-    const yearNum = dataYear ? (parseInt(dataYear.year, 10) || new Date().getFullYear()) : new Date().getFullYear();
-    const firstDate = new Date(yearNum, monthIndex, 1);
-    const firstWeekday = (firstDate.getDay() + 6) % 7;
-
-    function header() {
-        let h = '<div class="cal-row cal-header-row"><div class="cal-corner">Semana</div>';
-        diasSemana.forEach(d => { h += `<div class="cal-day-header">${d}</div>`; });
-        return h + '</div>';
-    }
-
-    function dayCell(turnos, dayNum) {
-        const cellDate = new Date(yearNum, monthIndex, dayNum);
-        const inMonth = cellDate.getMonth() === monthIndex && cellDate.getFullYear() === yearNum;
-        const dayLabel = `<div class="cal-day-num${inMonth ? "" : " out-month"}">${cellDate.getDate()}</div>`;
-        if (turnos.length === 0) {
-            return `<div class="cal-cell no-day">${dayLabel}<span class="libre">—</span></div>`;
-        }
-        let inner = dayLabel;
-        turnos.forEach(sch => {
-            const p = personaById[sch.personaId] || {};
-            const name = p.name || "?";
-            const t = stores[sch.tiendaId] || {};
-            const tl = t.name || sch.tiendaId;
-            const foto = p.photo
-                ? `<img class="cal-cell-photo" src="${p.photo}" alt="${name}">`
-                : `<span class="cal-cell-initials">${initials(name)}</span>`;
-            inner += `
-                <div class="cal-event ${turnoColor(sch)}" data-tip-id="${sch.personaId}" data-tip-store="${tl}">
-                    ${foto}
-                    <div class="cal-event-info">
-                        <span class="cal-event-name">${name}</span>
-                        <span class="cal-event-time">${tl}</span>
-                    </div>
-                </div>`;
-        });
-        return `<div class="cal-cell">${inner}</div>`;
-    }
-
-    let rows = '';
-    semanas.forEach((s, i) => {
-        let cells = '';
-        diasSemana.forEach((dia, dIdx) => {
-            const dayNum = i * 7 + dIdx - firstWeekday + 1;
-            const turnos = records.filter(r => r.week === s && normalizeDay(r.day) === dia);
-            cells += dayCell(turnos, dayNum);
-        });
-        rows += `<div class="cal-row cal-week-row"><div class="cal-week-label">${s}</div>${cells}</div>`;
-    });
-
-    return `
-        <div class="cal-wrapper">
-            <div class="cal-month-title">${MONTH_NAMES[monthIndex]} ${yearNum}</div>
-            <div class="cal-grid">
-                ${header()}
-                ${rows}
-            </div>
-        </div>`;
-}
-
+// Lista de guardias de todos los técnicos (con los datos de cada uno)
 function renderAllGuards() {
     const list = document.getElementById("allGuardsList");
     if (!list) return;
 
     const monthSel = guardsMonth();
+    const personaById = {};
+    personas.forEach(p => { personaById[p.id] = p; });
+
     const guardias = [];
     for (const [tiendaId, recs] of Object.entries(horarios)) {
         recs.forEach(r => {
@@ -445,7 +375,56 @@ function renderAllGuards() {
         return;
     }
 
-    list.innerHTML = buildMonthGrid(guardias);
+    const dayOrder = { "Lunes": 0, "Martes": 1, "Miércoles": 2, "Jueves": 3, "Viernes": 4, "Sábado": 5, "Domingo": 6 };
+    const monthIndex = MONTH_NAMES.indexOf(guardsMonth());
+    const dataYear = guardias.find(r => r.year);
+    const yearNum = dataYear ? (parseInt(dataYear.year, 10) || new Date().getFullYear()) : new Date().getFullYear();
+    const firstDate = new Date(yearNum, monthIndex, 1);
+    const firstWeekday = (firstDate.getDay() + 6) % 7;
+
+    guardias.forEach(g => {
+        const weekIdx = parseInt(String(g.week).replace(/\D/g, ""), 10) || 0;
+        const dayIdx = dayOrder[normalizeDay(g.day)] !== undefined ? dayOrder[normalizeDay(g.day)] : 9;
+        const cellDate = new Date(yearNum, monthIndex, (weekIdx - 1) * 7 + dayIdx - firstWeekday + 1);
+        g._week = weekIdx;
+        g._dayNum = cellDate.getDate();
+    });
+
+    guardias.sort((a, b) => {
+        if (a._week !== b._week) return a._week - b._week;
+        const da = dayOrder[normalizeDay(a.day)] !== undefined ? dayOrder[normalizeDay(a.day)] : 9;
+        const db = dayOrder[normalizeDay(b.day)] !== undefined ? dayOrder[normalizeDay(b.day)] : 9;
+        return da - db;
+    });
+
+    const semanaSet = [...new Set(guardias.map(g => g._week))].sort((x, y) => x - y);
+
+    function card(g) {
+        const t = stores[g.tiendaId] || {};
+        const tl = t.name || g.tiendaId;
+        const p = personaById[g.personaId] || {};
+        const avatar = p.photo
+            ? `<img class="guard-avatar" src="${p.photo}" alt="">`
+            : `<span class="guard-avatar guard-avatar-fallback">${initials(p.name || "?")}</span>`;
+        return `
+            <div class="guard-card" data-tip-id="${g.personaId}" data-tip-store="${tl}">
+                ${avatar}
+                <div class="guard-info">
+                    <div class="guard-name">${p.name || "?"}</div>
+                    <div class="guard-meta">📧 ${p.email || "—"}</div>
+                    <div class="guard-meta">📱 ${p.phone || "—"}</div>
+                </div>
+                <div class="guard-when">
+                    <span class="guard-badge">📆 ${normalizeDay(g.day) || ""} ${g._dayNum}</span>
+                    <span class="guard-badge guard-store">🏪 ${tl}</span>
+                </div>
+            </div>`;
+    }
+
+    list.innerHTML = semanaSet.map(w => `
+        <div class="guard-week">📅 Semana ${w}</div>
+        ${guardias.filter(g => g._week === w).map(card).join("")}
+    `).join("");
 }
 
 

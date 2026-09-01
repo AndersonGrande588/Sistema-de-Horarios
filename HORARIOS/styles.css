@@ -498,6 +498,93 @@
             min-width: 140px;
         }
 
+        /* Lista de guardias (tarjetas con datos del técnico) */
+        .guard-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 14px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            background: #fff;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+        .guard-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .guard-avatar-fallback {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #fff;
+            font-weight: 700;
+            font-size: 16px;
+        }
+        .guard-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .guard-name {
+            font-weight: 700;
+            font-size: 14px;
+            color: #111827;
+        }
+        .guard-meta {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 1px;
+            word-break: break-all;
+        }
+        .guard-when {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: flex-end;
+            flex-shrink: 0;
+        }
+        .guard-badge {
+            background: #fef3c7;
+            color: #b45309;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+        .guard-badge.guard-store {
+            background: #ffedd5;
+            color: #c2410c;
+        }
+        .guard-week {
+            font-weight: 700;
+            font-size: 13px;
+            color: #374151;
+            margin: 16px 0 8px;
+            padding-bottom: 4px;
+            border-bottom: 2px solid #ffedd5;
+        }
+        .guard-week:first-child {
+            margin-top: 0;
+        }
+        @media (max-width: 600px) {
+            .guard-card {
+                flex-wrap: wrap;
+            }
+            .guard-when {
+                align-items: flex-start;
+                width: 100%;
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+        }
+
         /* Tooltip con foto + info del técnico (hover) */
         .tech-tooltip {
             position: fixed;

@@ -1488,15 +1488,6 @@
       "personaId": "andres-bojaca",
       "month": "Septiembre",
       "week": "Semana 1",
-      "day": "Lunes",
-      "start": "08:00",
-      "end": "17:00",
-      "type": "normal"
-    },
-    {
-      "personaId": "andres-bojaca",
-      "month": "Septiembre",
-      "week": "Semana 1",
       "day": "Martes",
       "start": "08:00",
       "end": "16:00",
@@ -1762,42 +1753,6 @@
       "start": "08:00",
       "end": "16:00",
       "type": "normal"
-    },
-    {
-      "personaId": "andres-bojaca",
-      "month": "Septiembre",
-      "week": "Semana 5",
-      "day": "Jueves",
-      "start": "08:00",
-      "end": "17:00",
-      "type": "normal"
-    },
-    {
-      "personaId": "andres-bojaca",
-      "month": "Septiembre",
-      "week": "Semana 5",
-      "day": "Viernes",
-      "start": "08:00",
-      "end": "17:00",
-      "type": "normal"
-    },
-    {
-      "personaId": "andres-bojaca",
-      "month": "Septiembre",
-      "week": "Semana 5",
-      "day": "Sábado",
-      "start": "08:00",
-      "end": "17:00",
-      "type": "normal"
-    },
-    {
-      "personaId": "andres-bojaca",
-      "month": "Septiembre",
-      "week": "Semana 5",
-      "day": "Domingo",
-      "start": "08:00",
-      "end": "12:00",
-      "type": "guardia"
     }
   ]
 }

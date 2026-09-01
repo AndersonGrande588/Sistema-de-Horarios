@@ -10,7 +10,7 @@ Aplicación web **estática** que permite consultar los horarios de trabajo de u
 
 - **Tecnología:** HTML + CSS + JavaScript puro. Sin frameworks, sin dependencias, sin build tools.
 - **Datos:** archivos JSON (`personas.json` y `horarios.json`) cargados en el navegador con `fetch()`.
-- **Propósito:** visualizar de un vistazo qué técnico trabaja en cada tienda, en qué días y con qué tipo de jornada (normal o guardia), y coordinar la cobertura de las tiendas mediante un **calendario global de guardias** (todas las tiendas en un solo vistazo).
+- **Propósito:** visualizar de un vistazo qué técnico trabaja en cada tienda, en qué días y con qué tipo de jornada (normal o guardia), y coordinar la cobertura de las tiendas mediante una **lista global de guardias** (todas las tiendas en un solo vistazo).
 
 ---
 
@@ -35,7 +35,7 @@ Todo el procesamiento ocurre en el navegador (**client-side rendering**). No hay
 1. `funciones.js` carga ambos JSON en paralelo (`Promise.all`).
 2. El usuario elige un **país** → se habilitan las **tiendas** de ese país.
 3. El usuario elige una **tienda** → se muestra el banner de la tienda + el **calendario mensual** del personal (filtrable solo por **mes**).
-4. El botón **"🛡️ Ver todas las guardias"** abre un **modo global**: oculta los filtros de país/tienda y muestra un **calendario mensual** con todas las guardias de todas las tiendas (qué tienda tiene guardia y quién está asignado).
+4. El botón **"🛡️ Ver todas las guardias"** abre un **modo global**: oculta los filtros de país/tienda y muestra una **lista agrupada por semanas** con todas las guardias del mes; cada guardia indica el **día con su número** (p. ej. "Domingo 6"), la **tienda** y **todos los datos del técnico** asignado (foto, nombre, correo y teléfono).
 5. Al **pasar el cursor** sobre cualquier turno se muestra un tooltip con la **foto**, nombre, correo y teléfono del técnico.
 
 ---
@@ -138,9 +138,16 @@ Objeto que agrupa por `tiendaId`:
 | `start` / `end` | string | Hora inicio/fin en formato `HH:MM`. |
 | `type` | string | `"normal"` (jornada) o `"guardia"`. |
 
-Actualmente **9 tiendas** tienen horarios (≈205 registros, de los cuales **9 son guardias**), todos con `"month": "Septiembre"`.
+Actualmente **9 tiendas** tienen horarios (194 registros, de los cuales **8 son guardias**), todos con `"month": "Septiembre"` y **sin registros fuera del mes** (los días que caerían en agosto/octubre por la posición de las semanas se eliminan).
 
-> **`tienda9` (Bima):** 35 registros de **andres-bojaca**. Lunes, Jueves, Viernes y Sábado `08:00–17:00`; Martes y Miércoles `08:00–16:00`; Domingo **guardia**. (El día `"Sabado"` fue corregido a `"Sábado"`.)
+> **`tienda9` (Bima):** 30 registros de **andres-bojaca**. Lunes, Jueves, Viernes y Sábado `08:00–17:00`; Martes y Miércoles `08:00–16:00`; Domingo **guardia** (Semanas 1–4; la Semana 5 no tiene Domingo porque caería en octubre). (El día `"Sabado"` fue corregido a `"Sábado"`.)
+
+> **Guardias del mes (coinciden con la asignación real):**
+> - Jersoon Gonzalez → tienda5 · **6 septiembre** (Semana 1 Domingo)
+> - Angel Ortiz → tienda2 · **2 septiembre** (Semana 1 Miércoles)
+> - Julian Garzon → tienda3 · **13 septiembre** (Semana 2 Domingo)
+> - Kevin Alean → tienda1 · **20 septiembre** (Semana 3 Domingo)
+> - Andres Bojaca (Bima) → tienda9 · **6, 13, 20 y 27 septiembre** (Semanas 1–4 Domingo)
 
 > **Nota:** los datos no incluyen el número del día del mes; el calendario **calcula** los números de cada celda a partir de semana + día usando el calendario real del mes/año seleccionado (se usa `new Date(año, mes, n)` para que días ≤ 0 o > último día del mes caigan en el mes vecino y se marquen como `out-month`).
 
@@ -208,18 +215,22 @@ Cada turno se dibuja como `.cal-event` con:
 
 - `initials(name)`: devuelve las iniciales de un nombre (usadas como avatar de respaldo).
 
-### BLOQUE 6 — Panel de guardias de todos los técnicos (calendario)
+### BLOQUE 6 — Lista de guardias de todos los técnicos
 
 Modo global activado por el botón **"🛡️ Ver todas las guardias"**:
 
 - `toggleAllGuards()`: alterna `guardsMode`. Al abrir:
   - Oculta los selectores de **país/tienda**, el banner de tienda, la sección de calendario y el estado vacío.
-  - Llena su propio selector de **mes** (preselecciona el mes actual) y renderiza el calendario de guardias.
+  - Llena su propio selector de **mes** (preselecciona el mes actual) y renderiza la lista de guardias.
   - Al cerrar: restaura los selectores y, si había una tienda seleccionada, re-renderiza con `renderStore()`.
 - `guardsMonth()`: devuelve el mes elegido en el selector propio del panel de guardias.
 - `selectGuardsMonth()`: al cambiar el mes del panel, limpia el contenido y re-renderiza.
-- `buildMonthGrid(records)`: construye una rejilla mensual genérica (reutilizada para el calendario de guardias). Cada evento muestra la **tienda** en la línea de hora y el **técnico** en el nombre, con su foto.
-- `renderAllGuards()`: recorre **todas las tiendas**, filtra los registros tipo `guardia` por el mes seleccionado y dibuja el calendario con `buildMonthGrid`. Si no hay guardias en el mes, muestra "No hay guardias en este mes.".
+- `renderAllGuards()`: recorre **todas las tiendas**, filtra los registros tipo `guardia` por el mes seleccionado, calcula el **número del día real** de cada guardia (semana + día con el calendario real del mes/año, igual que el calendario de tienda) y agrupa/ordena por **semana**. Dibuja una **lista** con un encabezado `📅 Semana N` y, debajo, una tarjeta (`.guard-card`) por guardia. Cada tarjeta muestra:
+  - **Foto** del técnico (o iniciales) y su **nombre**, **correo** y **teléfono**.
+  - Badge "📆 Día + número" (p. ej. "Domingo 6") y badge "🏪 Tienda" (en qué tienda tiene la guardia).
+  - Si no hay guardias en el mes, muestra "No hay guardias en este mes.".
+  - Las tarjetas llevan `data-tip-id`/`data-tip-store`, por lo que el tooltip de la BLOQUE 7 también funciona sobre ellas.
+- Helper interno `card(g)`: genera la tarjeta de una guardia con los datos del técnico y los badges día/tienda.
 
 ### BLOQUE 7 — Tooltip con foto + info del técnico (hover)
 
@@ -245,7 +256,7 @@ CSS plano (sin preprocesador). Reglas principales:
 | `.filter-row`, `.filter-group` | Fila de filtros (el único filtro es el **mes**). |
 | `.hidden` | Oculta elementos que aún no aplican. |
 | `.guards-bar`, `.guards-btn` | Franja y botón global "🛡️ Ver todas las guardias" (naranja). |
-| `.guards-panel`, `.guards-head` | Panel del calendario de guardias con su selector de mes. |
+| `.guards-panel`, `.guards-head` | Panel de la **lista de guardias** con su selector de mes. |
 | `.cal-wrapper` | Contenedor del calendario (scroll horizontal si es necesario). |
 | `.cal-month-title` | Título del mes/año mostrado. |
 | `.cal-grid` | Rejilla del calendario (ancho mínimo 900px). |
@@ -258,6 +269,7 @@ CSS plano (sin preprocesador). Reglas principales:
 | `.cal-event` (+ variantes) | Turno: azul (jornada completa), verde (jornada parcial), naranja (guardia). |
 | `.cal-cell-photo`, `.cal-cell-initials` | Foto o avatar de 18px en el turno. |
 | `.cal-event-name`, `.cal-event-time` | Texto del turno. |
+| `.guard-card`, `.guard-avatar`, `.guard-info`, `.guard-when`, `.guard-badge` | Tarjetas de la **lista de guardias** (datos del técnico + badges cuándo/tienda). |
 | `.tech-tooltip`, `.tip-photo`, `.tip-name`, `.tip-meta` | Tooltip flotante con foto + info del técnico. |
 | `@media (max-width: 600px)` | Ajustes responsive: columnas simples y banner apilado. |
 
@@ -303,5 +315,5 @@ CSS plano (sin preprocesador). Reglas principales:
 - ✅ **Bima** agregada en Colombia (Bojacá), con horarios propios de Andres Bojaca (Lun/Sáb 08-17, Mar/Mié 08-16, Dom guardia).
 - ✅ Constantes `SHIFTS` y helper `turnoLabel()` para optimizar etiquetas de turnos.
 - ✅ Fotos de los técnicos en los turnos (18px) + **tooltip** al pasar el cursor con foto, nombre, correo, teléfono y tienda.
-- ✅ **Modo guardias**: botón global que oculta los filtros de tienda y muestra un calendario mensual con la guardia de cada tienda y quién está asignado.
+- ✅ **Modo guardias**: botón global que oculta los filtros de tienda y muestra una lista agrupada por semanas con todas las guardias del mes: día con su número, tienda y datos completos del técnico (foto, nombre, correo, teléfono).
 - ✅ Eliminados: panel lateral de técnicos, barra de señalización (Todas/Normal/Guardia) y filtro de año.
