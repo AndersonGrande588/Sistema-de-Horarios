@@ -13,7 +13,7 @@
 <div class="container">
     <header>
         <h1>📋 Gestor de Horarios por Tienda</h1>
-        <p>Selecciona un país y una tienda para ver el calendario del personal</p>
+        <p>Selecciona un país, tienda, mes y semana para ver el personal</p>
     </header>
 
     <div class="card selector-card">
@@ -52,23 +52,46 @@
 
     <div id="staffSection" class="hidden" style="margin-top: 20px;">
         <div class="section-header">
-            <h3>👥 Calendario Mensual</h3>
+            <h3>👥 Personal en Sitio</h3>
         </div>
 
-        <div class="mode-bar">
-            <button class="mode-btn active" id="btn-todas" onclick="selectMode('todas')">Todas</button>
-            <button class="mode-btn" id="btn-normal" onclick="selectMode('normal')">Jornada normal</button>
-            <button class="mode-btn" id="btn-guardia" onclick="selectMode('guardia')">Guardia</button>
-        </div>
-
-        <div class="filter-row hidden" id="dateFilters">
+        <div class="filter-row">
             <div class="filter-group">
-                <label>📅 Mes</label>
-                <select id="monthSelect" onchange="selectMonth()"></select>
+                <label for="filterMonth">📅 Mes</label>
+                <select id="filterMonth" onchange="renderStaffList()">
+                    <option value="">Todos los meses</option>
+                    <option>Enero</option>
+                    <option>Febrero</option>
+                    <option>Marzo</option>
+                    <option>Abril</option>
+                    <option>Mayo</option>
+                    <option>Junio</option>
+                    <option>Julio</option>
+                    <option>Agosto</option>
+                    <option>Septiembre</option>
+                    <option>Octubre</option>
+                    <option>Noviembre</option>
+                    <option>Diciembre</option>
+                </select>
             </div>
             <div class="filter-group">
-                <label>🗓️ Año</label>
-                <select id="yearSelect" onchange="selectYear()"></select>
+                <label for="filterWeek">🗓️ Semana</label>
+                <select id="filterWeek" onchange="renderStaffList()">
+                    <option value="">Todas las semanas</option>
+                    <option>Semana 1</option>
+                    <option>Semana 2</option>
+                    <option>Semana 3</option>
+                    <option>Semana 4</option>
+                    <option>Semana 5</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filterType">⏰ Tipo de jornada</label>
+                <select id="filterType" onchange="renderStaffList()">
+                    <option value="">Todas</option>
+                    <option value="normal">Jornada normal</option>
+                    <option value="guardia">Guardia</option>
+                </select>
             </div>
         </div>
 

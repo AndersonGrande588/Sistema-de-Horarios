@@ -278,7 +278,7 @@
             display: inline-block;
         }
 
-        /* ═══ CALENDARIO MENSUAL (NUEVO) ═══ */
+        /* ═══ VISTA SEMANAL TIPO GOOGLE CALENDAR (NUEVO) ═══ */
         .cal-wrapper {
             overflow-x: auto;
             background: #fff;
@@ -287,175 +287,211 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
-        .cal-month-title {
-            text-align: center;
-            font-size: 18px;
-            font-weight: 700;
-            color: #111827;
-            padding: 14px;
-            border-bottom: 1px solid #e5e7eb;
-            background: #f8fafc;
-        }
-
         .cal-grid {
-            min-width: 900px;
-            border-bottom: none;
+            min-width: 1000px;
         }
 
-        /* Fila común de la rejilla */
+        .cal-header {
+            display: grid;
+            grid-template-columns: 180px repeat(7, 1fr);
+            border-bottom: 2px solid #e5e7eb;
+            background: #f8fafc;
+            position: sticky;
+            top: 0;
+        }
+
+        .cal-header .cal-corner {
+            padding: 10px 12px;
+            font-weight: 700;
+            color: #374151;
+            font-size: 13px;
+            border-right: 1px solid #e5e7eb;
+        }
+
+        .cal-header .cal-day-header {
+            padding: 10px 12px;
+            text-align: center;
+            font-weight: 700;
+            color: #374151;
+            font-size: 13px;
+            border-right: 1px solid #e5e7eb;
+            text-transform: capitalize;
+        }
+
+        .cal-header .cal-day-header .cal-day-date {
+            font-weight: 400;
+            color: #9ca3af;
+            font-size: 11px;
+            display: block;
+        }
+
+        .cal-header .cal-day-header.today {
+            background: #eff6ff;
+            color: #2563eb;
+        }
+
         .cal-row {
             display: grid;
-            grid-template-columns: 100px repeat(7, 1fr);
+            grid-template-columns: 180px repeat(7, 1fr);
             border-bottom: 1px solid #e5e7eb;
+            height: 300px;
+            overflow: hidden;
         }
 
         .cal-row:last-child {
             border-bottom: none;
         }
 
-        /* Encabezado de los días */
-        .cal-header-row {
-            background: #f8fafc;
-            position: sticky;
-            top: 0;
-            z-index: 2;
-        }
-        .cal-header-row .cal-corner {
-            padding: 10px 12px;
-            font-weight: 700;
-            color: #374151;
-            font-size: 12px;
-            border-right: 1px solid #e5e7eb;
-        }
-        .cal-header-row .cal-day-header {
-            padding: 10px 12px;
-            text-align: center;
-            font-weight: 700;
-            color: #374151;
-            font-size: 12px;
-            border-right: 1px solid #e5e7eb;
-            text-transform: capitalize;
-        }
-
-        /* Fila de una semana */
-        .cal-week-row .cal-week-label {
-            padding: 10px 12px;
-            font-weight: 700;
-            color: #2563eb;
-            font-size: 12px;
+        .cal-person {
+            padding: 12px 12px;
             border-right: 1px solid #e5e7eb;
             background: #f9fafb;
             display: flex;
-            align-items: flex-start;
+            align-items: center;
+            gap: 10px;
         }
 
-        /* Celda de un día */
+        /* Columna de persona con foto arriba del nombre (apilado vertical, centrado) */
+        .cal-person-column {
+            flex-direction: column;
+            text-align: center;
+            justify-content: center;
+            gap: 6px;
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        .cal-person-column .cal-person-meta {
+            font-size: 10px;
+        }
+
+        /* Foto que se autoajusta a la proporción de cada imagen
+           (sin deformar ni cortar: ancho fluido, alto proporcional) */
+        .cal-photo {
+            width: 100%;
+            height: auto;
+            max-width: 90px;
+            max-height: 90px;
+            border-radius: 8px;
+            object-fit: contain;
+            border: 1px solid #e5e7eb;
+            background: #e5e7eb;
+            flex-shrink: 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin: 0 auto;
+            display: block;
+        }
+
+        .cal-person .cal-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .cal-person .cal-person-name {
+            font-weight: 700;
+            font-size: 13px;
+            color: #111827;
+        }
+
+        .cal-person .cal-person-meta {
+            font-size: 11px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        /* Indicador visual de disponibilidad por persona */
+        .cal-disp-badge {
+            display: inline-block;
+            margin-top: 5px;
+            font-size: 10px;
+            font-weight: 600;
+            color: #047857;
+            background: #d1fae5;
+            border: 1px solid #a7f3d0;
+            border-radius: 10px;
+            padding: 1px 8px;
+            white-space: nowrap;
+        }
+
+        /* Marcador de disponibilidad en la celda (borde según cobertura del horario normal) */
+        .cal-cell.disponible-completo {
+            box-shadow: none;
+        }
+        .cal-cell.disponible-parcial {
+            box-shadow: none;
+        }
+        .cal-cell.disponible-guardia {
+            box-shadow: none;
+        }
+
+        /* Celda de día con timeline de 08:00 - 17:00 */
         .cal-cell {
             border-right: 1px solid #e5e7eb;
-            height: 96px;
-            min-height: 96px;
-            padding: 5px;
-            background: #fff;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            overflow-y: auto;
-            overflow-x: hidden;
-            scrollbar-width: thin;
-            scrollbar-color: #d1d5db transparent;
+            position: relative;
+            height: 100%;
+            background-image: linear-gradient(to bottom, #f3f4f6 1px, transparent 1px);
+            background-size: 100% 50px;
+            background-position: 0 -1px;
         }
+
+        /* Marcos de horas cada 50px (1px lineas) */
+        .cal-cell::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: linear-gradient(to bottom, transparent 49px, #e5e7eb 49px, #e5e7eb 50px);
+            background-size: 100% 50px;
+            pointer-events: none;
+        }
+
         .cal-cell.no-day {
             background: #fafafa;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #d1d5db;
-        }
-        .cal-cell .libre {
-            color: #d1d5db;
         }
 
-        /* Evento / turno dentro de una celda */
-        .cal-event {
-            display: flex;
-            align-items: center;
-            gap: 5px;
+        .cal-turno {
+            position: absolute;
+            left: 6px;
+            right: 6px;
             border-radius: 6px;
-            padding: 3px 5px;
+            padding: 4px 6px;
             font-size: 11px;
+            font-weight: 600;
             color: #fff;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
             overflow: hidden;
-            flex-shrink: 0;
-        }
-        .cal-event.jornada-completa { background: linear-gradient(135deg, #2563eb, #3b82f6); }
-        .cal-event.jornada-parcial { background: linear-gradient(135deg, #059669, #10b981); }
-        .cal-event.guardia { background: linear-gradient(135deg, #f97316, #ea580c); }
-
-        .cal-event .cal-cell-photo {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            object-fit: cover;
-            flex-shrink: 0;
-            background: #e5e7eb;
-        }
-        .cal-event .cal-cell-initials {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.25);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
-            font-size: 9px;
-            flex-shrink: 0;
         }
-        .cal-event-info {
-            display: flex;
-            flex-direction: column;
-            line-height: 1.1;
-            min-width: 0;
-        }
-        .cal-event-name {
-            font-weight: 700;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .cal-event-time {
+
+        /* Colores según duración/tipo */
+        .cal-turno.jornada-completa { background: linear-gradient(135deg, #2563eb, #3b82f6); }
+        .cal-turno.jornada-parcial { background: linear-gradient(135deg, #059669, #10b981); }
+        .cal-turno.guardia { background: linear-gradient(135deg, #f97316, #ea580c); }
+
+        .cal-turno .turno-hora {
+            display: block;
             font-size: 10px;
+            font-weight: 400;
             opacity: 0.9;
         }
 
-        /* Barra de botones de señalización */
-        .mode-bar {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-        }
-        .mode-btn {
-            padding: 8px 16px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            background: #fff;
-            color: #374151;
-            font-weight: 600;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.15s;
-            font-family: inherit;
-        }
-        .mode-btn:hover {
-            border-color: #3b82f6;
-            color: #2563eb;
-        }
-        .mode-btn.active {
-            background: #2563eb;
-            border-color: #2563eb;
-            color: #fff;
+        .cal-empty-row {
+            padding: 16px;
+            text-align: center;
+            color: #9ca3af;
         }
 
         @media (max-width: 600px) {

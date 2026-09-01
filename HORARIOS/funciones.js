@@ -24,41 +24,40 @@ const stores = {
     tienda9: { name: "Bima", address: "Bodega Bima", country: "panama" }
 };
 
-let schedules = {};
+// Datos cargados desde los JSON separados
+let personas = [];
+let horarios = {};   // { tiendaId: [ { personaId, month, week, day, start, end, type } ] }
 let currentStore = "";
 
-// ═══════════════════════════════════════════════════════════
-//  FOTOS DE EMPLEADOS (carpeta /tecnicos)
-//  Edita aquí para cambiar la imagen de cada empleado.
-//  Si quieres añadir o corregir una foto, actualiza la ruta
-//  y coloca el archivo dentro de la carpeta "tecnicos".
-// ═══════════════════════════════════════════════════════════
-const photos = {
-    "Kevin Alean": "tecnicos/unnamed (1).webp",
-    "Jersoon Gonzalez": "tecnicos/web/jersoon.webp",
-    "Andres Bojaca": "tecnicos/web/bojaca.webp",
-    "Julian Garzon": "tecnicos/web/julian.webp",
-    "Anderson Grande": "tecnicos/web/anderson.webp",
-    "Angel Ortiz": "tecnicos/unnamed (2).webp",
-    "Andres Garzon": "tecnicos/unnamed (3).webp"
-};
+// Modo de señalización en el calendario: todas | normal | guardia
+let filterMode = "todas";
 
-async function loadSchedules() {
+// Filtros de fecha (mes/año) del calendario
+let currentMonth = "";
+let currentYear = "";
+
+async function loadData() {
     try {
-        const response = await fetch('horarios.json');
-        schedules = await response.json();
-        console.log("Datos cargados:", schedules);
+        const [pRes, hRes] = await Promise.all([
+            fetch('personas.json'),
+            fetch('horarios.json')
+        ]);
+        personas = await pRes.json();
+        horarios = await hRes.json();
+        console.log("Personas:", personas);
+        console.log("Horarios:", horarios);
     } catch (error) {
         console.error("Error cargando datos:", error);
-        schedules = {};
+        personas = [];
+        horarios = {};
     }
 }
 
-loadSchedules();
+loadData();
 
 
 // ═══════════════════════════════════════════════════════════
-//  BLOQUE 2: FUNCIONES PRINCIPALES
+//  BLOQUE 2: SELECCIÓN DE PAÍS / TIENDA
 // ═══════════════════════════════════════════════════════════
 
 function filterStoresByCountry() {
@@ -72,9 +71,7 @@ function filterStoresByCountry() {
     document.getElementById("staffSection").classList.add("hidden");
     document.getElementById("emptyState").classList.remove("hidden");
     document.getElementById("staffList").innerHTML = "";
-    document.getElementById("filterMonth").value = "";
-    document.getElementById("filterWeek").value = "";
-    document.getElementById("filterType").value = "";
+    document.getElementById("dateFilters").classList.add("hidden");
 
     if (!selectedCountry) {
         storeSelect.innerHTML = '<option value="">-- Primero selecciona un país --</option>';
@@ -107,14 +104,14 @@ function renderStore() {
         staffSection.classList.add("hidden");
         emptyState.classList.remove("hidden");
         document.getElementById("staffList").innerHTML = "";
+        document.getElementById("dateFilters").classList.add("hidden");
         return;
     }
 
-    // Limpiar lista y filtros al elegir una tienda distinta
     document.getElementById("staffList").innerHTML = "";
-    document.getElementById("filterMonth").value = "";
-    document.getElementById("filterWeek").value = "";
-    document.getElementById("filterType").value = "";
+    filterMode = "todas";
+    updateButtons();
+    populateDateFilters();
 
     emptyState.classList.add("hidden");
     storeInfo.classList.remove("hidden");
@@ -126,192 +123,200 @@ function renderStore() {
     document.getElementById("storeName").textContent = store.name;
     document.getElementById("storeAddress").textContent = store.address;
     document.getElementById("countryDisplay").textContent = `${country.flag} ${country.name}`;
-    document.getElementById("staffCount").textContent = (schedules[currentStore] || []).length;
+    const personasStore = new Set((horarios[currentStore] || []).map(r => r.personaId));
+    document.getElementById("staffCount").textContent = personasStore.size;
+
+    renderCalendar();
 }
 
-function renderStaffList() {
+
+// ═══════════════════════════════════════════════════════════
+//  BLOQUE 3: BOTONES DE SEÑALIZACIÓN
+// ═══════════════════════════════════════════════════════════
+
+function selectMode(mode) {
+    filterMode = mode;
+    updateButtons();
+    renderCalendar();
+}
+
+function updateButtons() {
+    ["todas", "normal", "guardia"].forEach(m => {
+        const btn = document.getElementById("btn-" + m);
+        if (btn) {
+            if (m === filterMode) {
+                btn.classList.add("active");
+            } else {
+                btn.classList.remove("active");
+            }
+        }
+    });
+}
+
+
+// ═══════════════════════════════════════════════════════════
+//  BLOQUE 3.5: FILTROS DE MES Y AÑO
+// ═══════════════════════════════════════════════════════════
+
+const MONTH_NAMES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+
+function populateDateFilters() {
+    const recs = horarios[currentStore] || [];
+    const mesSet = new Set();
+    const anioSet = new Set();
+    recs.forEach(r => {
+        if (r.month) mesSet.add(String(r.month));
+        if (r.year) anioSet.add(String(r.year));
+    });
+    if (anioSet.size === 0) anioSet.add(String(new Date().getFullYear()));
+
+    const mesSel = document.getElementById("monthSelect");
+    const anoSel = document.getElementById("yearSelect");
+    if (!mesSel || !anoSel) return;
+
+    mesSel.innerHTML = '<option value="">-- Mes --</option>' +
+        MONTH_NAMES.map(m => `<option value="${m}">${m}</option>`).join("");
+    anoSel.innerHTML = '<option value="">-- Año --</option>' +
+        [...anioSet].sort((a, b) => a - b)
+                    .map(y => `<option value="${y}">${y}</option>`).join("");
+
+    currentMonth = [...mesSet].sort((a, b) => MONTH_NAMES.indexOf(a) - MONTH_NAMES.indexOf(b))[0] || "";
+    currentYear = [...anioSet].sort((a, b) => a - b)[0] || "";
+    mesSel.value = currentMonth;
+    anoSel.value = currentYear;
+
+    document.getElementById("dateFilters").classList.remove("hidden");
+}
+
+function selectMonth() {
+    currentMonth = document.getElementById("monthSelect").value;
+    document.getElementById("staffList").innerHTML = "";
+    if (!currentMonth) return;
+    renderCalendar();
+}
+
+function selectYear() {
+    currentYear = document.getElementById("yearSelect").value;
+    document.getElementById("staffList").innerHTML = "";
+    if (!currentYear) return;
+    renderCalendar();
+}
+
+
+// ═══════════════════════════════════════════════════════════
+//  BLOQUE 4: CALENDARIO MENSUAL
+// ═══════════════════════════════════════════════════════════
+
+function renderCalendar() {
     const container = document.getElementById("staffList");
+    const records = (horarios[currentStore] || []).filter(r =>
+        (!currentMonth || String(r.month) === currentMonth) &&
+        (!currentYear || !r.year || String(r.year) === currentYear)
+    );
 
-    const filterMonth = document.getElementById("filterMonth").value;
-    const filterWeek = document.getElementById("filterWeek").value;
-    const filterType = document.getElementById("filterType").value;
-
-    let staff = schedules[currentStore] || [];
-
-    // No mostrar el horario hasta que se elija una semana
-    if (!filterWeek) {
-        container.innerHTML = `
-            <div class="empty-box">
-                <div style="font-size: 36px; margin-bottom: 8px;">&#x1F4C5;</div>
-                <p style="margin: 0; font-size: 15px;">Selecciona una semana para ver el horario del personal.</p>
-            </div>`;
-        return;
-    }
-
-    if (filterMonth) {
-        staff = staff.filter(s => s.month === filterMonth);
-    }
-
-    if (filterWeek) {
-        staff = staff.filter(s => s.week === filterWeek);
-    }
-
-    if (filterType) {
-        staff = staff.filter(s => {
-            const esGuardia = String(s.day).indexOf("Guardia") !== -1;
-            if (filterType === "guardia") return esGuardia;
-            if (filterType === "normal") return !esGuardia;
-            return true;
-        });
-    }
-
-    if (staff.length === 0) {
+    if (records.length === 0) {
         container.innerHTML = `
             <div class="empty-box">
                 <div style="font-size: 36px; margin-bottom: 8px;">&#x1F4ED;</div>
-                <p style="margin: 0; font-size: 15px;">No hay personal para los filtros seleccionados.</p>
+                <p style="margin: 0; font-size: 15px;">No hay horarios para esta tienda.</p>
             </div>`;
         return;
     }
 
-    // Agrupar horarios por persona
-    const byPerson = {};
-    staff.forEach(s => {
-        if (!byPerson[s.name]) {
-            byPerson[s.name] = {
-                name: s.name,
-                email: s.email,
-                phone: s.phone,
-                schedules: []
-            };
-        }
-        byPerson[s.name].schedules.push(s);
+    // Mapa por id de persona
+    const personaById = {};
+    personas.forEach(p => { personaById[p.id] = p; });
+
+    // Días de la semana en orden
+    const diasSemana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+
+    // Semanas que aparecen (en orden natural Semana 1..5)
+    const semanaSet = new Set();
+    records.forEach(r => semanaSet.add(r.week));
+    const semanas = [...semanaSet].sort((a, b) => {
+        const na = parseInt(a.replace(/\D/g, ""), 10) || 0;
+        const nb = parseInt(b.replace(/\D/g, ""), 10) || 0;
+        return na - nb;
     });
 
-    // Orden fijo de la semana (para normalizar y ordenar)
-    const ordenSemana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
-
-    // Solo los días que se trabajan en la selección actual (en orden semanal)
-    const days = ordenSemana.filter(d =>
-        staff.some(s => String(s.day).indexOf(d) === 0)
-    );
-
-    // Constantes del calendario (coinciden con el CSS)
-    const DAY_START = "08:00";   // hora de inicio del día
-    const DAY_END = "17:00";     // hora de fin del día
-    const CELL_HEIGHT = 300;     // alto en px de cada celda
-
-    function toMinutes(time) {
-        const [h, m] = time.split(":").map(Number);
-        return h * 60 + m;
+    // Normaliza un día ("Domingo (Guardia)" -> "Domingo")
+    function normalizeDay(d) {
+        return diasSemana.find(x => String(d).indexOf(x) === 0) || String(d);
     }
 
-    // Normaliza un día para que coincida con la lista (ej. quita " (Guardia)")
-    function normalizeDay(day) {
-        return ordenSemana.find(d => day.indexOf(d) === 0) || day;
-    }
-
-    const startMin = toMinutes(DAY_START);
-    const endMin = toMinutes(DAY_END);
-    const totalMin = endMin - startMin;
-
-    function turnoStyle(sch) {
-        // Guardia: ocupa todo el día, igual que un turno normal (08:00 - 17:00)
-        if (String(sch.day).indexOf("Guardia") !== -1) {
-            return `top:0;height:${CELL_HEIGHT}px;`;
-        }
-        const topMin = Math.max(toMinutes(sch.start), startMin);
-        const bottomMin = Math.min(toMinutes(sch.end), endMin);
-        if (bottomMin <= topMin) return null;
-        const top = ((topMin - startMin) / totalMin) * CELL_HEIGHT;
-        const height = ((bottomMin - topMin) / totalMin) * CELL_HEIGHT;
-        return `top:${top}px;height:${height}px;`;
-    }
-
-    function turnoClass(sch) {
-        const dur = toMinutes(sch.end) - toMinutes(sch.start);
-        if (String(sch.day).indexOf("Guardia") !== -1) return "guardia";
+    // Color de un turno según su tipo
+    function turnoColor(sch) {
+        if (sch.type === "guardia") return "guardia";
+        const dur = toMin(sch.end) - toMin(sch.start);
         if (dur >= 540) return "jornada-completa";
         return "jornada-parcial";
     }
 
-    // Encabezado con los días que se trabajan
+    function toMin(t) {
+        const [h, m] = String(t).split(":").map(Number);
+        return (isNaN(h) ? 0 : h) * 60 + (isNaN(m) ? 0 : m);
+    }
+
+    // ¿Debe mostrarse un turno según el modo de señalización?
+    function visible(sch) {
+        if (filterMode === "todas") return true;
+        return sch.type === filterMode;
+    }
+
+    // Encabezado de días
     function buildHeader() {
-        const cols = `180px repeat(${days.length}, 1fr)`;
-        let h =
-            `<div class="cal-header" style="grid-template-columns:${cols}">` +
-            '<div class="cal-corner">Personal</div>';
-        days.forEach((d, i) => {
-            h += `<div class="cal-day-header">${d}<span class="cal-day-date">Horario</span></div>`;
+        let h = '<div class="cal-row cal-header-row">' +
+                '<div class="cal-corner">Semana</div>';
+        diasSemana.forEach(d => {
+            h += `<div class="cal-day-header">${d}</div>`;
         });
         h += '</div>';
         return h;
     }
 
-    // Filas: una por persona
-    function buildRow(person) {
-        const initials = person.name
-            .split(' ')
-            .map(n => n[0])
-            .join('')
-            .substring(0, 2)
-            .toUpperCase();
-
-        // Foto del empleado: foto arriba del nombre si hay, sino iniciales
-        const photo = photos[person.name];
-        const photoHtml = photo
-            ? `<img class="cal-photo" src="${photo}" alt="${person.name}">`
-            : `<div class="cal-avatar">${initials}</div>`;
-
-        // Disponibilidad semanal: días con turno / días laborales
-        let diasConTurno = 0;
-        days.forEach(day => {
-            if (person.schedules.some(s => normalizeDay(s.day) === day)) diasConTurno++;
+    // Fila de una semana
+    function buildWeekRow(semana) {
+        let cells = '';
+        diasSemana.forEach(dia => {
+            const turnos = records.filter(r => r.week === semana && normalizeDay(r.day) === dia && visible(r));
+            cells += buildDayCell(turnos, personaById);
         });
+        return `<div class="cal-row cal-week-row"><div class="cal-week-label">${semana}</div>${cells}</div>`;
+    }
 
-        let row =
-            `<div class="cal-row" style="grid-template-columns:180px repeat(${days.length}, 1fr)">` +
-            `<div class="cal-person cal-person-column">
-                ${photoHtml}
-                <div>
-                    <div class="cal-person-name">${person.name}</div>
-                    <div class="cal-person-meta">${person.email}<br>${person.phone}</div>
-                    <div class="cal-disp-badge">${diasConTurno}/${days.length} días disponibles</div>
-                </div>
-            </div>`;
-
-        days.forEach(day => {
-            const daySchedules = person.schedules.filter(s => normalizeDay(s.day) === day);
-            if (daySchedules.length === 0) {
-                row += '<div class="cal-cell no-day"></div>';
-                return;
-            }
-            let cellInner = '';
-            daySchedules.forEach(sch => {
-                const style = turnoStyle(sch);
-                if (!style) return;
-                cellInner += `
-                    <div class="cal-turno ${turnoClass(sch)}" style="${style}" title="${sch.day} ${sch.start}-${sch.end}">
-                        ${sch.start}-${sch.end}
-                    </div>`;
-            });
-            // Marcador de disponibilidad: clase según cobertura del horario normal
-            let dispClass = 'disponible-parcial';
-            if (daySchedules.some(s => (toMinutes(s.end) - toMinutes(s.start)) >= 540)) {
-                dispClass = 'disponible-completo';
-            }
-            row += `<div class="cal-cell ${dispClass}">${cellInner}</div>`;
+    // Celda de un día: lista de turnos de las personas
+    function buildDayCell(turnos, personaById) {
+        if (turnos.length === 0) {
+            return '<div class="cal-cell no-day"><span class="libre">—</span></div>';
+        }
+        let inner = '';
+        turnos.forEach(sch => {
+            const p = personaById[sch.personaId] || {};
+            const name = p.name || "?";
+            const initials = name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase();
+            const hora = sch.type === "guardia" ? "Guardia" : ((sch.start && sch.end) ? `${sch.start}–${sch.end}` : "—");
+            const photo = p.photo;
+            const avatar = photo
+                ? `<img class="cal-cell-photo" src="${photo}" alt="${name}">`
+                : `<span class="cal-cell-initials">${initials}</span>`;
+            inner += `
+                <div class="cal-event ${turnoColor(sch)}" title="${name} ${hora}">
+                    ${avatar}
+                    <div class="cal-event-info">
+                        <span class="cal-event-name">${name}</span>
+                        <span class="cal-event-time">${hora}</span>
+                    </div>
+                </div>`;
         });
-
-        row += '</div>';
-        return row;
+        return `<div class="cal-cell">${inner}</div>`;
     }
 
     let rows = '';
-    Object.values(byPerson).forEach(p => { rows += buildRow(p); });
+    semanas.forEach(s => { rows += buildWeekRow(s); });
 
     container.innerHTML = `
         <div class="cal-wrapper">
+            <div class="cal-month-title">${currentMonth} ${currentYear}</div>
             <div class="cal-grid">
                 ${buildHeader()}
                 ${rows}

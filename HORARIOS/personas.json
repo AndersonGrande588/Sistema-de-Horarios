@@ -1,0 +1,51 @@
+[
+  {
+    "id": "kevin-alean",
+    "name": "Kevin Alean",
+    "email": "kevin.alean@rsg.com.co",
+    "phone": "324 5210384",
+    "photo": "tecnicos/unnamed (1).webp"
+  },
+  {
+    "id": "angel-ortiz",
+    "name": "Angel Ortiz",
+    "email": "angel.ortiz@rsg.com.co",
+    "phone": "318 4080894",
+    "photo": "tecnicos/unnamed (2).webp"
+  },
+  {
+    "id": "julian-garzon",
+    "name": "Julian Garzon",
+    "email": "julian.garzon@rsg.com.co",
+    "phone": "316 9017657",
+    "photo": "tecnicos/web/julian.webp"
+  },
+  {
+    "id": "jersoon-gonzalez",
+    "name": "Jersoon Gonzalez",
+    "email": "jersoon.gonzalez@rsg.com.co",
+    "phone": "302 2531384",
+    "photo": "tecnicos/web/jersoon.webp"
+  },
+  {
+    "id": "anderson-grande",
+    "name": "Anderson Grande",
+    "email": "anderson.grande@rsg.com.co",
+    "phone": "312 5373173",
+    "photo": "tecnicos/web/anderson.webp"
+  },
+  {
+    "id": "andres-garzon",
+    "name": "Andres Garzon",
+    "email": "andres.garzon@rsg.com.co",
+    "phone": "312 3492975",
+    "photo": "tecnicos/unnamed (3).webp"
+  },
+  {
+    "id": "andres-bojaca",
+    "name": "Andres Bojaca",
+    "email": "jesus.bojaca@rsg.com.co",
+    "phone": "320 4841099",
+    "photo": "tecnicos/web/bojaca.webp"
+  }
+]
