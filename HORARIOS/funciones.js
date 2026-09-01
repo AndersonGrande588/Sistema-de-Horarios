@@ -180,8 +180,8 @@ function populateDateFilters() {
         [...anioSet].sort((a, b) => a - b)
                     .map(y => `<option value="${y}">${y}</option>`).join("");
 
-    currentMonth = [...mesSet].sort((a, b) => MONTH_NAMES.indexOf(a) - MONTH_NAMES.indexOf(b))[0] || "";
-    currentYear = [...anioSet].sort((a, b) => a - b)[0] || "";
+currentMonth = MONTH_NAMES[new Date().getMonth()] || "";
+currentYear = [...anioSet].sort((a, b) => a - b)[0] || "";
     mesSel.value = currentMonth;
     anoSel.value = currentYear;
 
