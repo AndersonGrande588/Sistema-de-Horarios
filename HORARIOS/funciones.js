@@ -311,6 +311,11 @@ function guardsMonth() {
     return sel ? sel.value : currentMonth;
 }
 
+function guardsCountry() {
+    const sel = document.getElementById("guardsCountrySelect");
+    return sel ? sel.value : "";
+}
+
 function toggleAllGuards() {
     guardsMode = !guardsMode;
     const panel = document.getElementById("allGuardsPanel");
@@ -331,6 +336,26 @@ function toggleAllGuards() {
                 MONTH_NAMES.map(m => `<option value="${m}">${m}</option>`).join("");
             sel.value = currentMonth || MONTH_NAMES[new Date().getMonth()];
         }
+
+        const monthVal = sel ? sel.value : (currentMonth || MONTH_NAMES[new Date().getMonth()]);
+        const countriesInMonth = new Set();
+        for (const [tid, recs] of Object.entries(horarios)) {
+            recs.forEach(r => {
+                if (r.type !== "guardia") return;
+                if (monthVal && String(r.month) !== monthVal) return;
+                const t = stores[tid];
+                if (t && t.country) countriesInMonth.add(t.country);
+            });
+        }
+        const cSel = document.getElementById("guardsCountrySelect");
+        if (cSel) {
+            cSel.innerHTML = '<option value="">🌍 Todos los países</option>' +
+                [...countriesInMonth].sort().map(cc => {
+                    const c = countries[cc];
+                    return `<option value="${cc}">${c ? c.flag + " " + c.name : cc}</option>`;
+                }).join("");
+        }
+
         panel.classList.remove("hidden");
         renderAllGuards();
     } else {
@@ -346,7 +371,7 @@ function toggleAllGuards() {
     }
 }
 
-function selectGuardsMonth() {
+function selectGuardsFilters() {
     const list = document.getElementById("allGuardsList");
     if (list) list.innerHTML = "";
     renderAllGuards();
@@ -358,6 +383,7 @@ function renderAllGuards() {
     if (!list) return;
 
     const monthSel = guardsMonth();
+    const countrySel = guardsCountry();
     const personaById = {};
     personas.forEach(p => { personaById[p.id] = p; });
 
@@ -366,12 +392,14 @@ function renderAllGuards() {
         recs.forEach(r => {
             if (r.type !== "guardia") return;
             if (monthSel && String(r.month) !== monthSel) return;
+            const t = stores[tiendaId] || {};
+            if (countrySel && t.country !== countrySel) return;
             guardias.push({ tiendaId: tiendaId, ...r });
         });
     }
 
     if (guardias.length === 0) {
-        list.innerHTML = '<p class="tech-empty">No hay guardias en este mes.</p>';
+        list.innerHTML = '<p class="tech-empty">No hay guardias en este mes/país.</p>';
         return;
     }
 
@@ -402,6 +430,7 @@ function renderAllGuards() {
     function card(g) {
         const t = stores[g.tiendaId] || {};
         const tl = t.name || g.tiendaId;
+        const c = countries[t.country] || {};
         const p = personaById[g.personaId] || {};
         const avatar = p.photo
             ? `<img class="guard-avatar" src="${p.photo}" alt="">`
@@ -417,6 +446,7 @@ function renderAllGuards() {
                 <div class="guard-when">
                     <span class="guard-badge">📆 ${normalizeDay(g.day) || ""} ${g._dayNum}</span>
                     <span class="guard-badge guard-store">🏪 ${tl}</span>
+                    ${c.flag ? `<span class="guard-badge guard-country">${c.flag} ${c.name}</span>` : ""}
                 </div>
             </div>`;
     }

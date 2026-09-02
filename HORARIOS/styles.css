@@ -493,7 +493,12 @@
             font-size: 16px;
             color: #111827;
         }
-        .guards-head select {
+        .guards-head-filters {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .guards-head-filters select {
             width: auto;
             min-width: 140px;
         }
@@ -561,6 +566,10 @@
         .guard-badge.guard-store {
             background: #ffedd5;
             color: #c2410c;
+        }
+        .guard-badge.guard-country {
+            background: #ecfdf5;
+            color: #047857;
         }
         .guard-week {
             font-weight: 700;

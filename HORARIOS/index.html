@@ -23,7 +23,10 @@
     <div id="allGuardsPanel" class="guards-panel hidden">
         <div class="guards-head">
             <h3>🧾 Lista de guardias del mes</h3>
-            <select id="guardsMonthSelect" onchange="selectGuardsMonth()"></select>
+            <div class="guards-head-filters">
+                <select id="guardsMonthSelect" onchange="selectGuardsFilters()"></select>
+                <select id="guardsCountrySelect" onchange="selectGuardsFilters()"></select>
+            </div>
         </div>
         <div id="allGuardsList"></div>
     </div>
