@@ -12,22 +12,29 @@ const countries = {
     panama: { name: "Panamá", flag: "\uD83C\uDDF5\uD83C\uDDF8" }
 };
 
+const cities = {
+    bogota: { name: "Bogotá", country: "colombia" },
+    chia: { name: "Chía", country: "colombia" },
+    bojaca: { name: "Bojacá", country: "colombia" }
+};
+
 const stores = {
-    tienda1: { name: "C.C Colina", address: "Centro Comercial Parque la colina", country: "colombia" },
-    tienda2: { name: "Zona Calle 82", address: "Zona Comercial Calle 82", country: "colombia" },
-    tienda3: { name: "C.C Felicidad", address: "Centro Comercial La Felicidad", country: "colombia" },
-    tienda4: { name: "C.C Plaza Central", address: "Centro Comercial Plaza Central", country: "colombia" },
-    tienda5: { name: "C.C Unicentro", address: "Centro Comercial Unicentro", country: "colombia" },
-    tienda6: { name: "Oficina Colina", address: "Oficinas Corporativas Colina", country: "colombia" },
-    tienda7: { name: "C.C Titan", address: "Centro Comercial Titan Plaza", country: "colombia" },
-    tienda8: { name: "C.C Fontanar", address: "Centro Comercial Fontanar", country: "colombia" },
-    tienda9: { name: "Bima", address: "Bodega Bima, Bojacá", country: "colombia" }
+    tienda1: { name: "C.C Colina", address: "Centro Comercial Parque la colina", country: "colombia", city: "bogota" },
+    tienda2: { name: "Zona Calle 82", address: "Zona Comercial Calle 82", country: "colombia", city: "bogota" },
+    tienda3: { name: "C.C Felicidad", address: "Centro Comercial La Felicidad", country: "colombia", city: "bogota" },
+    tienda4: { name: "C.C Plaza Central", address: "Centro Comercial Plaza Central", country: "colombia", city: "bogota" },
+    tienda5: { name: "C.C Unicentro", address: "Centro Comercial Unicentro", country: "colombia", city: "bogota" },
+    tienda6: { name: "Oficina Colina", address: "Oficinas Corporativas Colina", country: "colombia", city: "bogota" },
+    tienda7: { name: "C.C Titan", address: "Centro Comercial Titan Plaza", country: "colombia", city: "bogota" },
+    tienda8: { name: "C.C Fontanar", address: "Centro Comercial Fontanar", country: "colombia", city: "chia" },
+    tienda9: { name: "Bima", address: "Bodega Bima, Bojacá", country: "colombia", city: "bojaca" }
 };
 
 // Datos cargados desde los JSON separados
 let personas = [];
 let horarios = {};   // { tiendaId: [ { personaId, month, week, day, start, end, type } ] }
 let currentStore = "";
+let currentCity = "";
 
 // Filtro de fecha (mes) del calendario
 let currentMonth = "";
@@ -56,32 +63,96 @@ loadData();
 //  BLOQUE 2: SELECCIÓN DE PAÍS / TIENDA
 // ═══════════════════════════════════════════════════════════
 
-function filterStoresByCountry() {
-    const countrySelect = document.getElementById("countrySelect");
-    const storeSelect = document.getElementById("storeSelect");
-    const selectedCountry = countrySelect.value;
-
+function resetStoreSelection() {
     currentStore = "";
-    storeSelect.value = "";
+    const storeSelect = document.getElementById("storeSelect");
+    if (storeSelect) storeSelect.value = "";
     document.getElementById("storeInfo").classList.add("hidden");
     document.getElementById("staffSection").classList.add("hidden");
     document.getElementById("emptyState").classList.remove("hidden");
-    document.getElementById("staffList").innerHTML = "";
+    if (document.getElementById("staffList")) document.getElementById("staffList").innerHTML = "";
+}
+
+function updateCityGuardsButton() {
+    const btn = document.getElementById("btnCityGuards");
+    if (!btn) return;
+    if (currentCity && cities[currentCity]) {
+        btn.classList.remove("hidden");
+        btn.textContent = `🛡️ Guardias en ${cities[currentCity].name}`;
+    } else {
+        btn.classList.add("hidden");
+    }
+}
+
+function filterStoresByCountry() {
+    const countrySelect = document.getElementById("countrySelect");
+    const citySelect = document.getElementById("citySelect");
+    const selectedCountry = countrySelect.value;
+
+    currentCity = "";
+    resetStoreSelection();
+    updateCityGuardsButton();
+
+    citySelect.value = "";
+    citySelect.disabled = true;
+    citySelect.innerHTML = '<option value="">-- Elegir --</option>';
 
     if (!selectedCountry) {
-        storeSelect.innerHTML = '<option value="">-- Primero selecciona un país --</option>';
+        const storeSelect = document.getElementById("storeSelect");
+        storeSelect.innerHTML = '<option value="">-- Elegir --</option>';
         storeSelect.disabled = true;
         return;
     }
 
-    let options = '<option value="">-- Elige una tienda --</option>';
-
-    for (const [storeId, storeData] of Object.entries(stores)) {
-        if (storeData.country === selectedCountry) {
-            options += `<option value="${storeId}">${storeData.name}</option>`;
+    const citySet = new Set();
+    for (const storeData of Object.values(stores)) {
+        if (storeData.country === selectedCountry && storeData.city) {
+            citySet.add(storeData.city);
         }
     }
 
+    if (citySet.size === 0) {
+        // País sin ciudades definidas: listar tiendas directamente
+        populateStoreOptions(selectedCountry, "");
+        return;
+    }
+
+    let options = '<option value="">-- Elegir --</option>';
+    for (const cityId of citySet) {
+        const c = cities[cityId];
+        options += `<option value="${cityId}">${c ? c.name : cityId}</option>`;
+    }
+    citySelect.innerHTML = options;
+    citySelect.disabled = false;
+
+    const storeSelect = document.getElementById("storeSelect");
+    storeSelect.innerHTML = '<option value="">-- Elegir --</option>';
+    storeSelect.disabled = true;
+}
+
+function filterStoresByCity() {
+    const citySelect = document.getElementById("citySelect");
+    const selectedCity = citySelect.value;
+
+    currentCity = selectedCity;
+    resetStoreSelection();
+    updateCityGuardsButton();
+
+    const countrySelect = document.getElementById("countrySelect");
+    const selectedCountry = countrySelect.value;
+    populateStoreOptions(selectedCountry, selectedCity);
+}
+
+function populateStoreOptions(countryId, cityId) {
+    const storeSelect = document.getElementById("storeSelect");
+    let options = '<option value="">-- Elige una tienda --</option>';
+    for (const [storeId, storeData] of Object.entries(stores)) {
+        const countryOk = !countryId || storeData.country === countryId;
+        const cityOk = !cityId || storeData.city === cityId;
+        if (countryOk && cityOk) {
+            options += `<option value="${storeId}">${storeData.name}</option>`;
+        }
+    }
     storeSelect.innerHTML = options;
     storeSelect.disabled = false;
 }
@@ -111,10 +182,12 @@ function renderStore() {
 
     const store = stores[currentStore];
     const country = countries[store.country];
+    const city = cities[store.city];
 
     document.getElementById("storeName").textContent = store.name;
     document.getElementById("storeAddress").textContent = store.address;
-    document.getElementById("countryDisplay").textContent = `${country.flag} ${country.name}`;
+    const countryCity = city ? `${city.name} · ${country.flag} ${country.name}` : `${country.flag} ${country.name}`;
+    document.getElementById("countryDisplay").textContent = countryCity;
     const personasStore = new Set((horarios[currentStore] || []).map(r => r.personaId));
     document.getElementById("staffCount").textContent = personasStore.size;
 
@@ -316,64 +389,118 @@ function guardsCountry() {
     return sel ? sel.value : "";
 }
 
-function toggleAllGuards() {
-    guardsMode = !guardsMode;
+function guardsCity() {
+    const sel = document.getElementById("guardsCitySelect");
+    return sel ? sel.value : "";
+}
+
+function guardsCountryChanged() {
+    const countrySel = guardsCountry();
+    const citySel = document.getElementById("guardsCitySelect");
+    if (citySel) {
+        const citiesInCountry = new Set();
+        for (const t of Object.values(stores)) {
+            if (!t.country || !t.city) continue;
+            if (countrySel && t.country !== countrySel) continue;
+            citiesInCountry.add(t.city);
+        }
+        citySel.innerHTML = '<option value="">🏙️ Todas las ciudades</option>' +
+            [...citiesInCountry].sort().map(cc => {
+                const c = cities[cc];
+                return `<option value="${cc}">${c ? c.name : cc}</option>`;
+            }).join("");
+    }
+    selectGuardsFilters();
+}
+
+function updateGuardsCountryOptions() {
+    const monthVal = guardsMonth() || currentMonth || MONTH_NAMES[new Date().getMonth()];
+    const countriesInMonth = new Set();
+    for (const [tid, recs] of Object.entries(horarios)) {
+        recs.forEach(r => {
+            if (r.type !== "guardia") return;
+            if (monthVal && String(r.month) !== monthVal) return;
+            const t = stores[tid];
+            if (t && t.country) countriesInMonth.add(t.country);
+        });
+    }
+    const cSel = document.getElementById("guardsCountrySelect");
+    if (cSel) {
+        cSel.innerHTML = '<option value="">🌍 Todos los países</option>' +
+            [...countriesInMonth].sort().map(cc => {
+                const c = countries[cc];
+                return `<option value="${cc}">${c ? c.flag + " " + c.name : cc}</option>`;
+            }).join("");
+    }
+}
+
+function closeGuards() {
+    guardsMode = false;
     const panel = document.getElementById("allGuardsPanel");
-    const btn = document.getElementById("btnAllGuards");
-    if (!panel) return;
-
-    if (btn) btn.textContent = guardsMode ? "✖ Cerrar guardias" : "🛡️ Ver todas las guardias";
-
-    if (guardsMode) {
-        document.querySelectorAll(".selector-card").forEach(c => c.classList.add("hidden"));
+    if (panel) panel.classList.add("hidden");
+    document.querySelector(".filter-bar").classList.remove("hidden");
+    if (currentStore) {
+        renderStore();
+    } else {
         document.getElementById("storeInfo").classList.add("hidden");
         document.getElementById("staffSection").classList.add("hidden");
-        document.getElementById("emptyState").classList.add("hidden");
-
-        const sel = document.getElementById("guardsMonthSelect");
-        if (sel) {
-            sel.innerHTML = '<option value="">-- Mes --</option>' +
-                MONTH_NAMES.map(m => `<option value="${m}">${m}</option>`).join("");
-            sel.value = currentMonth || MONTH_NAMES[new Date().getMonth()];
-        }
-
-        const monthVal = sel ? sel.value : (currentMonth || MONTH_NAMES[new Date().getMonth()]);
-        const countriesInMonth = new Set();
-        for (const [tid, recs] of Object.entries(horarios)) {
-            recs.forEach(r => {
-                if (r.type !== "guardia") return;
-                if (monthVal && String(r.month) !== monthVal) return;
-                const t = stores[tid];
-                if (t && t.country) countriesInMonth.add(t.country);
-            });
-        }
-        const cSel = document.getElementById("guardsCountrySelect");
-        if (cSel) {
-            cSel.innerHTML = '<option value="">🌍 Todos los países</option>' +
-                [...countriesInMonth].sort().map(cc => {
-                    const c = countries[cc];
-                    return `<option value="${cc}">${c ? c.flag + " " + c.name : cc}</option>`;
-                }).join("");
-        }
-
-        panel.classList.remove("hidden");
-        renderAllGuards();
-    } else {
-        panel.classList.add("hidden");
-        document.querySelectorAll(".selector-card").forEach(c => c.classList.remove("hidden"));
-        if (currentStore) {
-            renderStore();
-        } else {
-            document.getElementById("storeInfo").classList.add("hidden");
-            document.getElementById("staffSection").classList.add("hidden");
-            document.getElementById("emptyState").classList.remove("hidden");
-        }
+        document.getElementById("emptyState").classList.remove("hidden");
     }
 }
 
 function selectGuardsFilters() {
     const list = document.getElementById("allGuardsList");
     if (list) list.innerHTML = "";
+    renderAllGuards();
+}
+
+function showCityGuards() {
+    if (!currentCity) return;
+    guardsMode = true;
+    const panel = document.getElementById("allGuardsPanel");
+    if (!panel) return;
+
+    document.querySelector(".filter-bar").classList.add("hidden");
+    document.getElementById("storeInfo").classList.add("hidden");
+    document.getElementById("staffSection").classList.add("hidden");
+    document.getElementById("emptyState").classList.add("hidden");
+
+    const sel = document.getElementById("guardsMonthSelect");
+    if (sel) {
+        sel.innerHTML = '<option value="">-- Mes --</option>' +
+            MONTH_NAMES.map(m => `<option value="${m}">${m}</option>`).join("");
+        sel.value = currentMonth || MONTH_NAMES[new Date().getMonth()];
+    }
+
+    const monthVal = sel ? sel.value : (currentMonth || MONTH_NAMES[new Date().getMonth()]);
+    updateGuardsCountryOptions();
+
+    const citySel = document.getElementById("guardsCitySelect");
+    if (citySel) {
+        const citiesInMonth = new Set();
+        for (const [tid, recs] of Object.entries(horarios)) {
+            recs.forEach(r => {
+                if (r.type !== "guardia") return;
+                if (monthVal && String(r.month) !== monthVal) return;
+                const t = stores[tid];
+                if (t && t.city) citiesInMonth.add(t.city);
+            });
+        }
+        citySel.innerHTML = '<option value="">🏙️ Todas las ciudades</option>' +
+            [...citiesInMonth].sort().map(cc => {
+                const c = cities[cc];
+                return `<option value="${cc}">${c ? c.name : cc}</option>`;
+            }).join("");
+        citySel.value = currentCity;
+    }
+
+    // Ajustar el título del panel
+    const headTitle = panel.querySelector("h3");
+    if (headTitle && cities[currentCity]) {
+        headTitle.textContent = `🧾 Guardias en ${cities[currentCity].name}`;
+    }
+
+    panel.classList.remove("hidden");
     renderAllGuards();
 }
 
@@ -384,6 +511,7 @@ function renderAllGuards() {
 
     const monthSel = guardsMonth();
     const countrySel = guardsCountry();
+    const citySel = guardsCity();
     const personaById = {};
     personas.forEach(p => { personaById[p.id] = p; });
 
@@ -394,12 +522,13 @@ function renderAllGuards() {
             if (monthSel && String(r.month) !== monthSel) return;
             const t = stores[tiendaId] || {};
             if (countrySel && t.country !== countrySel) return;
+            if (citySel && t.city !== citySel) return;
             guardias.push({ tiendaId: tiendaId, ...r });
         });
     }
 
     if (guardias.length === 0) {
-        list.innerHTML = '<p class="tech-empty">No hay guardias en este mes/país.</p>';
+        list.innerHTML = '<p class="tech-empty">No hay guardias en este mes/país/ciudad.</p>';
         return;
     }
 
@@ -431,6 +560,7 @@ function renderAllGuards() {
         const t = stores[g.tiendaId] || {};
         const tl = t.name || g.tiendaId;
         const c = countries[t.country] || {};
+        const city = cities[t.city] || {};
         const p = personaById[g.personaId] || {};
         const avatar = p.photo
             ? `<img class="guard-avatar" src="${p.photo}" alt="">`
@@ -446,6 +576,7 @@ function renderAllGuards() {
                 <div class="guard-when">
                     <span class="guard-badge">📆 ${normalizeDay(g.day) || ""} ${g._dayNum}</span>
                     <span class="guard-badge guard-store">🏪 ${tl}</span>
+                    ${city.name ? `<span class="guard-badge guard-city">🏙️ ${city.name}</span>` : ""}
                     ${c.flag ? `<span class="guard-badge guard-country">${c.flag} ${c.name}</span>` : ""}
                 </div>
             </div>`;

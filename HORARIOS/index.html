@@ -13,43 +13,57 @@
 <div class="container">
     <header>
         <h1>📋 Gestor de Horarios por Tienda</h1>
-        <p>Selecciona un país y una tienda para ver el calendario del personal</p>
+        <p>Filtra por país, ciudad y tienda para ver el calendario del personal</p>
     </header>
-
-    <div class="guards-bar">
-        <button class="guards-btn" id="btnAllGuards" onclick="toggleAllGuards()">🛡️ Ver todas las guardias</button>
-    </div>
 
     <div id="allGuardsPanel" class="guards-panel hidden">
         <div class="guards-head">
             <h3>🧾 Lista de guardias del mes</h3>
-            <div class="guards-head-filters">
-                <select id="guardsMonthSelect" onchange="selectGuardsFilters()"></select>
-                <select id="guardsCountrySelect" onchange="selectGuardsFilters()"></select>
+            <div class="guards-head-tools">
+                <div class="guards-head-filters">
+                    <select id="guardsMonthSelect" onchange="selectGuardsFilters()"></select>
+                    <select id="guardsCountrySelect" onchange="guardsCountryChanged()"></select>
+                    <select id="guardsCitySelect" onchange="selectGuardsFilters()"></select>
+                </div>
+                <button class="guards-btn guards-close-btn" onclick="closeGuards()">✖ Cerrar</button>
             </div>
         </div>
         <div id="allGuardsList"></div>
     </div>
 
-    <div class="card selector-card">
-        <label for="countrySelect">🌍 Seleccionar País</label>
-        <select id="countrySelect" onchange="filterStoresByCountry()">
-            <option value="">-- Elige un país --</option>
-            <option value="colombia">🇨🇴 Colombia</option>
-            <option value="mexico">🇲🇽 México</option>
-            <option value="argentina">🇦🇷 Argentina</option>
-            <option value="chile">🇨🇱 Chile</option>
-            <option value="peru">🇵🇪 Perú</option>
-            <option value="ecuador">🇪🇨 Ecuador</option>
-            <option value="panama">🇵🇦 Panamá</option>
-        </select>
-    </div>
+    <div class="filter-bar">
+        <div class="filter-field">
+            <label for="countrySelect">🌍 País</label>
+            <select id="countrySelect" onchange="filterStoresByCountry()">
+                <option value="">-- Elegir --</option>
+                <option value="colombia">🇨🇴 Colombia</option>
+                <option value="mexico">🇲🇽 México</option>
+                <option value="argentina">🇦🇷 Argentina</option>
+                <option value="chile">🇨🇱 Chile</option>
+                <option value="peru">🇵🇪 Perú</option>
+                <option value="ecuador">🇪🇨 Ecuador</option>
+                <option value="panama">🇵🇦 Panamá</option>
+            </select>
+        </div>
 
-    <div class="card selector-card">
-        <label for="storeSelect">🏪 Seleccionar Tienda</label>
-        <select id="storeSelect" onchange="renderStore()" disabled>
-            <option value="">-- Primero selecciona un país --</option>
-        </select>
+        <div class="filter-field">
+            <label for="citySelect">🏙️ Ciudad</label>
+            <select id="citySelect" onchange="filterStoresByCity()" disabled>
+                <option value="">-- Elegir --</option>
+            </select>
+        </div>
+
+        <div class="filter-field">
+            <label for="storeSelect">🏪 Tienda</label>
+            <select id="storeSelect" onchange="renderStore()" disabled>
+                <option value="">-- Elegir --</option>
+            </select>
+        </div>
+
+        <div class="filter-field filter-action">
+            <label>&nbsp;</label>
+            <button class="guards-btn city-guards-btn hidden" id="btnCityGuards" onclick="showCityGuards()">🛡️ Guardias de esta ciudad</button>
+        </div>
     </div>
 
     <div id="storeInfo" class="hidden">
@@ -82,7 +96,7 @@
 
     <div id="emptyState" class="empty-state">
         <div class="icon">🏪</div>
-        <p>Selecciona un país y una tienda para ver el personal y sus horarios</p>
+        <p>Selecciona un país, una ciudad y una tienda para ver el personal y sus horarios</p>
     </div>
 </div>
 

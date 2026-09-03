@@ -142,6 +142,51 @@
             margin-bottom: 5px;
         }
 
+        /* Barra de filtros compacta (país / ciudad / tienda) */
+        .filter-bar {
+            display: flex;
+            align-items: flex-end;
+            gap: 14px;
+            flex-wrap: wrap;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px 18px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .filter-field {
+            display: flex;
+            flex-direction: column;
+            flex: 1 1 160px;
+            min-width: 150px;
+        }
+        .filter-field label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            margin-bottom: 6px;
+        }
+        .filter-field select {
+            width: 100%;
+            padding: 8px 10px;
+            font-size: 14px;
+        }
+        .filter-action {
+            flex: 0 0 auto;
+            min-width: 0;
+        }
+        .filter-action .guards-btn {
+            padding: 8px 16px;
+            font-size: 13px;
+            margin-bottom: 0;
+        }
+        .city-guards-btn {
+            white-space: nowrap;
+        }
+
         .employee-card {
             background: #fff;
             border: 1px solid #e5e7eb;
@@ -497,10 +542,22 @@
             display: flex;
             gap: 10px;
             align-items: center;
+            flex-wrap: wrap;
         }
         .guards-head-filters select {
             width: auto;
-            min-width: 140px;
+            min-width: 120px;
+        }
+        .guards-head-tools {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .guards-close-btn {
+            padding: 8px 14px;
+            font-size: 13px;
+            background: #6b7280;
         }
 
         /* Lista de guardias (tarjetas con datos del técnico) */
@@ -570,6 +627,10 @@
         .guard-badge.guard-country {
             background: #ecfdf5;
             color: #047857;
+        }
+        .guard-badge.guard-city {
+            background: #eff6ff;
+            color: #1d4ed8;
         }
         .guard-week {
             font-weight: 700;
