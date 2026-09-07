@@ -16,6 +16,25 @@
         <p>Filtra por país, ciudad y tienda para ver el calendario del personal</p>
     </header>
 
+    <div class="free-filter-bar">
+        <button class="free-btn" id="btnFreeFilter" onclick="toggleFreeFilter()">🎛️ Filtro libre</button>
+    </div>
+
+    <div id="freeFilterPanel" class="free-panel hidden">
+        <div class="free-head">
+            <h3>🎛️ Filtro libre — varios países / ciudades a la vez</h3>
+            <div class="free-head-tools">
+                <div class="free-month">
+                    <label>📅 Mes</label>
+                    <select id="freeMonthSelect" onchange="renderFreeFilter()"></select>
+                </div>
+                <button class="guards-btn guards-close-btn" onclick="closeFreeFilter()">✖ Volver al modo normal</button>
+            </div>
+        </div>
+        <div class="free-cols" id="freeCheckboxes"></div>
+        <div id="freeResults"></div>
+    </div>
+
     <div id="allGuardsPanel" class="guards-panel hidden">
         <div class="guards-head">
             <h3>🧾 Lista de guardias del mes</h3>

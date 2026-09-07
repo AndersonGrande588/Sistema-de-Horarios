@@ -14,8 +14,7 @@ const countries = {
 
 const cities = {
     bogota: { name: "Bogotá", country: "colombia" },
-    chia: { name: "Chía", country: "colombia" },
-    bojaca: { name: "Bojacá", country: "colombia" }
+    chia: { name: "Chía", country: "colombia" }
 };
 
 const stores = {
@@ -27,7 +26,7 @@ const stores = {
     tienda6: { name: "Oficina Colina", address: "Oficinas Corporativas Colina", country: "colombia", city: "bogota" },
     tienda7: { name: "C.C Titan", address: "Centro Comercial Titan Plaza", country: "colombia", city: "bogota" },
     tienda8: { name: "C.C Fontanar", address: "Centro Comercial Fontanar", country: "colombia", city: "chia" },
-    tienda9: { name: "Bima", address: "Bodega Bima, Bojacá", country: "colombia", city: "bojaca" }
+    tienda9: { name: "Bima", address: "Bodega Bima", country: "colombia", city: "chia" }
 };
 
 // Datos cargados desde los JSON separados
@@ -262,19 +261,19 @@ function turnoColor(sch) {
 //  BLOQUE 4: CALENDARIO MENSUAL
 // ═══════════════════════════════════════════════════════════
 
-function renderCalendar() {
-    const container = document.getElementById("staffList");
-    const records = (horarios[currentStore] || []).filter(r =>
-        !currentMonth || String(r.month) === currentMonth
+function renderCalendarHTML(storeId, monthSel) {
+    const store = stores[storeId] || {};
+    const storeName = store.name || storeId;
+    const records = (horarios[storeId] || []).filter(r =>
+        !monthSel || String(r.month) === monthSel
     );
 
     if (records.length === 0) {
-        container.innerHTML = `
+        return `
             <div class="empty-box">
                 <div style="font-size: 36px; margin-bottom: 8px;">&#x1F4ED;</div>
                 <p style="margin: 0; font-size: 15px;">No hay horarios para esta tienda.</p>
             </div>`;
-        return;
     }
 
     // Mapa por id de persona
@@ -302,7 +301,7 @@ function renderCalendar() {
     }
 
     // Fecha real del mes mostrado (para numerar los días)
-    const monthIndex = MONTH_NAMES.indexOf(currentMonth);
+    const monthIndex = MONTH_NAMES.indexOf(monthSel);
     const dataYear = records.find(r => r.year);
     const yearNum = dataYear ? (parseInt(dataYear.year, 10) || new Date().getFullYear()) : new Date().getFullYear();
     const firstDate = new Date(yearNum, monthIndex, 1);
@@ -337,9 +336,8 @@ function renderCalendar() {
             const foto = p.photo
                 ? `<img class="cal-cell-photo" src="${p.photo}" alt="${name}">`
                 : `<span class="cal-cell-initials">${initials(name)}</span>`;
-            const tienda = (stores[currentStore] || {}).name || "";
             inner += `
-                <div class="cal-event ${turnoColor(sch)}" data-tip-id="${sch.personaId}" data-tip-store="${tienda}">
+                <div class="cal-event ${turnoColor(sch)}" data-tip-id="${sch.personaId}" data-tip-store="${storeName}">
                     ${foto}
                     <div class="cal-event-info">
                         <span class="cal-event-name">${name}</span>
@@ -353,14 +351,19 @@ function renderCalendar() {
     let rows = '';
     semanas.forEach((s, i) => { rows += buildWeekRow(s, i); });
 
-    container.innerHTML = `
+    return `
         <div class="cal-wrapper">
-            <div class="cal-month-title">${currentMonth} ${yearNum}</div>
+            <div class="cal-month-title">${monthSel} ${yearNum}</div>
             <div class="cal-grid">
                 ${buildHeader()}
                 ${rows}
             </div>
         </div>`;
+}
+
+function renderCalendar() {
+    const container = document.getElementById("staffList");
+    if (container) container.innerHTML = renderCalendarHTML(currentStore, currentMonth);
 }
 
 
@@ -505,35 +508,11 @@ function showCityGuards() {
 }
 
 // Lista de guardias de todos los técnicos (con los datos de cada uno)
-function renderAllGuards() {
-    const list = document.getElementById("allGuardsList");
-    if (!list) return;
-
-    const monthSel = guardsMonth();
-    const countrySel = guardsCountry();
-    const citySel = guardsCity();
-    const personaById = {};
-    personas.forEach(p => { personaById[p.id] = p; });
-
-    const guardias = [];
-    for (const [tiendaId, recs] of Object.entries(horarios)) {
-        recs.forEach(r => {
-            if (r.type !== "guardia") return;
-            if (monthSel && String(r.month) !== monthSel) return;
-            const t = stores[tiendaId] || {};
-            if (countrySel && t.country !== countrySel) return;
-            if (citySel && t.city !== citySel) return;
-            guardias.push({ tiendaId: tiendaId, ...r });
-        });
-    }
-
-    if (guardias.length === 0) {
-        list.innerHTML = '<p class="tech-empty">No hay guardias en este mes/país/ciudad.</p>';
-        return;
-    }
+function buildGuardCards(guardias, personaById, monthSel) {
+    if (!guardias || guardias.length === 0) return "";
 
     const dayOrder = { "Lunes": 0, "Martes": 1, "Miércoles": 2, "Jueves": 3, "Viernes": 4, "Sábado": 5, "Domingo": 6 };
-    const monthIndex = MONTH_NAMES.indexOf(guardsMonth());
+    const monthIndex = MONTH_NAMES.indexOf(monthSel);
     const dataYear = guardias.find(r => r.year);
     const yearNum = dataYear ? (parseInt(dataYear.year, 10) || new Date().getFullYear()) : new Date().getFullYear();
     const firstDate = new Date(yearNum, monthIndex, 1);
@@ -582,10 +561,251 @@ function renderAllGuards() {
             </div>`;
     }
 
-    list.innerHTML = semanaSet.map(w => `
+    return semanaSet.map(w => `
         <div class="guard-week">📅 Semana ${w}</div>
         ${guardias.filter(g => g._week === w).map(card).join("")}
     `).join("");
+}
+
+function renderAllGuards() {
+    const list = document.getElementById("allGuardsList");
+    if (!list) return;
+
+    const monthSel = guardsMonth();
+    const countrySel = guardsCountry();
+    const citySel = guardsCity();
+    const personaById = {};
+    personas.forEach(p => { personaById[p.id] = p; });
+
+    const guardias = [];
+    for (const [tiendaId, recs] of Object.entries(horarios)) {
+        recs.forEach(r => {
+            if (r.type !== "guardia") return;
+            if (monthSel && String(r.month) !== monthSel) return;
+            const t = stores[tiendaId] || {};
+            if (countrySel && t.country !== countrySel) return;
+            if (citySel && t.city !== citySel) return;
+            guardias.push({ tiendaId: tiendaId, ...r });
+        });
+    }
+
+    if (guardias.length === 0) {
+        list.innerHTML = '<p class="tech-empty">No hay guardias en este mes/país/ciudad.</p>';
+        return;
+    }
+
+    list.innerHTML = buildGuardCards(guardias, personaById, monthSel);
+}
+
+
+// ═══════════════════════════════════════════════════════════
+//  BLOQUE 6.5: FILTRO LIBRE (VARIOS PAÍSES / CIUDADES)
+// ═══════════════════════════════════════════════════════════
+
+let freeMode = false;
+
+function freeMonth() {
+    const sel = document.getElementById("freeMonthSelect");
+    return sel ? sel.value : (currentMonth || MONTH_NAMES[new Date().getMonth()]);
+}
+
+function buildFreeCheckboxes() {
+    const box = document.getElementById("freeCheckboxes");
+    if (!box) return;
+
+    const countrySet = new Set();
+    Object.values(stores).forEach(s => { if (s.country) countrySet.add(s.country); });
+
+    let html = `<div class="free-tools-row">
+        <button type="button" class="free-select-btn" onclick="setAllFreeCities(true)">✓ Seleccionar todas</button>
+        <button type="button" class="free-select-btn" onclick="setAllFreeCities(false)">✗ Quitar todas</button>
+    </div>`;
+
+    for (const cc of [...countrySet].sort()) {
+        const c = countries[cc] || {};
+        const citySet = new Set();
+        Object.values(stores).forEach(s => {
+            if (s.country === cc && s.city) citySet.add(s.city);
+        });
+        html += `<div class="free-country">
+                    <label>
+                        <input type="checkbox" class="free-country-check" data-cc="${cc}"
+                               onchange="toggleFreeCountry('${cc}')">
+                        ${c.flag || ""} ${c.name || cc}
+                    </label>
+                </div>
+                <div class="free-country-children">`;
+        for (const cityId of [...citySet].sort()) {
+            const city = cities[cityId];
+            html += `<label class="free-city">
+                        <input type="checkbox" class="free-city-check" data-cc="${cc}" data-city="${cityId}"
+                               onchange="toggleFreeCity('${cityId}')">
+                        🏙️ ${city ? city.name : cityId}
+                    </label>`;
+        }
+        html += `</div>`;
+    }
+
+    box.innerHTML = html;
+}
+
+function toggleFreeCountry(cc) {
+    const countryCheck = document.querySelector(`.free-country-check[data-cc="${cc}"]`);
+    const checked = countryCheck ? countryCheck.checked : false;
+    document.querySelectorAll(`.free-city-check[data-cc="${cc}"]`).forEach(cb => { cb.checked = checked; });
+    renderFreeFilter();
+}
+
+function toggleFreeCity(cityId) {
+    const cb = document.querySelector(`.free-city-check[data-city="${cityId}"]`);
+    if (!cb) return;
+    const cc = cb.dataset.cc;
+    const cityChecks = [...document.querySelectorAll(`.free-city-check[data-cc="${cc}"]`)];
+    const anyChecked = cityChecks.some(x => x.checked);
+    const allChecked = cityChecks.every(x => x.checked);
+    const countryCheck = document.querySelector(`.free-country-check[data-cc="${cc}"]`);
+    if (countryCheck) {
+        countryCheck.checked = allChecked;
+        countryCheck.indeterminate = anyChecked && !allChecked;
+    }
+    renderFreeFilter();
+}
+
+function setAllFreeCities(on) {
+    document.querySelectorAll(".free-city-check").forEach(cb => { cb.checked = on; });
+    document.querySelectorAll(".free-country-check").forEach(cb => {
+        cb.checked = on;
+        cb.indeterminate = false;
+    });
+    renderFreeFilter();
+}
+
+function selectedFreeCities() {
+    return [...document.querySelectorAll(".free-city-check:checked")].map(cb => cb.dataset.city);
+}
+
+function toggleFreeFilter() {
+    freeMode = !freeMode;
+    const btn = document.getElementById("btnFreeFilter");
+    const panel = document.getElementById("freeFilterPanel");
+    if (!panel) return;
+
+    if (btn) btn.textContent = freeMode ? "✖ Salir del filtro libre" : "🎛️ Filtro libre";
+
+    if (!freeMode) {
+        closeFreeFilter();
+        return;
+    }
+
+    // Entrando: ocultar el esquema principal
+    document.querySelector(".filter-bar").classList.add("hidden");
+    document.getElementById("allGuardsPanel").classList.add("hidden");
+    document.getElementById("storeInfo").classList.add("hidden");
+    document.getElementById("staffSection").classList.add("hidden");
+    document.getElementById("emptyState").classList.add("hidden");
+
+    const ms = document.getElementById("freeMonthSelect");
+    if (ms) {
+        ms.innerHTML = '<option value="">-- Mes --</option>' +
+            MONTH_NAMES.map(m => `<option value="${m}">${m}</option>`).join("");
+        ms.value = currentMonth || MONTH_NAMES[new Date().getMonth()];
+    }
+
+    buildFreeCheckboxes();
+    setAllFreeCities(true);
+    panel.classList.remove("hidden");
+    renderFreeFilter();
+}
+
+function closeFreeFilter() {
+    freeMode = false;
+    const btn = document.getElementById("btnFreeFilter");
+    if (btn) btn.textContent = "🎛️ Filtro libre";
+    const panel = document.getElementById("freeFilterPanel");
+    if (panel) panel.classList.add("hidden");
+
+    document.querySelector(".filter-bar").classList.remove("hidden");
+    if (currentStore) {
+        renderStore();
+    } else {
+        document.getElementById("storeInfo").classList.add("hidden");
+        document.getElementById("staffSection").classList.add("hidden");
+        document.getElementById("emptyState").classList.remove("hidden");
+    }
+}
+
+function renderFreeFilter() {
+    const res = document.getElementById("freeResults");
+    if (!res) return;
+
+    const monthSel = freeMonth();
+    const citiesSel = selectedFreeCities();
+    const personaById = {};
+    personas.forEach(p => { personaById[p.id] = p; });
+
+    if (citiesSel.length === 0) {
+        res.innerHTML = '<p class="tech-empty">Selecciona al menos un país o ciudad.</p>';
+        return;
+    }
+
+    // Agrupar ciudades por país
+    const byCountry = {};
+    for (const cityId of citiesSel) {
+        const city = cities[cityId];
+        if (!city) continue;
+        (byCountry[city.country] = byCountry[city.country] || []).push(cityId);
+    }
+
+    let html = "";
+    for (const cc of Object.keys(byCountry).sort()) {
+        const c = countries[cc] || {};
+        html += `<div class="free-results-section">
+            <h4 class="free-results-country">${c.flag || ""} ${c.name || cc}</h4>`;
+
+        for (const cityId of byCountry[cc].sort()) {
+            const city = cities[cityId] || {};
+            const cityStores = Object.entries(stores).filter(([, s]) =>
+                s.country === cc && s.city === cityId
+            );
+            html += `<div class="free-results-city">🏙️ ${city.name || cityId}</div>`;
+
+            // Guardias de la ciudad
+            const guardias = [];
+            for (const [tid, recs] of Object.entries(horarios)) {
+                if (!cityStores.some(([sid]) => sid === tid)) continue;
+                recs.forEach(r => {
+                    if (r.type !== "guardia") return;
+                    if (monthSel && String(r.month) !== monthSel) return;
+                    guardias.push({ tiendaId: tid, ...r });
+                });
+            }
+            html += `<div class="free-subtitle">🛡️ Guardias</div>`;
+            if (guardias.length === 0) {
+                html += '<p class="tech-empty">Sin guardias en este mes.</p>';
+            } else {
+                html += buildGuardCards(guardias, personaById, monthSel);
+            }
+
+            // Calendarios de cada tienda de la ciudad
+            html += `<div class="free-subtitle">📅 Calendarios</div>`;
+            let anyCal = false;
+            for (const [tid, storeData] of cityStores) {
+                const hasRecords = (horarios[tid] || []).some(r =>
+                    !monthSel || String(r.month) === monthSel
+                );
+                if (!hasRecords) continue;
+                anyCal = true;
+                html += `<div class="free-results-store">🏪 ${storeData.name}</div>`;
+                html += renderCalendarHTML(tid, monthSel);
+            }
+            if (!anyCal) {
+                html += '<p class="tech-empty">Sin horarios para este mes.</p>';
+            }
+        }
+        html += `</div>`;
+    }
+
+    res.innerHTML = html;
 }
 
 

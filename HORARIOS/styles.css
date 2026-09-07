@@ -705,6 +705,166 @@
             color: #9ca3af;
             font-size: 13px;
         }
+
+        /* ─── Filtro libre (modo aparte) ─── */
+        .free-filter-bar {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .free-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: #fff;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            font-family: inherit;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            transition: transform 0.15s;
+        }
+        .free-btn:hover {
+            transform: translateY(-1px);
+        }
+        .free-panel {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .free-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .free-head h3 {
+            margin: 0;
+            font-size: 16px;
+            color: #111827;
+        }
+        .free-head-tools {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .free-month {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .free-month label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #6b7280;
+            margin: 0;
+        }
+        .free-month select {
+            width: auto;
+            min-width: 110px;
+            padding: 8px 10px;
+            font-size: 14px;
+        }
+        .free-cols {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+        }
+        .free-tools-row {
+            width: 100%;
+            margin-bottom: 8px;
+        }
+        .free-select-btn {
+            border: 1px solid #c4b5fd;
+            background: #ede9fe;
+            color: #6d28d9;
+            font-weight: 600;
+            font-size: 12px;
+            padding: 5px 12px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-family: inherit;
+            margin-right: 8px;
+            transition: background 0.15s;
+        }
+        .free-select-btn:hover {
+            background: #ddd6fe;
+        }
+        .free-country {
+            width: 100%;
+            font-weight: 700;
+            font-size: 14px;
+            color: #374151;
+            margin: 6px 0 4px;
+        }
+        .free-country label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 700;
+        }
+        .free-country-children {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 22px;
+            padding-left: 28px;
+            margin-bottom: 10px;
+        }
+        .free-city {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: #374151;
+            cursor: pointer;
+        }
+        .free-city input,
+        .free-country input {
+            width: auto;
+        }
+        .free-results-section {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 14px;
+        }
+        .free-results-country {
+            margin: 0 0 6px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #111827;
+        }
+        .free-results-city {
+            margin: 6px 0 8px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #4338ca;
+        }
+        .free-results-store {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1d4ed8;
+            margin: 14px 0 6px;
+        }
+        .free-subtitle {
+            font-size: 12px;
+            font-weight: 700;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            margin: 12px 0 6px;
+        }
         @media (max-width: 600px) {
             body {
                 padding: 12px;

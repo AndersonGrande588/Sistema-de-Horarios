@@ -1,6 +1,6 @@
 # Manual de Usuario — Gestor de Horarios por Tienda
 
-**Versión:** 1.1  
+**Versión:** 1.2  
 **Fecha:** Septiembre 2026  
 **Plataforma:** Web (HTML + CSS + JavaScript)
 
@@ -18,9 +18,10 @@
 8. [Colores de los turnos](#8-colores-de-los-turnos)
 9. [Tooltip: Información del técnico](#9-tooltip-información-del-técnico)
 10. [Modo Guardias](#10-modo-guardias)
-11. [Filtro de Mes](#11-filtro-de-mes)
-12. [Cómo editar horarios y guardias](#12-cómo-editar-horarios-y-guardias)
-13. [Preguntas frecuentes (FAQ)](#13-preguntas-frecuentes-faq)
+11. [Filtro libre (varios países/ciudades)](#11-filtro-libre-varios-paísesciudades)
+12. [Filtro de Mes](#12-filtro-de-mes)
+13. [Cómo editar horarios y guardias](#13-cómo-editar-horarios-y-guardias)
+14. [Preguntas frecuentes (FAQ)](#14-preguntas-frecuentes-faq)
 
 ---
 
@@ -32,7 +33,8 @@ El **Gestor de Horarios por Tienda** es una aplicación web que permite visualiz
 
 - Filtrar por **país**, **ciudad** y **tienda**.
 - Ver el **calendario mensual** de turnos por tienda, organizado por semanas y días.
-- Consultar **todas las guardias** de todas las tiendas en una sola lista.
+- Consultar **las guardias de cada ciudad** con los datos del técnico.
+- **Filtro libre**: ver varios países/ciudades a la vez (guardias y calendarios juntos).
 - Obtener la **información de contacto** de cada técnico (foto, correo, teléfono) al pasar el cursor.
 - **Editar y configurar** horarios fácilmente desde archivos JSON.
 
@@ -117,9 +119,8 @@ Los tres filtros (País, Ciudad y Tienda) están en una **barra compacta** en un
 |--------|
 | Bogotá |
 | Chía |
-| Bojacá |
 
-> **Importante:** Todos los centros comerciales (C.C) están en **Bogotá**. Las excepciones son **Fontanar** (tienda8), que está en **Chía**, y **Bima** (tienda9), que está en **Bojacá**.
+> **Importante:** Todos los centros comerciales (C.C) están en **Bogotá**. Las excepciones son **Fontanar** (tienda8) y **Bima** (tienda9), que están en **Chía**.
 
 Al elegir una ciudad, el desplegable de **tiendas** se actualiza mostrando solo las tiendas de esa ciudad.
 
@@ -156,7 +157,7 @@ En la barra de filtros, al elegir una ciudad aparece un botón naranja que abre 
 | tienda6 | Oficina Colina | Bogotá | Oficinas Corporativas Colina |
 | tienda7 | C.C Titan | Bogotá | Centro Comercial Titan Plaza |
 | tienda8 | C.C Fontanar | Chía | Centro Comercial Fontanar |
-| tienda9 | Bima | Bojacá | Bodega Bima, Bojacá |
+| tienda9 | Bima | Chía | Bodega Bima |
 
 ---
 
@@ -238,7 +239,28 @@ Pulsa el botón **"✖ Cerrar"** (arriba a la derecha del panel) para volver a l
 
 ---
 
-## 11. Filtro de Mes
+## 11. Filtro libre (varios países/ciudades)
+
+**Ubicación:** Botón morado "🎛️ Filtro libre" entre el título y la barra de filtros.
+
+Este modo **está apartado** del esquema principal (no lo modifica): sirve para ver **varios países o ciudades a la vez** sin tener que cambiar de tienda una por una.
+
+### Cómo usarlo
+1. Pulsa **"🎛️ Filtro libre"**. Se oculta el esquema principal y se abre el panel libre.
+2. Con las casillas, marca los **países** (marca todas sus ciudades) y/o **ciudades** que quieras ver.
+   - Botones rápidos: **"✓ Seleccionar todas"** y **"✗ Quitar todas"**.
+   - Al marcar un país se marcan todas sus ciudades; la casilla del país se pone "a medias" si solo marcas algunas ciudades.
+3. Elige el **📅 Mes** si quieres ver otro mes.
+4. Los resultados se actualizan al instante y muestran, **agrupados por país y ciudad**:
+   - 🛡️ **Guardias** de esa ciudad (lista con foto, datos del técnico, día, tienda, ciudad y país).
+   - 📅 **Calendario mensual** de **cada tienda** de la ciudad, uno debajo del otro.
+5. Para salir, pulsa **"✖ Volver al modo normal"** (o el botón "✖ Salir del filtro libre").
+
+> Otra opción: **"🛡️ Guardias en [ciudad]"** en la barra de filtros solo abre las guardias de **una** ciudad. El filtro libre muestra **varias** ciudades y además sus calendarios.
+
+---
+
+## 12. Filtro de Mes
 
 **Ubicación:** Desplegable "📅 Mes" arriba del calendario de la tienda.
 
@@ -256,7 +278,7 @@ Pulsa el botón **"✖ Cerrar"** (arriba a la derecha del panel) para volver a l
 
 ---
 
-## 12. Cómo editar horarios y guardias
+## 13. Cómo editar horarios y guardias
 
 No hay panel de administración visual. Los datos se editan directamente en los archivos JSON.
 
@@ -345,7 +367,6 @@ tienda10: {
 const cities = {
   bogota: { name: "Bogotá", country: "colombia" },
   chia: { name: "Chía", country: "colombia" },
-  bojaca: { name: "Bojacá", country: "colombia" },
   cali: { name: "Cali", country: "colombia" }
 };
 ```
@@ -356,7 +377,7 @@ const cities = {
 
 ---
 
-## 13. Preguntas frecuentes (FAQ)
+## 14. Preguntas frecuentes (FAQ)
 
 **¿Por qué no cargan los datos al abrir el archivo directamente?**
 Debido a las restricciones de CORS del navegador con el protocolo `file://`. Usa la versión de Vercel o un servidor local.
@@ -377,13 +398,16 @@ Selecciona una ciudad y pulsa **"🛡️ Guardias en [ciudad]"**. Aparece la lis
 Sí. En el modo guardias hay filtros de país y ciudad para mostrar solo las guardias de esa zona. También puedes pulsar **"🛡️ Guardias en [ciudad]"** en la barra de filtros para ver las guardias de una ciudad concreta al instante.
 
 **¿Qué tiendas NO están en Bogotá?**
-Fontanar (tienda8) está en **Chía** y Bima (tienda9) está en **Bojacá**. El resto están en **Bogotá**.
+Fontanar (tienda8) y Bima (tienda9) están en **Chía**. El resto están en **Bogotá**.
+
+**¿Cómo veo guardias y calendarios de varias ciudades al mismo tiempo?**
+Pulsa **"🎛️ Filtro libre"**, marca los países y ciudades que quieras y verás las guardias y los calendarios de las tiendas seleccionadas juntos, agrupados por país y ciudad.
 
 **¿Las guardias tienen horario definido?**
 No. Las guardias se muestran con la etiqueta "Guardia" sin horas específicas, ya que cubren todo el día.
 
 **¿Cuántas tiendas y empleados hay actualmente?**
-9 tiendas (en Bogotá, Chía y Bojacá) y 7 empleados únicos, con 194 registros de horarios (8 guardias).
+9 tiendas (en Bogotá y Chía) y 7 empleados únicos, con 192 registros de horarios (12 guardias).
 
 ---
 

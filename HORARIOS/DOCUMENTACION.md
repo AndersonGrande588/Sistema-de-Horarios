@@ -77,11 +77,11 @@ const stores = {
     tienda6: { name: "Oficina Colina",    address: "Oficinas Corporativas Colina",       country: "colombia" },
     tienda7: { name: "C.C Titan",         address: "Centro Comercial Titan Plaza",       country: "colombia" },
     tienda8: { name: "C.C Fontanar",      address: "Centro Comercial Fontanar",          country: "colombia" },
-    tienda9: { name: "Bima",              address: "Bodega Bima, Bojacá",                country: "colombia" }
+    tienda9: { name: "Bima",              address: "Bodega Bima",                        country: "colombia", city: "chia" }
 };
 ```
 
-> **Bima** (`tienda9`) está en **Colombia (Bojacá)** y tiene horarios propios asignados a un único técnico (Andres Bojaca).
+> **Bima** (`tienda9`) está en **Colombia (Chía)** y tiene horarios propios asignados a un único técnico (Andres Bojaca).
 
 ### 4.2 `personas.json` — empleados
 
@@ -312,7 +312,7 @@ CSS plano (sin preprocesador). Reglas principales:
 - ✅ Etiqueta "Guardia" en los turnos de guardia (sin horario).
 - ✅ Celdas con altura fija uniforme (96px) y scroll interno para días muy cargados (se removió el CSS obsoleto de la vista semanal).
 - ✅ Filtro de **mes** (12 meses) que preselecciona el mes actual del sistema; limpieza de la información al cambiar.
-- ✅ **Bima** agregada en Colombia (Bojacá), con horarios propios de Andres Bojaca (Lun/Sáb 08-17, Mar/Mié 08-16, Dom guardia).
+- ✅ **Bima** agregada en Colombia (Chía), con horarios propios de Andres Bojaca (Lun/Sáb 08-17, Mar/Mié 08-16, Dom guardia).
 - ✅ Constantes `SHIFTS` y helper `turnoLabel()` para optimizar etiquetas de turnos.
 - ✅ Fotos de los técnicos en los turnos (18px) + **tooltip** al pasar el cursor con foto, nombre, correo, teléfono y tienda.
 - ✅ **Modo guardias**: botón global que oculta los filtros de tienda y muestra una lista agrupada por semanas con todas las guardias del mes: día con su número, tienda y datos completos del técnico (foto, nombre, correo, teléfono).

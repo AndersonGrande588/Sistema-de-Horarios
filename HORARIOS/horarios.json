@@ -1691,6 +1691,34 @@
       "start": "08:00",
       "end": "16:00",
       "type": "normal"
+    },
+    {
+      "personaId": "andres-bojaca",
+      "month": "Septiembre",
+      "week": "Semana 1",
+      "day": "Domingo (Guardia)",
+      "type": "guardia"
+    },
+    {
+      "personaId": "andres-bojaca",
+      "month": "Septiembre",
+      "week": "Semana 2",
+      "day": "Domingo (Guardia)",
+      "type": "guardia"
+    },
+    {
+      "personaId": "andres-bojaca",
+      "month": "Septiembre",
+      "week": "Semana 3",
+      "day": "Domingo (Guardia)",
+      "type": "guardia"
+    },
+    {
+      "personaId": "andres-bojaca",
+      "month": "Septiembre",
+      "week": "Semana 4",
+      "day": "Domingo (Guardia)",
+      "type": "guardia"
     }
   ]
 }
