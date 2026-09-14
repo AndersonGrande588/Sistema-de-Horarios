@@ -497,12 +497,6 @@ function showCityGuards() {
         citySel.value = currentCity;
     }
 
-    // Ajustar el título del panel
-    const headTitle = panel.querySelector("h3");
-    if (headTitle && cities[currentCity]) {
-        headTitle.textContent = `🧾 Guardias en ${cities[currentCity].name}`;
-    }
-
     panel.classList.remove("hidden");
     renderAllGuards();
 }
@@ -567,9 +561,30 @@ function buildGuardCards(guardias, personaById, monthSel) {
     `).join("");
 }
 
+function updateGuardsTitle() {
+    const panel = document.getElementById("allGuardsPanel");
+    if (!panel) return;
+    const headTitle = panel.querySelector("h3");
+    if (!headTitle) return;
+
+    const cityId = guardsCity();
+    const countrySel = guardsCountry();
+    let text;
+    if (cityId && cities[cityId]) {
+        text = `🧾 Guardias en ${cities[cityId].name}`;
+    } else if (countrySel && countries[countrySel]) {
+        text = `🧾 Guardias en ${countries[countrySel].name}`;
+    } else {
+        text = "🧾 Todas las guardias";
+    }
+    headTitle.textContent = text;
+}
+
 function renderAllGuards() {
     const list = document.getElementById("allGuardsList");
     if (!list) return;
+
+    updateGuardsTitle();
 
     const monthSel = guardsMonth();
     const countrySel = guardsCountry();
