@@ -9,7 +9,7 @@
 Aplicación web **estática** que permite consultar los horarios de trabajo de un equipo técnico por tienda y país, organizados en un **calendario mensual** estilo rejilla (fila = semana, columna = día).
 
 - **Tecnología:** HTML + CSS + JavaScript puro. Sin frameworks, sin dependencias, sin build tools.
-- **Datos:** archivos JSON (`personas.json` y `horarios.json`) cargados en el navegador con `fetch()`.
+- **Datos:** archivos JSON (`personas.json` + un `horarios/<id>.json` por técnico) cargados en el navegador con `fetch()`.
 - **Propósito:** visualizar de un vistazo qué técnico trabaja en cada tienda, en qué días y con qué tipo de jornada (normal o guardia), y coordinar la cobertura de las tiendas mediante una **lista global de guardias** (todas las tiendas en un solo vistazo).
 
 ---
@@ -24,15 +24,15 @@ Navegador (cliente)
    ├─ funciones.js   → lógica de la aplicación
    │
    └─ Datos (fetch)
-       ├─ personas.json   → catálogo de empleados
-       └─ horarios.json   → horarios por tienda
+       ├─ personas.json        → catálogo de empleados
+       └─ horarios/<id>.json   → un archivo por técnico con TODOS sus turnos
 ```
 
 Todo el procesamiento ocurre en el navegador (**client-side rendering**). No hay servidor ni base de datos: los JSON son la fuente de verdad.
 
 ### Flujo general
 
-1. `funciones.js` carga ambos JSON en paralelo (`Promise.all`).
+1. `funciones.js` carga `personas.json` y, en paralelo (`Promise.all`), el archivo `horarios/<id>.json` de cada persona; luego agrupa los turnos por tienda.
 2. El usuario elige un **país** → se habilitan las **tiendas** de ese país.
 3. El usuario elige una **tienda** → se muestra el banner de la tienda + el **calendario mensual** del personal (filtrable solo por **mes**).
 4. El botón **"🛡️ Ver todas las guardias"** abre un **modo global**: oculta los filtros de país/tienda y muestra una **lista agrupada por semanas** con todas las guardias del mes; cada guardia indica el **día con su número** (p. ej. "Domingo 6"), la **tienda** y **todos los datos del técnico** asignado (foto, nombre, correo y teléfono).
@@ -48,7 +48,7 @@ Todo el procesamiento ocurre en el navegador (**client-side rendering**). No hay
 | `styles.css` | Todas las reglas de estilo (hoja única). |
 | `funciones.js` | Lógica completa: carga de datos, selección país/tienda, filtro de mes, render del calendario, modo guardias y tooltips. |
 | `personas.json` | Lista de empleados (id, nombre, email, teléfono, foto). |
-| `horarios.json` | Horarios por tienda, cada registro referenciando a un empleado por `personaId`. |
+| `horarios/<id>.json` | Un archivo por técnico con todos sus turnos (todas las tiendas y meses), cada uno con fecha y número de día reales. |
 | `tecnicos/` | Fotografías de los empleados (WebP optimizadas en `tecnicos/web/`). |
 | `backup_refactor/` | Respaldo de los archivos previos al refactor (no se usa en producción). |
 | `GoogleSites_Calendario.html`, `Horarios.html`, `BORRADOR.html` | Versiones antiguas / borradores; **no forman parte de la app actual**. |
@@ -107,18 +107,24 @@ Lista (array) de objetos:
 
 Actualmente hay **7 empleados únicos**.
 
-### 4.3 `horarios.json` — horarios por tienda
+### 4.3 `horarios/<id>.json` — un archivo por técnico
 
-Objeto que agrupa por `tiendaId`:
+Cada empleado de `personas.json` tiene su propio archivo `horarios/<id>.json` (p. ej. `horarios/kevin-alean.json`). Contiene **todos** sus turnos, en todas las tiendas y meses. Se cargan con `Promise.allSettled`; si a una persona le falta el archivo, se ignora sin romper la app.
 
 ```json
 {
-  "tienda1": [
+  "id": "kevin-alean",
+  "name": "Kevin Alean",
+  "shifts": [
     {
-      "personaId": "kevin-alean",
+      "store": "tienda1",
+      "storeName": "C.C Colina",
       "month": "Septiembre",
+      "year": 2026,
+      "date": "2026-09-01",
+      "dayNumber": 1,
+      "weekday": "Martes",
       "week": "Semana 1",
-      "day": "Martes",
       "start": "08:00",
       "end": "16:00",
       "type": "normal"
@@ -127,20 +133,26 @@ Objeto que agrupa por `tiendaId`:
 }
 ```
 
-| Campo | Tipo | Descripción |
+| Campo (registro) | Tipo | Descripción |
 |---|---|---|
-| `tiendaId` (clave) | string | Clave de la tienda (`tienda1`…`tienda9`). |
-| `personaId` | string | Empleado (debe existir en `personas.json`). |
-| `month` | string | Mes en español (p. ej. `"Septiembre"`). |
-| `year` | string | *(opcional)* Año. Si no se indica, se toma el año actual. |
-| `week` | string | Número de la semana dentro del mes (`"Semana 1"`…`"Semana 5"`). |
-| `day` | string | Día de la semana (`"Lunes"`…`"Domingo"`). El `"Domingo (Guardia)"` se normaliza a `"Domingo"`. |
-| `start` / `end` | string | Hora inicio/fin en formato `HH:MM`. |
+| `store` | string | Clave de la tienda (`tienda1`…`tienda9`). |
+| `storeName` | string | Nombre de la tienda (informativo). |
+| `month` | string | Mes en español (p. ej. `"Septiembre"`, `"Octubre"`). |
+| `year` | number | Año (2026). |
+| `date` | string | **Fecha real ISO** (`YYYY-MM-DD`), coherente con el calendario. |
+| `dayNumber` | number | **Número del día** del mes (1…31). Debe coincidir con la `date`. |
+| `weekday` | string | Día de la semana (`"Lunes"`…`"Domingo"`). |
+| `week` | string | Semana dentro del mes (`"Semana 1"`…`"Semana 5"`). |
+| `start` / `end` | string | Hora inicio/fin en formato `HH:MM` (ausentes en guardias). |
 | `type` | string | `"normal"` (jornada) o `"guardia"`. |
 
-Actualmente **9 tiendas** tienen horarios (194 registros, de los cuales **8 son guardias**), todos con `"month": "Septiembre"` y **sin registros fuera del mes** (los días que caerían en agosto/octubre por la posición de las semanas se eliminan).
+`funciones.js` reconstruye con esto el objeto `horarios` agrupado por tienda (usa `store` como clave y `weekday` como `day`; las guardias se marcan como `"Domingo (Guardia)"`).
 
-> **`tienda9` (Bima):** 30 registros de **andres-bojaca**. Lunes, Jueves, Viernes y Sábado `08:00–17:00`; Martes y Miércoles `08:00–16:00`; Domingo **guardia** (Semanas 1–4; la Semana 5 no tiene Domingo porque caería en octubre). (El día `"Sabado"` fue corregido a `"Sábado"`.)
+Totales actuales (generados desde los datos originales): **9 tiendas**, **395 turnos** = **192 de Septiembre** + **203 de Octubre**. Técnicos: Kevin Alean, Angel Ortiz, Julian Garzon (tiendas 3 y 4), Jersoon Gonzalez, Anderson Grande, Andres Garzon y Andres Bojaca (tiendas 8 y 9).
+
+> **Bima (`tienda9`):** turnos de **andres-bojaca**. Lunes, Jueves, Viernes y Sábado `08:00–17:00`; Martes y Miércoles `08:00–16:00`; Domingo **guardia** (Semanas 1–4).
+>
+> **Octubre:** se repite el patrón de septiembre (mismos días de la semana y misma paridad de semana por persona/tienda) pero con las **fechas reales** de octubre (el día 1 es **jueves**).
 
 > **Guardias del mes (coinciden con la asignación real):**
 > - Jersoon Gonzalez → tienda5 · **6 septiembre** (Semana 1 Domingo)
@@ -149,7 +161,7 @@ Actualmente **9 tiendas** tienen horarios (194 registros, de los cuales **8 son 
 > - Kevin Alean → tienda1 · **20 septiembre** (Semana 3 Domingo)
 > - Andres Bojaca (Bima) → tienda9 · **6, 13, 20 y 27 septiembre** (Semanas 1–4 Domingo)
 
-> **Nota:** los datos no incluyen el número del día del mes; el calendario **calcula** los números de cada celda a partir de semana + día usando el calendario real del mes/año seleccionado (se usa `new Date(año, mes, n)` para que días ≤ 0 o > último día del mes caigan en el mes vecino y se marquen como `out-month`).
+> **Nota:** cada registro ya trae su **fecha real** (`date`) y su **número de día** (`dayNumber`). El calendario además **recalcula** el número de cada celda a partir de semana + día con el calendario real del mes/año (`new Date(año, mes, n)`), de modo que los días ≤ 0 o > último día del mes caen en el mes vecino y se marcan como `out-month`.
 
 ---
 
@@ -165,7 +177,7 @@ El archivo está organizado en bloques numerados.
   - `currentStore`: tienda seleccionada.
   - `currentMonth`: mes del filtro (preseleccionado al **mes actual del sistema**).
   - `guardsMode`: indica si el panel de guardias está abierto.
-- `loadData()`: carga ambos JSON con `Promise.all` y los guarda en el estado. Si falla, registra el error en consola y deja arrays vacíos.
+- `loadData()`: carga `personas.json` y luego, con `Promise.all`, el `horarios/<id>.json` de cada persona (`allSettled`-style: ignora los que falten). Reconstruye el objeto `horarios` agrupado por tienda. Si algo falla, registra el error en consola y deja los datos vacíos.
 - `MONTH_NAMES`: lista ordenada de los 12 meses en español (usada para el filtro y para numerar días). Se define en el BLOQUE 3.5.
 
 ### BLOQUE 2 — Selección de país / tienda
@@ -297,7 +309,7 @@ CSS plano (sin preprocesador). Reglas principales:
 
 - **Sin backend:** los datos se editan directamente en los JSON (o se generan con scripts). No hay persistencia desde la UI.
 - **Sin build:** no hay minificación ni bundling; los archivos se suben tal cual.
-- **Fechas calculadas:** falta el campo numérico del día del mes en los datos; la numeración se **deriva** de semana + día usando el calendario real del mes/año. Si los datos de semana/día no coincidieran con un calendario real, la numeración podría desplazarse.
+- **Fechas reales:** cada registro incluye `date` y `dayNumber`. La numeración de la rejilla se **recalcula** con semana + día usando el calendario real del mes/año; si los datos de semana/día no coincidieran con un calendario real, la numeración podría desplazarse (los generadores garantizan la coherencia).
 - **Horas de guardia:** los registros tipo `guardia` pueden tener `start`/`end`, pero la UI siempre muestra la etiqueta **"Guardia"**.
 - **Filtro único:** solo existe el filtro de **mes** (el de año y los botones de señalización fueron retirados).
 - **Solo fotos en hover:** la información del técnico (foto + correo + teléfono) se muestra en un tooltip al pasar el cursor; no hay panel lateral permanente.
@@ -307,7 +319,8 @@ CSS plano (sin preprocesador). Reglas principales:
 
 ## 9. Estado del proyecto (resumen de lo hecho)
 
-- ✅ División de la base de datos en `personas.json` + `horarios.json`.
+- ✅ Base de datos en `personas.json` + un `horarios/<id>.json` por técnico (un archivo por persona con todos sus turnos, con fecha y número de día reales).
+- ✅ Horarios de **Octubre** generados repitiendo el patrón de Septiembre con fechas reales.
 - ✅ Calendario mensual en rejilla (semana × día) con numeración de días (soporta mes anterior/siguiente en gris).
 - ✅ Etiqueta "Guardia" en los turnos de guardia (sin horario).
 - ✅ Celdas con altura fija uniforme (96px) y scroll interno para días muy cargados (se removió el CSS obsoleto de la vista semanal).

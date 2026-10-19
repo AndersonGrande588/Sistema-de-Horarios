@@ -140,23 +140,28 @@ Añade un objeto nuevo a la lista con: `id` (único), `name`, `email`, `phone`, 
 }
 ```
 
-### Añadir un horario (`horarios.json`)
-Dentro del objeto de la tienda (p. ej. `"tienda1"`), añade un registro:
+### Añadir un horario (`horarios/<id>.json`)
+Cada técnico tiene su propio archivo `horarios/<id>.json` (p. ej. `horarios/juan-perez.json`). Añade el turno dentro de su array `shifts`:
 ```json
 {
-  "personaId": "juan-perez",
+  "store": "tienda1",
+  "storeName": "C.C Colina",
   "month": "Septiembre",
-  "week": "Semana 2",
-  "day": "Lunes",
+  "year": 2026,
+  "date": "2026-09-01",
+  "dayNumber": 1,
+  "weekday": "Lunes",
+  "week": "Semana 1",
   "start": "08:00",
   "end": "17:00",
   "type": "normal"
 }
 ```
-- `personaId` **debe** coincidir con un `id` de `personas.json`.
-- `type` es `"normal"` o `"guardia"` (en guardia la app muestra la etiqueta "Guardia", no la hora).
-- Para otro mes cambia `month` (p. ej. `"Octubre"`); opcionalmente añade `"year": "2026"`.
-- Si una tienda no existe, crea su clave (p. ej. `"tienda10"`) y añade la tienda al objeto `stores` en `funciones.js` con su `country` y `address`.
+- El `id` del archivo **debe** coincidir con el `id` de la persona en `personas.json`.
+- `date` y `dayNumber` deben ser coherentes entre sí y con el calendario real (`weekday`/`week`).
+- `type` es `"normal"` o `"guardia"` (en guardia la app muestra la etiqueta "Guardia", no la hora; omite `start`/`end`).
+- Para otro mes cambia `month`, `year` y las fechas.
+- Si una tienda no existe, usa su clave (p. ej. `"tienda10"`) y añade la tienda al objeto `stores` en `funciones.js` con su `country` y `address`.
 
 > Al editar, guarda el archivo con **codificación UTF-8** (para que se vean bien acentos como "Miércoles", "Sábado").
 
@@ -168,7 +173,7 @@ Dentro del objeto de la tienda (p. ej. `"tienda1"`), añade un registro:
 Por la política CORS del navegador con el protocolo `file://`. Usa Vercel o un servidor local.
 
 **¿El mes siempre va a estar en Septiembre?**
-No. Se preselecciona el **mes actual del sistema**. Cuando haya datos de otros meses, verás que salen al cambiar el filtro.
+No. Se preselecciona el **mes actual del sistema**. Hay datos de **Septiembre y Octubre**, y salen al cambiar el filtro.
 
 **¿Por qué veo números en gris como "31" o "1"?**
 Son días de otro mes que encajan en la rejilla del calendario real (posición de la semana).
@@ -186,7 +191,7 @@ Cada tarjeta de la lista muestra un badge con el **nombre de la tienda** (🏪) 
 Es intencional: las guardias no tienen una jornada fija de horas, se marcan como turno de guardia 24/7.
 
 **¿Cuántos empleados y tiendas hay?**
-7 empleados únicos; 9 tiendas con horarios cargados (incl. Bima en Colombia), 194 registros (8 guardias), todos de Septiembre.
+7 empleados únicos; 9 tiendas con horarios cargados (incl. Bima en Colombia), 395 turnos (192 de septiembre + 203 de octubre; 24 guardias). Cada técnico tiene su archivo `horarios/<id>.json`.
 
 ---
 

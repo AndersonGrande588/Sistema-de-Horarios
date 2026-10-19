@@ -40,19 +40,47 @@ let currentMonth = "";
 
 async function loadData() {
     try {
-        const [pRes, hRes] = await Promise.all([
-            fetch('personas.json'),
-            fetch('horarios.json')
-        ]);
+        const pRes = await fetch('personas.json');
         personas = await pRes.json();
-        horarios = await hRes.json();
-        console.log("Personas:", personas);
-        console.log("Horarios:", horarios);
     } catch (error) {
-        console.error("Error cargando datos:", error);
+        console.error("Error cargando personas:", error);
         personas = [];
-        horarios = {};
     }
+
+    // Un archivo de horarios por persona: horarios/<id>.json
+    horarios = {};
+    const docs = await Promise.all(
+        personas.map(p =>
+            fetch(`horarios/${p.id}.json`)
+                .then(res => (res.ok ? res.json() : null))
+                .catch(() => null)
+        )
+    );
+
+    docs.forEach(doc => {
+        if (!doc || !Array.isArray(doc.shifts)) return;
+        doc.shifts.forEach(s => {
+            if (!s.store) return;
+            if (!horarios[s.store]) horarios[s.store] = [];
+            horarios[s.store].push({
+                personaId: doc.id,
+                store: s.store,
+                month: s.month,
+                year: s.year,
+                week: s.week,
+                day: s.type === 'guardia' ? 'Domingo (Guardia)' : s.weekday,
+                weekday: s.weekday,
+                date: s.date,
+                dayNumber: s.dayNumber,
+                start: s.start,
+                end: s.end,
+                type: s.type
+            });
+        });
+    });
+
+    console.log("Personas:", personas);
+    console.log("Horarios:", horarios);
 }
 
 loadData();

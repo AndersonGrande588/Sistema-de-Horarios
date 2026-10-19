@@ -305,45 +305,57 @@ Para agregar una persona nueva, añade un objeto a la lista:
 | `phone` | Número de teléfono |
 | `photo` | Ruta a la foto (opcional) |
 
-### Editar horarios (`horarios.json`)
+### Editar horarios (`horarios/<id>.json`)
 
-Cada tienda tiene su sección. Ejemplo para tienda1:
+Cada técnico tiene su propio archivo (`horarios/juan-perez.json`, `horarios/kevin-alean.json`, …) con **todos** sus turnos. Añade el turno dentro del array `shifts`:
 
 ```json
-"tienda1": [
-  {
-    "personaId": "juan-perez",
-    "month": "Septiembre",
-    "week": "Semana 2",
-    "day": "Lunes",
-    "start": "08:00",
-    "end": "17:00",
-    "type": "normal"
-  }
-]
+{
+  "store": "tienda1",
+  "storeName": "C.C Colina",
+  "month": "Septiembre",
+  "year": 2026,
+  "date": "2026-09-01",
+  "dayNumber": 1,
+  "weekday": "Lunes",
+  "week": "Semana 1",
+  "start": "08:00",
+  "end": "17:00",
+  "type": "normal"
+}
 ```
 
 **Campos:**
 | Campo | Descripción |
 |-------|-------------|
-| `personaId` | Debe coincidir con un `id` en personas.json |
+| `store` | Clave de la tienda (`tienda1`…`tienda9`) |
+| `storeName` | Nombre de la tienda (informativo) |
 | `month` | Nombre del mes en español |
+| `year` | Año |
+| `date` | Fecha real `YYYY-MM-DD` |
+| `dayNumber` | Número del día del mes (1…31) |
+| `weekday` | Día de la semana |
 | `week` | Semana (Semana 1 a Semana 5) |
-| `day` | Día de la semana |
 | `start` | Hora de inicio (solo para type normal) |
 | `end` | Hora de fin (solo para type normal) |
 | `type` | `"normal"` o `"guardia"` |
 
+El nombre del archivo **debe** coincidir con el `id` de la persona en `personas.json`.
+
 ### Crear una guardia
 
-Para asignar una guardia, crea un registro con `type: "guardia"`:
+Para asignar una guardia, crea un turno con `type: "guardia"` (sin `start`/`end`) en el archivo del técnico:
 
 ```json
 {
-  "personaId": "angel-ortiz",
+  "store": "tienda2",
+  "storeName": "Zona Calle 82",
   "month": "Septiembre",
+  "year": 2026,
+  "date": "2026-09-02",
+  "dayNumber": 2,
+  "weekday": "Domingo",
   "week": "Semana 1",
-  "day": "Miércoles",
   "type": "guardia"
 }
 ```
@@ -371,7 +383,7 @@ const cities = {
 };
 ```
 
-3. Agrega los horarios en `horarios.json` bajo la clave `"tienda10"`.
+3. Agrega los turnos de esa tienda en el archivo `horarios/<id>.json` del técnico que la cubre (usando `"store": "tienda10"`).
 
 > **Importante:** Guarda siempre los archivos JSON con codificación **UTF-8** para que se muestren correctamente los acentos.
 
@@ -407,7 +419,7 @@ Pulsa **"🎛️ Filtro libre"**, marca los países y ciudades que quieras y ver
 No. Las guardias se muestran con la etiqueta "Guardia" sin horas específicas, ya que cubren todo el día.
 
 **¿Cuántas tiendas y empleados hay actualmente?**
-9 tiendas (en Bogotá y Chía) y 7 empleados únicos, con 192 registros de horarios (12 guardias).
+9 tiendas (en Bogotá y Chía) y 7 empleados únicos, con 395 turnos cargados (192 de septiembre + 203 de octubre; 24 guardias). Cada técnico tiene su propio archivo `horarios/<id>.json`.
 
 ---
 
