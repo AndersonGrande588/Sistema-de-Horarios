@@ -1,0 +1,6 @@
+# Respaldos del editor local de horarios
+herramientas/.respaldos/
+
+# Python
+__pycache__/
+*.py[cod]

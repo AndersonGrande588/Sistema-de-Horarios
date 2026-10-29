@@ -126,9 +126,25 @@ Ejemplo: si el día 1 cae en martes, la celda del lunes de la primera semana mue
 
 ## 8. Cómo agregar o modificar horarios ✏️
 
-**No hay panel de administración**: los datos se editan directamente en los archivos JSON (o con un script que los genere). Pasos básicos:
+**La página web no tiene panel de administración.** Para el día a día usa el **editor local**; si necesitas entender o corregir el JSON a mano, más abajo está el formato.
 
-### Añadir una persona (`personas.json`)
+### Editor local (recomendado) 🖥️
+Es una herramienta **solo para el administrador**, no hace parte de la web y no se publica. Vive en la carpeta `herramientas/` del repositorio.
+
+1. Abre `herramientas/INICIAR_EDITOR.bat` (doble clic).
+2. Elige **técnico** y **mes**.
+3. Selecciona un turno de la tabla para editarlo, o pulsa **Nuevo turno**.
+4. Ajusta día, tienda, tipo (jornada normal o guardia) y horas; pulsa **Aplicar**.
+5. Pulsa **Guardar (Ctrl+S)**. La web muestra el cambio al recargar.
+
+El editor calcula solo la fecha, el día de la semana y la semana del mes, e impide duplicados y que una guardia y una jornada normal coincidan el mismo día. Antes de guardar deja una copia en `herramientas/.respaldos/`.
+
+> Más detalle en `herramientas/LEEME.md`.
+
+### Edición manual del JSON
+Si prefieres editar los archivos directamente:
+
+#### Añadir una persona (`personas.json`)
 Añade un objeto nuevo a la lista con: `id` (único), `name`, `email`, `phone`, `photo`.
 ```json
 {
@@ -140,7 +156,7 @@ Añade un objeto nuevo a la lista con: `id` (único), `name`, `email`, `phone`, 
 }
 ```
 
-### Añadir un horario (`horarios/<id>.json`)
+#### Añadir un horario (`horarios/<id>.json`)
 Cada técnico tiene su propio archivo `horarios/<id>.json` (p. ej. `horarios/juan-perez.json`). Añade el turno dentro de su array `shifts`:
 ```json
 {

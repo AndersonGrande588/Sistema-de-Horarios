@@ -52,6 +52,7 @@ Todo el procesamiento ocurre en el navegador (**client-side rendering**). No hay
 | `tecnicos/` | Fotografías de los empleados (WebP optimizadas en `tecnicos/web/`). |
 | `backup_refactor/` | Respaldo de los archivos previos al refactor (no se usa en producción). |
 | `GoogleSites_Calendario.html`, `Horarios.html`, `BORRADOR.html` | Versiones antiguas / borradores; **no forman parte de la app actual**. |
+| `../herramientas/` | **Herramienta interna del administrador** (editor de escritorio en Python). No se publica ni se enlaza desde la web. |
 
 ---
 
@@ -322,11 +323,21 @@ CSS plano (sin preprocesador). Reglas principales:
 - **Repositorio:** `https://github.com/AndersonGrande588/Sistema-de-Horarios.git`
 - **Requisito:** el sitio debe servirse vía HTTP(S) porque la app usa `fetch()` para los JSON. Abrir `index.html` con doble clic (protocolo `file://`) puede bloquear la carga por CORS; en Vercel funciona sin problema.
 
+### 7.1 Editor local (fuera del despliegue)
+
+La carpeta `herramientas/` (en la raíz del repositorio, **fuera** de `HORARIOS/`) contiene un editor de escritorio en **Python + Tkinter** para que el administrador modifique los horarios sin editar JSON a mano.
+
+- **No forma parte de la aplicación web:** no hay enlaces desde `index.html`, y la carpeta está excluida del despliegue mediante `.vercelignore`.
+- **Cómo se abre:** `herramientas/INICIAR_EDITOR.bat` (o `python -X utf8 herramientas/editor_horarios.py`).
+- **Qué hace:** alta, edición, duplicado de día y borrado de turnos; calcula `date`, `dayNumber`, `weekday` y `week` automáticamente y valida duplicados, horas y el conflicto guardia ↔ jornada normal.
+- **Dónde guarda:** directamente en `HORARIOS/horarios/<id>.json` con el mismo esquema y formato (UTF-8 sin BOM, `indent=2`). Antes de sobrescribir crea un respaldo en `herramientas/.respaldos/` (esa carpeta está en `.gitignore`).
+- **Pruebas:** `--selftest` (lógica de datos) y `--uitest` (interfaz simulada); ambas trabajan sobre copias temporales y dejan intactos los JSON reales.
+
 ---
 
 ## 8. Limitaciones y notas técnicas
 
-- **Sin backend:** los datos se editan directamente en los JSON (o se generan con scripts). No hay persistencia desde la UI.
+- **Sin backend:** los datos se editan con el editor local de `herramientas/` (o directamente en los JSON). No hay persistencia desde la UI web.
 - **Sin build:** no hay minificación ni bundling; los archivos se suben tal cual.
 - **Fechas reales:** cada registro incluye `date` y `dayNumber`. La numeración de la rejilla se **recalcula** con semana + día usando el calendario real del mes/año; si los datos de semana/día no coincidieran con un calendario real, la numeración podría desplazarse (los generadores garantizan la coherencia).
 - **Horas de guardia:** los registros tipo `guardia` pueden tener `start`/`end`, pero la UI siempre muestra la etiqueta **"Guardia"**.
@@ -350,6 +361,7 @@ CSS plano (sin preprocesador). Reglas principales:
 - ✅ Celdas con altura fija uniforme (96px) y scroll interno para días muy cargados (se removió el CSS obsoleto de la vista semanal).
 - ✅ Filtro de **mes** (12 meses) que preselecciona el mes actual del sistema; limpieza de la información al cambiar.
 - ✅ **Bima** agregada en Colombia (Chía), con horarios propios de Andres Bojaca (Lun/Sáb 08-17, Mar/Mié 08-16, Dom guardia).
+- ✅ **Editor local de horarios** (`herramientas/`, Python + Tkinter) para el administrador: alta, edición, duplicado y borrado de turnos con validaciones y respaldos automáticos. No se publica ni se enlaza desde la web.
 - ✅ Constantes `SHIFTS` y helper `turnoLabel()` para optimizar etiquetas de turnos.
 - ✅ Fotos de los técnicos en los turnos (18px) + **tooltip** al pasar el cursor con foto, nombre, correo, teléfono y tienda.
 - ✅ **Modo guardias**: botón global que oculta los filtros de tienda y muestra una lista agrupada por semanas con todas las guardias del mes: día con su número, tienda y datos completos del técnico (foto, nombre, correo, teléfono).
