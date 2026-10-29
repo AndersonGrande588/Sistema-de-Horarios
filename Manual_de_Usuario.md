@@ -317,7 +317,7 @@ Cada técnico tiene su propio archivo (`horarios/juan-perez.json`, `horarios/kev
   "year": 2026,
   "date": "2026-09-01",
   "dayNumber": 1,
-  "weekday": "Lunes",
+  "weekday": "Martes",
   "week": "Semana 1",
   "start": "08:00",
   "end": "17:00",
@@ -335,7 +335,7 @@ Cada técnico tiene su propio archivo (`horarios/juan-perez.json`, `horarios/kev
 | `date` | Fecha real `YYYY-MM-DD` |
 | `dayNumber` | Número del día del mes (1…31) |
 | `weekday` | Día de la semana |
-| `week` | Semana (Semana 1 a Semana 5) |
+| `week` | Semana (Semana 1 a Semana 6) |
 | `start` | Hora de inicio (solo para type normal) |
 | `end` | Hora de fin (solo para type normal) |
 | `type` | `"normal"` o `"guardia"` |
@@ -352,8 +352,8 @@ Para asignar una guardia, crea un turno con `type: "guardia"` (sin `start`/`end`
   "storeName": "Zona Calle 82",
   "month": "Septiembre",
   "year": 2026,
-  "date": "2026-09-02",
-  "dayNumber": 2,
+  "date": "2026-09-06",
+  "dayNumber": 6,
   "weekday": "Domingo",
   "week": "Semana 1",
   "type": "guardia"
@@ -419,7 +419,7 @@ Pulsa **"🎛️ Filtro libre"**, marca los países y ciudades que quieras y ver
 No. Las guardias se muestran con la etiqueta "Guardia" sin horas específicas, ya que cubren todo el día.
 
 **¿Cuántas tiendas y empleados hay actualmente?**
-9 tiendas (en Bogotá y Chía) y 7 empleados únicos, con 395 turnos cargados (192 de septiembre + 203 de octubre; 24 guardias). Cada técnico tiene su propio archivo `horarios/<id>.json`.
+9 tiendas (en Bogotá y Chía) y 6 empleados únicos, con 699 turnos cargados (170 de septiembre + 181 de octubre + 168 de noviembre + 180 de diciembre). Cada técnico tiene su propio archivo `horarios/<id>.json`.
 
 ---
 

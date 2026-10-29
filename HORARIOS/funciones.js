@@ -308,14 +308,17 @@ function renderCalendarHTML(storeId, monthSel) {
     const personaById = {};
     personas.forEach(p => { personaById[p.id] = p; });
 
-    // Semanas que aparecen (en orden natural Semana 1..5)
-    const semanaSet = new Set();
-    records.forEach(r => semanaSet.add(r.week));
-    const semanas = [...semanaSet].sort((a, b) => {
-        const na = parseInt(a.replace(/\D/g, ""), 10) || 0;
-        const nb = parseInt(b.replace(/\D/g, ""), 10) || 0;
-        return na - nb;
-    });
+    // Fecha real del mes mostrado (para numerar los días)
+    const monthIndex = MONTH_NAMES.indexOf(monthSel);
+    const dataYear = records.find(r => r.year);
+    const yearNum = dataYear ? (parseInt(dataYear.year, 10) || new Date().getFullYear()) : new Date().getFullYear();
+    const firstDate = new Date(yearNum, monthIndex, 1);
+    const firstWeekday = (firstDate.getDay() + 6) % 7; // 0 = lunes
+
+    // Semanas del mes según el calendario real (4, 5 o 6)
+    const lastDay = new Date(yearNum, monthIndex + 1, 0).getDate();
+    const totalWeeks = Math.ceil((lastDay + firstWeekday) / 7);
+    const semanas = Array.from({ length: totalWeeks }, (_, i) => `Semana ${i + 1}`);
 
     // Encabezado de días
     function buildHeader() {
@@ -327,13 +330,6 @@ function renderCalendarHTML(storeId, monthSel) {
         h += '</div>';
         return h;
     }
-
-    // Fecha real del mes mostrado (para numerar los días)
-    const monthIndex = MONTH_NAMES.indexOf(monthSel);
-    const dataYear = records.find(r => r.year);
-    const yearNum = dataYear ? (parseInt(dataYear.year, 10) || new Date().getFullYear()) : new Date().getFullYear();
-    const firstDate = new Date(yearNum, monthIndex, 1);
-    const firstWeekday = (firstDate.getDay() + 6) % 7; // 0 = lunes
 
     // Fila de una semana
     function buildWeekRow(semana, semanaIndex) {

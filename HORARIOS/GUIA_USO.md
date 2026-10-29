@@ -150,7 +150,7 @@ Cada técnico tiene su propio archivo `horarios/<id>.json` (p. ej. `horarios/jua
   "year": 2026,
   "date": "2026-09-01",
   "dayNumber": 1,
-  "weekday": "Lunes",
+  "weekday": "Martes",
   "week": "Semana 1",
   "start": "08:00",
   "end": "17:00",
@@ -173,7 +173,7 @@ Cada técnico tiene su propio archivo `horarios/<id>.json` (p. ej. `horarios/jua
 Por la política CORS del navegador con el protocolo `file://`. Usa Vercel o un servidor local.
 
 **¿El mes siempre va a estar en Septiembre?**
-No. Se preselecciona el **mes actual del sistema**. Hay datos de **Septiembre y Octubre**, y salen al cambiar el filtro.
+No. Se preselecciona el **mes actual del sistema**. Hay datos de **Septiembre, Octubre, Noviembre y Diciembre**, y salen al cambiar el filtro.
 
 **¿Por qué veo números en gris como "31" o "1"?**
 Son días de otro mes que encajan en la rejilla del calendario real (posición de la semana).
@@ -191,7 +191,7 @@ Cada tarjeta de la lista muestra un badge con el **nombre de la tienda** (🏪) 
 Es intencional: las guardias no tienen una jornada fija de horas, se marcan como turno de guardia 24/7.
 
 **¿Cuántos empleados y tiendas hay?**
-7 empleados únicos; 9 tiendas con horarios cargados (incl. Bima en Colombia), 395 turnos (192 de septiembre + 203 de octubre; 24 guardias). Cada técnico tiene su archivo `horarios/<id>.json`.
+6 empleados únicos; 9 tiendas con horarios cargados (incl. Bima en Colombia), 699 turnos (170 de septiembre + 181 de octubre + 168 de noviembre + 180 de diciembre). Cada técnico tiene su archivo `horarios/<id>.json`.
 
 ---
 

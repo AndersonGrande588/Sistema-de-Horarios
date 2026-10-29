@@ -105,7 +105,7 @@ Lista (array) de objetos:
 | `phone` | string | Teléfono de contacto. |
 | `photo` | string | Ruta de la foto (WebP). Si falta, se muestra un avatar con iniciales. |
 
-Actualmente hay **7 empleados únicos**.
+Actualmente hay **6 empleados únicos**.
 
 ### 4.3 `horarios/<id>.json` — un archivo por técnico
 
@@ -142,24 +142,41 @@ Cada empleado de `personas.json` tiene su propio archivo `horarios/<id>.json` (p
 | `date` | string | **Fecha real ISO** (`YYYY-MM-DD`), coherente con el calendario. |
 | `dayNumber` | number | **Número del día** del mes (1…31). Debe coincidir con la `date`. |
 | `weekday` | string | Día de la semana (`"Lunes"`…`"Domingo"`). |
-| `week` | string | Semana dentro del mes (`"Semana 1"`…`"Semana 5"`). |
+| `week` | string | Semana dentro del mes (`"Semana 1"`…`"Semana 6"`; noviembre necesita 6). |
 | `start` / `end` | string | Hora inicio/fin en formato `HH:MM` (ausentes en guardias). |
 | `type` | string | `"normal"` (jornada) o `"guardia"`. |
 
 `funciones.js` reconstruye con esto el objeto `horarios` agrupado por tienda (usa `store` como clave y `weekday` como `day`; las guardias se marcan como `"Domingo (Guardia)"`).
 
-Totales actuales (generados desde los datos originales): **9 tiendas**, **395 turnos** = **192 de Septiembre** + **203 de Octubre**. Técnicos: Kevin Alean, Angel Ortiz, Julian Garzon (tiendas 3 y 4), Jersoon Gonzalez, Anderson Grande, Andres Garzon y Andres Bojaca (tiendas 8 y 9).
+Totales actuales: **9 tiendas**, **699 turnos** = **170 de Septiembre** + **181 de Octubre** + **168 de Noviembre** + **180 de Diciembre**. Técnicos: Kevin Alean, Brayan Sanchez (Calle 82, reemplaza a Angel Ortiz), Jersoon Gonzalez (alterna Unicentro y Titán), Anderson Grande, Andres Garzon (Felicidad y Plaza Central, zonas que antes tenía Julián) y Andres Bojaca (tiendas 8 y 9). Julián Garzón salió del esquema.
 
 > **Bima (`tienda9`):** turnos de **andres-bojaca**. Lunes, Jueves, Viernes y Sábado `08:00–17:00`; Martes y Miércoles `08:00–16:00`; Domingo **guardia** (Semanas 1–4).
 >
-> **Octubre:** se repite el patrón de septiembre (mismos días de la semana y misma paridad de semana por persona/tienda) pero con las **fechas reales** de octubre (el día 1 es **jueves**).
+> **Octubre, Noviembre y Diciembre:** repiten el patrón de septiembre (mismos días de la semana y misma paridad de semana por persona/tienda) con las **fechas reales** de cada mes (1 oct = **jueves**; 1 nov = **domingo**; 1 dic = **martes**). Noviembre usa **Semana 6** para el día 30; diciembre usa **Semana 5** para el día 31.
 
-> **Guardias del mes (coinciden con la asignación real):**
-> - Jersoon Gonzalez → tienda5 · **6 septiembre** (Semana 1 Domingo)
-> - Angel Ortiz → tienda2 · **2 septiembre** (Semana 1 Miércoles)
-> - Julian Garzon → tienda3 · **13 septiembre** (Semana 2 Domingo)
-> - Kevin Alean → tienda1 · **20 septiembre** (Semana 3 Domingo)
-> - Andres Bojaca (Bima) → tienda9 · **6, 13, 20 y 27 septiembre** (Semanas 1–4 Domingo)
+> **Guardias de Septiembre:**
+> - Jersoon Gonzalez → tienda5 · **6** (Semana 1 Domingo)
+> - Andres Garzon → tienda3 · **13** (Semana 2 Domingo)
+> - Kevin Alean → tienda1 · **20** (Semana 3 Domingo)
+> - Brayan Sanchez → tienda2 · **27** (Semana 4 Domingo)
+> - Andres Bojaca → tiendas 8 y 9 · **6, 13, 20 y 27** (Semanas 1–4 Domingo)
+
+> **Guardias de Octubre (ajustadas):**
+> - Anderson Grande → tienda6 · **4** (Semana 1)
+> - Andres Garzon → tienda3 · **11** (Semana 2)
+> - Jersoon Gonzalez → tienda5 · **12** (Semana 3, lunes) y **25** (Semana 4)
+> - Kevin Alean → tienda1 · **18** (Semana 3)
+> - Andres Bojaca → tiendas 8 y 9 · **4, 11, 18 y 25** (Semanas 1–4)
+
+> **Noviembre:** Anderson **1**, Andres Garzon **8**, Jersoon **9** y **22**, Kevin **15**, Andres Bojaca **1, 8, 15 y 22**.
+
+> **Diciembre (mismas guardias que octubre, corridas al mes):**
+> - Anderson Grande → tienda6 · **6**
+> - Andres Garzon → tienda3 · **13**
+> - Jersoon Gonzalez → tienda5 · **14** (lunes) y **27**
+> - Kevin Alean → tienda1 · **20**
+> - Andres Bojaca → tiendas 8 y 9 · **6, 13, 20 y 27**
+> - Brayan Sanchez → sin guardia
 
 > **Nota:** cada registro ya trae su **fecha real** (`date`) y su **número de día** (`dayNumber`). El calendario además **recalcula** el número de cada celda a partir de semana + día con el calendario real del mes/año (`new Date(año, mes, n)`), de modo que los días ≤ 0 o > último día del mes caen en el mes vecino y se marcan como `out-month`.
 
@@ -321,6 +338,11 @@ CSS plano (sin preprocesador). Reglas principales:
 
 - ✅ Base de datos en `personas.json` + un `horarios/<id>.json` por técnico (un archivo por persona con todos sus turnos, con fecha y número de día reales).
 - ✅ Horarios de **Octubre** generados repitiendo el patrón de Septiembre con fechas reales.
+- ✅ Horarios de **Noviembre** generados (incluye **Semana 6** para el día 30).
+- ✅ Horarios de **Diciembre** generados (incluye **Semana 5** para el día 31).
+- ✅ **Brayan Sanchez** reemplaza a Angel Ortiz en Calle 82 (sin guardia en octubre).
+- ✅ Guardias de octubre ajustadas: Andrés Garzón el 11; Jersoon el 12 y el 25.
+- ✅ Andrés Garzón toma las zonas de Julián (Felicidad + Plaza Central) y Jersoon alterna Unicentro + Titán; Julián sale del esquema.
 - ✅ Calendario mensual en rejilla (semana × día) con numeración de días (soporta mes anterior/siguiente en gris).
 - ✅ Etiqueta "Guardia" en los turnos de guardia (sin horario).
 - ✅ Celdas con altura fija uniforme (96px) y scroll interno para días muy cargados (se removió el CSS obsoleto de la vista semanal).
