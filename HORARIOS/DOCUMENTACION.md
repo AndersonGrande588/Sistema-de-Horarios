@@ -148,11 +148,13 @@ Cada empleado de `personas.json` tiene su propio archivo `horarios/<id>.json` (p
 
 `funciones.js` reconstruye con esto el objeto `horarios` agrupado por tienda (usa `store` como clave y `weekday` como `day`; las guardias se marcan como `"Domingo (Guardia)"`).
 
-Totales actuales: **9 tiendas**, **699 turnos** = **170 de Septiembre** + **181 de Octubre** + **168 de Noviembre** + **180 de Diciembre**. Técnicos: Kevin Alean, Brayan Sanchez (Calle 82, reemplaza a Angel Ortiz), Jersoon Gonzalez (alterna Unicentro y Titán), Anderson Grande, Andres Garzon (Felicidad y Plaza Central, zonas que antes tenía Julián) y Andres Bojaca (tiendas 8 y 9). Julián Garzón salió del esquema.
+Totales actuales: **9 tiendas**, **708 turnos** = **172 de Septiembre** + **184 de Octubre** + **170 de Noviembre** + **182 de Diciembre**. Técnicos: Kevin Alean, Brayan Sanchez (Calle 82, reemplaza a Angel Ortiz), Jersoon Gonzalez (alterna Unicentro y Titán), Anderson Grande, Andres Garzon (Felicidad y Plaza Central, zonas que antes tenía Julián) y Andres Bojaca (tiendas 8 y 9). Julián Garzón salió del esquema.
 
 > **Bima (`tienda9`):** turnos de **andres-bojaca**. Lunes, Jueves, Viernes y Sábado `08:00–17:00`; Martes y Miércoles `08:00–16:00`; Domingo **guardia** (Semanas 1–4).
 >
 > **Octubre, Noviembre y Diciembre:** repiten el patrón de septiembre (mismos días de la semana y misma paridad de semana por persona/tienda) con las **fechas reales** de cada mes (1 oct = **jueves**; 1 nov = **domingo**; 1 dic = **martes**). Noviembre usa **Semana 6** para el día 30; diciembre usa **Semana 5** para el día 31.
+
+> **Brayan Sanchez (Calle 82):** trabaja de lunes a viernes en `tienda2` y **todos los sábados** `08:00–12:00`. Sin guardias desde octubre.
 
 > **Guardias de Septiembre:**
 > - Jersoon Gonzalez → tienda5 · **6** (Semana 1 Domingo)

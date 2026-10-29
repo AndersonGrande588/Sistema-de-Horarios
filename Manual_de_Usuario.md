@@ -419,7 +419,7 @@ Pulsa **"🎛️ Filtro libre"**, marca los países y ciudades que quieras y ver
 No. Las guardias se muestran con la etiqueta "Guardia" sin horas específicas, ya que cubren todo el día.
 
 **¿Cuántas tiendas y empleados hay actualmente?**
-9 tiendas (en Bogotá y Chía) y 6 empleados únicos, con 699 turnos cargados (170 de septiembre + 181 de octubre + 168 de noviembre + 180 de diciembre). Cada técnico tiene su propio archivo `horarios/<id>.json`.
+9 tiendas (en Bogotá y Chía) y 6 empleados únicos, con 708 turnos cargados (172 de septiembre + 184 de octubre + 170 de noviembre + 182 de diciembre). Cada técnico tiene su propio archivo `horarios/<id>.json`.
 
 ---
 

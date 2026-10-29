@@ -191,7 +191,7 @@ Cada tarjeta de la lista muestra un badge con el **nombre de la tienda** (🏪) 
 Es intencional: las guardias no tienen una jornada fija de horas, se marcan como turno de guardia 24/7.
 
 **¿Cuántos empleados y tiendas hay?**
-6 empleados únicos; 9 tiendas con horarios cargados (incl. Bima en Colombia), 699 turnos (170 de septiembre + 181 de octubre + 168 de noviembre + 180 de diciembre). Cada técnico tiene su archivo `horarios/<id>.json`.
+6 empleados únicos; 9 tiendas con horarios cargados (incl. Bima en Colombia), 708 turnos (172 de septiembre + 184 de octubre + 170 de noviembre + 182 de diciembre). Cada técnico tiene su archivo `horarios/<id>.json`.
 
 ---
 
