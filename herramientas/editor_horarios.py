@@ -21,6 +21,7 @@ import re
 import shutil
 import sys
 import tempfile
+import unicodedata
 from pathlib import Path
 
 # ─────────────────────────────────────────────────────────────
@@ -51,6 +52,58 @@ STORE_NAMES = {
 }
 
 HORA_RE = re.compile(r"^([01]\d|2[0-3]):([0-5]\d)$")
+
+
+def sin_acentos(texto):
+    """Minúsculas y sin tildes, para buscar sin pelear con los acentos."""
+    texto = unicodedata.normalize("NFKD", texto or "")
+    texto = "".join(c for c in texto if not unicodedata.combining(c))
+    return re.sub(r"\s+", " ", texto).strip().lower()
+
+
+STORE_KEYS = list(STORE_NAMES)
+
+
+def store_label(key):
+    """Etiqueta que se muestra en el desplegable: 'C.C Felicidad — tienda3'."""
+    return "%s — %s" % (STORE_NAMES[key], key)
+
+
+ALL_STORE_LABELS = [store_label(k) for k in STORE_KEYS]
+
+
+def resolve_store(texto):
+    """Convierte lo escrito por el usuario en una clave de tienda.
+
+    Acepta 'tienda3', 'C.C Felicidad', 'C.C Felicidad — tienda3' o una
+    búsqueda parcial única como 'felicidad'. Devuelve None si no hay
+    coincidencia o si hay varias.
+    """
+    t = (texto or "").strip()
+    if not t:
+        return None
+    if t in STORE_NAMES:
+        return t
+    if "—" in t:
+        cola = t.split("—")[-1].strip()
+        if cola in STORE_NAMES:
+            return cola
+    n = sin_acentos(t)
+    for key in STORE_KEYS:
+        if n == sin_acentos(key) or n == sin_acentos(STORE_NAMES[key]):
+            return key
+    matches = [k for k in STORE_KEYS
+               if n in sin_acentos(k) or n in sin_acentos(store_label(k))]
+    return matches[0] if len(matches) == 1 else None
+
+
+def filter_store_labels(texto):
+    """Lista de etiquetas que coinciden con lo escrito (para el buscador)."""
+    n = sin_acentos(texto)
+    if not n:
+        return list(ALL_STORE_LABELS)
+    return [lbl for lbl in ALL_STORE_LABELS if n in sin_acentos(lbl)]
+
 
 
 # ─────────────────────────────────────────────────────────────
@@ -200,8 +253,14 @@ def run_gui(test=False):
         def __init__(self):
             super().__init__()
             self.title("Editor de Horarios — herramienta local")
-            self.geometry("1180x760")
-            self.minsize(1000, 640)
+            pantalla_w = self.winfo_screenwidth()
+            pantalla_h = self.winfo_screenheight()
+            ancho = min(1180, max(980, pantalla_w - 60))
+            alto = min(760, max(620, pantalla_h - 100))
+            x = max(0, (pantalla_w - ancho) // 2)
+            y = max(0, (pantalla_h - alto) // 2 - 10)
+            self.geometry("%dx%d+%d+%d" % (ancho, alto, x, y))
+            self.minsize(980, 600)
             self.configure(bg="#f3f4f6")
 
             self.personas = load_personas(BASE)
@@ -238,7 +297,6 @@ def run_gui(test=False):
             self.protocol("WM_DELETE_WINDOW", self._on_close)
             self.bind("<Control-s>", lambda e: self._save())
             self.bind("<Control-n>", lambda e: self._new_shift())
-            self.bind("<Delete>", lambda e: self._delete())
 
         # ---------- construcción de la interfaz ----------
         def _build_ui(self):
@@ -297,6 +355,9 @@ def run_gui(test=False):
             self.tree.tag_configure("guardia", background="#fff1e0")
             self.tree.grid(row=0, column=0, sticky="nsew")
             self.tree.bind("<<TreeviewSelect>>", self._on_select)
+            self.tree.bind("<Double-1>", self._on_select)
+            self.tree.bind("<Return>", self._on_select)
+            self.tree.bind("<Delete>", lambda e: self._delete())
 
             sb = ttk.Scrollbar(box, orient="vertical", command=self.tree.yview)
             sb.grid(row=0, column=1, sticky="ns")
@@ -304,6 +365,9 @@ def run_gui(test=False):
 
             self.lbl_count = ttk.Label(box, text="", style="Hint.TLabel")
             self.lbl_count.grid(row=1, column=0, columnspan=2, sticky="w", pady=(6, 0))
+            ttk.Label(box, text="Doble clic o Enter sobre una fila para editarla",
+                      style="Hint.TLabel").grid(row=1, column=0, columnspan=2,
+                                                sticky="e", pady=(6, 0))
 
             # --- formulario ---
             form = ttk.LabelFrame(main, text="Turno", padding=12)
@@ -323,11 +387,13 @@ def run_gui(test=False):
             self.lbl_fecha = ttk.Label(form, text="", style="Hint.TLabel")
             self.lbl_fecha.grid(row=3, column=0, sticky="w", pady=(0, 8))
 
-            ttk.Label(form, text="Tienda").grid(row=4, column=0, sticky="w")
+            ttk.Label(form, text="Tienda (escribe para buscar)").grid(row=4, column=0, sticky="w")
             self.tienda_var = tk.StringVar()
             self.cb_tienda = ttk.Combobox(form, textvariable=self.tienda_var,
-                                          state="readonly", width=28)
+                                          width=28, values=ALL_STORE_LABELS)
             self.cb_tienda.grid(row=5, column=0, sticky="ew", pady=(2, 8))
+            self.cb_tienda.bind("<KeyRelease>", self._filter_stores)
+            self.cb_tienda.bind("<<ComboboxSelected>>", self._on_store_selected)
 
             ttk.Label(form, text="Tipo de turno").grid(row=6, column=0, sticky="w")
             self.tipo_var = tk.StringVar()
@@ -347,6 +413,8 @@ def run_gui(test=False):
             ttk.Label(times, text="Fin").grid(row=0, column=2, sticky="w")
             self.ent_fin = ttk.Entry(times, width=8)
             self.ent_fin.grid(row=0, column=3, sticky="ew", padx=(6, 0))
+            self.ent_ini.bind("<Return>", lambda e: self._apply())
+            self.ent_fin.bind("<Return>", lambda e: self._apply())
 
             self.btn_aplicar = ttk.Button(form, text="✔ Aplicar", style="Accent.TButton",
                                           command=self._apply)
@@ -496,6 +564,20 @@ def run_gui(test=False):
             self.ent_ini.config(state=state)
             self.ent_fin.config(state=state)
 
+        def _filter_stores(self, event=None):
+            """Filtra la lista de tiendas mientras se escribe."""
+            if event is not None and event.keysym in (
+                    "Up", "Down", "Return", "Escape", "Tab", "Home", "End",
+                    "Left", "Right", "Prior", "Next"):
+                return
+            self.cb_tienda["values"] = filter_store_labels(self.tienda_var.get())
+
+        def _on_store_selected(self, _evt=None):
+            store = resolve_store(self.tienda_var.get())
+            if store:
+                self.tienda_var.set(store_label(store))
+            self.cb_tienda["values"] = ALL_STORE_LABELS
+
         def _on_select(self, _evt=None):
             if self._suppress_events:
                 return
@@ -532,7 +614,7 @@ def run_gui(test=False):
             self.selected_shift = s
             self.lbl_modo.config(text="Editando turno del %s" % s.get("date", ""))
             self.dia_var.set(str(s.get("dayNumber")))
-            self.tienda_var.set("%s — %s" % (STORE_NAMES.get(s.get("store"), "?"), s.get("store")))
+            self.tienda_var.set(store_label(s.get("store")) if s.get("store") in STORE_NAMES else "")
             self.tipo_var.set("Guardia" if s.get("type") == "guardia" else "Jornada normal")
             self.ent_ini.config(state="normal")
             self.ent_fin.config(state="normal")
@@ -551,10 +633,15 @@ def run_gui(test=False):
                 self._suppress_events = True
                 self.tree.selection_remove(*self.tree.selection())
                 self._suppress_events = False
-            # tienda habitual del técnico en ese mes
-            stores = [s.get("store") for _, s in self._month_shifts()]
-            store = stores[0] if stores else "tienda1"
-            self.tienda_var.set("%s — %s" % (STORE_NAMES[store], store))
+            # tienda habitual del técnico en ese mes (la que más usa)
+            conteo = {}
+            for _, s in self._month_shifts():
+                conteo[s.get("store")] = conteo.get(s.get("store"), 0) + 1
+            store = max(conteo, key=conteo.get) if conteo else "tienda1"
+            if store not in STORE_NAMES:
+                store = "tienda1"
+            self.tienda_var.set(store_label(store))
+            self.cb_tienda["values"] = ALL_STORE_LABELS
             self.tipo_var.set("Jornada normal")
             dias = calendar.monthrange(self.year, MES_NUM[self.current_month])[1]
             try:
@@ -574,10 +661,12 @@ def run_gui(test=False):
 
         def _form_values(self):
             """Devuelve (store, tipo, start, end) o lanza ValueError con mensaje."""
-            txt = self.tienda_var.get()
-            store = txt.split("—")[-1].strip() if "—" in txt else txt.strip()
-            if store not in STORE_NAMES:
-                raise ValueError("Selecciona una tienda.")
+            store = resolve_store(self.tienda_var.get())
+            if not store:
+                raise ValueError("Selecciona una tienda válida.\n\n"
+                                 "Puedes escribir para buscar: por ejemplo "
+                                 "\"Felicidad\" o \"tienda3\".")
+            self.tienda_var.set(store_label(store))
             typ = "guardia" if self.tipo_var.get() == "Guardia" else "normal"
             if typ == "guardia":
                 return store, typ, None, None
@@ -586,14 +675,25 @@ def run_gui(test=False):
         def _apply(self):
             if not self.current_pid:
                 return
+            m = MES_NUM[self.current_month]
+            dias = calendar.monthrange(self.year, m)[1]
             try:
                 day = int(self.dia_var.get())
+            except (TypeError, ValueError):
+                messagebox.showerror("Día inválido",
+                                     "Escribe un día del mes (1–%d)." % dias, parent=self)
+                return
+            if not 1 <= day <= dias:
+                messagebox.showerror("Día inválido",
+                                     "%s de %d solo tiene %d días." %
+                                     (self.current_month, self.year, dias), parent=self)
+                return
+            try:
                 store, typ, start, end = self._form_values()
-            except (TypeError, ValueError) as exc:
+            except ValueError as exc:
                 messagebox.showerror("Datos incompletos", str(exc), parent=self)
                 return
 
-            m = MES_NUM[self.current_month]
             cand = build_shift(store, self.year, m, day, typ, start, end)
             doc = self._doc()
             errs, repl, guardia_day = analyze(doc, cand, self.ignore_index)
@@ -813,20 +913,29 @@ def ui_test():
         app.withdraw()
         app.update()
 
+        # el desplegable de tiendas debe venir lleno
+        assert len(app.cb_tienda["values"]) == len(STORE_NAMES), app.cb_tienda["values"]
+
         pid = "andres-garzon"
         idx = next(i for i, p in enumerate(app.personas) if p["id"] == pid)
         app.cb_persona.current(idx)
-        app._on_persona_change()
-        app.mes_var.set("Diciembre")
-        app._on_month_change()
+        app.cb_persona.event_generate("<<ComboboxSelected>>")
         app.update()
+        app.cb_mes.set("Diciembre")
+        app.cb_mes.event_generate("<<ComboboxSelected>>")
+        app.update()
+        assert app.current_pid == pid and app.current_month == "Diciembre"
         base = len(app.tree.get_children())
         assert base > 0, "no se listaron turnos"
 
-        # 1) alta de un turno (domingo 6 de diciembre, libre)
+        # 1) alta de un turno buscando la tienda por texto ("feli")
         app.dia_var.set("6")
-        app.tienda_var.set("C.C Felicidad — tienda3")
+        app.cb_dia.event_generate("<<ComboboxSelected>>")
+        app.tienda_var.set("feli")
+        app._filter_stores()
+        assert list(app.cb_tienda["values"]) == ["C.C Felicidad — tienda3"], app.cb_tienda["values"]
         app.tipo_var.set("Jornada normal")
+        app._on_type_change()
         app.ent_ini.delete(0, "end")
         app.ent_ini.insert(0, "08:00")
         app.ent_fin.delete(0, "end")
@@ -835,6 +944,7 @@ def ui_test():
         app.update()
         assert len(app.tree.get_children()) == base + 1, "no se agregó el turno"
         assert pid in app.dirty, "no se marcó como modificado"
+        assert app.docs[pid]["shifts"][app.ignore_index]["store"] == "tienda3"
 
         # 2) edición del turno recién creado
         app.ent_fin.delete(0, "end")
@@ -844,6 +954,16 @@ def ui_test():
         assert len(app.tree.get_children()) == base + 1, "la edición duplicó el turno"
         s = app.docs[pid]["shifts"][app.ignore_index]
         assert s["end"] == "16:00", s
+
+        # 2b) cambiar la tienda del mismo turno buscando "plaza"
+        app.tienda_var.set("plaza")
+        app._filter_stores()
+        assert list(app.cb_tienda["values"]) == ["C.C Plaza Central — tienda4"], app.cb_tienda["values"]
+        app._apply()
+        app.update()
+        s = app.docs[pid]["shifts"][app.ignore_index]
+        assert s["store"] == "tienda4" and s["storeName"] == "C.C Plaza Central", s
+        assert len(app.tree.get_children()) == base + 1, "cambiar tienda duplicó el turno"
 
         # 3) convertirlo en guardia
         app.tipo_var.set("Guardia")
@@ -865,6 +985,16 @@ def ui_test():
         else:
             raise AssertionError("debía bloquear jornada en un día con guardia")
 
+        # 4b) una tienda inexistente debe rechazarse
+        app.tienda_var.set("zzz")
+        app.dia_var.set("8")
+        try:
+            app._apply()
+        except AssertionError:
+            pass
+        else:
+            raise AssertionError("debía rechazar una tienda inexistente")
+
         # 5) guardar (redirigido a la carpeta temporal)
         app._save()
         app.update()
@@ -880,15 +1010,17 @@ def ui_test():
         n_before = len(app.docs[pid]["shifts"])
         first = app.tree.get_children()[0]
         app.tree.selection_set(first)
-        app._on_select()
+        app.tree.event_generate("<<TreeviewSelect>>", when="now")
+        app.update()
+        assert app.ignore_index is not None, "el clic no cargó el turno en el formulario"
         app._delete()
         app.update()
         assert len(app.docs[pid]["shifts"]) == n_before - 1, "no se eliminó"
 
         after = hashlib.md5(real.read_bytes()).hexdigest()
         assert before == after, "¡se modificó el archivo real!"
-        print("UITEST OK: alta, edición, guardia, conflicto, guardado y borrado")
-        print("           (archivo real intacto: %s)" % real.name)
+        print("UITEST OK: tiendas, alta, edición, cambio de tienda, guardia,")
+        print("           conflicto, guardado y borrado (archivo real intacto)")
     finally:
         globals()["save_doc"] = real_save
         app.destroy()
@@ -960,9 +1092,23 @@ def run_selftest():
         errs, _, _ = analyze(docs["kevin-alean"], bad2)
         assert errs, "debía rechazar formato de hora inválido"
 
+        # 7) búsqueda y resolución de tiendas
+        assert resolve_store("tienda3") == "tienda3"
+        assert resolve_store("C.C Felicidad — tienda3") == "tienda3"
+        assert resolve_store("felicidad") == "tienda3"
+        assert resolve_store("PLAZA central") == "tienda4"
+        assert resolve_store("bima") == "tienda9"
+        assert resolve_store("colina") is None, "colina es ambiguo (2 tiendas)"
+        assert resolve_store("no existe") is None
+        labels = filter_store_labels("unicentro")
+        assert labels == ["C.C Unicentro — tienda5"], labels
+        assert len(filter_store_labels("")) == len(STORE_NAMES)
+        assert len(filter_store_labels("tienda")) == len(STORE_NAMES)
+
         print("  ✓ alta de turno, esquema y orden de claves")
         print("  ✓ detección de duplicados y conflictos guardia/jornada")
         print("  ✓ respaldo automático y validación de horas")
+        print("  ✓ búsqueda de tiendas por nombre, clave o texto parcial")
         print("Autoprueba OK (archivos reales intactos)")
 
 

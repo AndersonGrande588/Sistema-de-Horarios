@@ -135,6 +135,7 @@ Es una herramienta **solo para el administrador**, no hace parte de la web y no 
 2. Elige **técnico** y **mes**.
 3. Selecciona un turno de la tabla para editarlo, o pulsa **Nuevo turno**.
 4. Ajusta día, tienda, tipo (jornada normal o guardia) y horas; pulsa **Aplicar**.
+   En **Tienda** puedes escribir para buscar (`felicidad`, `plaza`, `tienda3`…).
 5. Pulsa **Guardar (Ctrl+S)**. La web muestra el cambio al recargar.
 
 El editor calcula solo la fecha, el día de la semana y la semana del mes, e impide duplicados y que una guardia y una jornada normal coincidan el mismo día. Antes de guardar deja una copia en `herramientas/.respaldos/`.

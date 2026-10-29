@@ -26,6 +26,8 @@ normal de Windows). No necesita internet ni instalar paquetes.
 1. Elige el **técnico** y el **mes**.
 2. Selecciona un turno de la tabla para editarlo, o pulsa **Nuevo turno**.
 3. Ajusta día, tienda, tipo y horas. Pulsa **Aplicar**.
+   - En **Tienda** puedes escribir para buscar: `felicidad`, `plaza`,
+     `unicentro`, `tienda3`, etc. La lista se filtra sola.
 4. Pulsa **Guardar (Ctrl+S)** para escribir el JSON. El cambio se ve en la web
    al recargar la página.
 
