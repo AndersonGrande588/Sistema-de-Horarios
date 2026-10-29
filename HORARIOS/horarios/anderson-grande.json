@@ -371,6 +371,17 @@
       "storeName": "Oficina Colina",
       "month": "Octubre",
       "year": 2026,
+      "date": "2026-10-03",
+      "dayNumber": 4,
+      "weekday": "Domingo",
+      "week": "Semana 1",
+      "type": "guardia"
+    },
+    {
+      "store": "tienda6",
+      "storeName": "Oficina Colina",
+      "month": "Octubre",
+      "year": 2026,
       "date": "2026-10-05",
       "dayNumber": 5,
       "weekday": "Lunes",
