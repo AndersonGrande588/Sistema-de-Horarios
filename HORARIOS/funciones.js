@@ -68,7 +68,7 @@ async function loadData() {
                 month: s.month,
                 year: s.year,
                 week: s.week,
-                day: s.type === 'guardia' ? 'Domingo (Guardia)' : s.weekday,
+                day: s.weekday,
                 weekday: s.weekday,
                 date: s.date,
                 dayNumber: s.dayNumber,
@@ -539,16 +539,20 @@ function buildGuardCards(guardias, personaById, monthSel) {
     guardias.forEach(g => {
         const weekIdx = parseInt(String(g.week).replace(/\D/g, ""), 10) || 0;
         const dayIdx = dayOrder[normalizeDay(g.day)] !== undefined ? dayOrder[normalizeDay(g.day)] : 9;
-        const cellDate = new Date(yearNum, monthIndex, (weekIdx - 1) * 7 + dayIdx - firstWeekday + 1);
+        // El día real viene en los datos; si faltara, se calcula con la semana.
+        let dayNum = parseInt(g.dayNumber, 10);
+        if (!dayNum && g.date) dayNum = parseInt(String(g.date).slice(8, 10), 10);
+        if (!dayNum) {
+            dayNum = new Date(yearNum, monthIndex,
+                (weekIdx - 1) * 7 + dayIdx - firstWeekday + 1).getDate();
+        }
         g._week = weekIdx;
-        g._dayNum = cellDate.getDate();
+        g._dayNum = dayNum;
     });
 
     guardias.sort((a, b) => {
         if (a._week !== b._week) return a._week - b._week;
-        const da = dayOrder[normalizeDay(a.day)] !== undefined ? dayOrder[normalizeDay(a.day)] : 9;
-        const db = dayOrder[normalizeDay(b.day)] !== undefined ? dayOrder[normalizeDay(b.day)] : 9;
-        return da - db;
+        return a._dayNum - b._dayNum;
     });
 
     const semanaSet = [...new Set(guardias.map(g => g._week))].sort((x, y) => x - y);
