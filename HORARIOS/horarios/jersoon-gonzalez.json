@@ -417,8 +417,8 @@
       "type": "normal"
     },
     {
-      "store": "tienda7",
-      "storeName": "C.C Titan",
+      "store": "tienda5",
+      "storeName": "C.C Unicentro",
       "month": "Octubre",
       "year": 2026,
       "date": "2026-10-02",
@@ -558,6 +558,17 @@
       "type": "guardia"
     },
     {
+      "store": "tienda7",
+      "storeName": "C.C Titan",
+      "month": "Octubre",
+      "year": 2026,
+      "date": "2026-10-12",
+      "dayNumber": 12,
+      "weekday": "Lunes",
+      "week": "Semana 3",
+      "type": "guardia"
+    },
+    {
       "store": "tienda5",
       "storeName": "C.C Unicentro",
       "month": "Octubre",
@@ -612,19 +623,6 @@
     {
       "store": "tienda5",
       "storeName": "C.C Unicentro",
-      "month": "Octubre",
-      "year": 2026,
-      "date": "2026-10-17",
-      "dayNumber": 17,
-      "weekday": "Sábado",
-      "week": "Semana 3",
-      "start": "08:00",
-      "end": "12:00",
-      "type": "normal"
-    },
-    {
-      "store": "tienda7",
-      "storeName": "C.C Titan",
       "month": "Octubre",
       "year": 2026,
       "date": "2026-10-17",
