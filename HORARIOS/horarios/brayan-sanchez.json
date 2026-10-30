@@ -711,9 +711,7 @@
       "dayNumber": 2,
       "weekday": "Lunes",
       "week": "Semana 2",
-      "start": "08:00",
-      "end": "17:00",
-      "type": "normal"
+      "type": "guardia"
     },
     {
       "store": "tienda2",
@@ -867,9 +865,7 @@
       "dayNumber": 16,
       "weekday": "Lunes",
       "week": "Semana 4",
-      "start": "08:00",
-      "end": "17:00",
-      "type": "normal"
+      "type": "guardia"
     },
     {
       "store": "tienda2",
@@ -1011,7 +1007,7 @@
       "weekday": "Sábado",
       "week": "Semana 5",
       "start": "08:00",
-      "end": "12:00",
+      "end": "17:00",
       "type": "normal"
     },
     {

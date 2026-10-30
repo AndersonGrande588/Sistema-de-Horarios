@@ -859,9 +859,7 @@
       "dayNumber": 2,
       "weekday": "Lunes",
       "week": "Semana 2",
-      "start": "08:00",
-      "end": "17:00",
-      "type": "normal"
+      "type": "guardia"
     },
     {
       "store": "tienda9",
@@ -1059,9 +1057,18 @@
       "dayNumber": 16,
       "weekday": "Lunes",
       "week": "Semana 4",
-      "start": "08:00",
-      "end": "17:00",
-      "type": "normal"
+      "type": "guardia"
+    },
+    {
+      "store": "tienda9",
+      "storeName": "Bima",
+      "month": "Noviembre",
+      "year": 2026,
+      "date": "2026-11-16",
+      "dayNumber": 16,
+      "weekday": "Lunes",
+      "week": "Semana 4",
+      "type": "guardia"
     },
     {
       "store": "tienda9",
@@ -1227,6 +1234,28 @@
       "start": "08:00",
       "end": "12:00",
       "type": "normal"
+    },
+    {
+      "store": "tienda8",
+      "storeName": "C.C Fontanar",
+      "month": "Noviembre",
+      "year": 2026,
+      "date": "2026-11-29",
+      "dayNumber": 29,
+      "weekday": "Domingo",
+      "week": "Semana 5",
+      "type": "guardia"
+    },
+    {
+      "store": "tienda9",
+      "storeName": "Bima",
+      "month": "Noviembre",
+      "year": 2026,
+      "date": "2026-11-29",
+      "dayNumber": 29,
+      "weekday": "Domingo",
+      "week": "Semana 5",
+      "type": "guardia"
     },
     {
       "store": "tienda8",

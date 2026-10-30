@@ -694,17 +694,6 @@
       "storeName": "Oficina Colina",
       "month": "Noviembre",
       "year": 2026,
-      "date": "2026-11-01",
-      "dayNumber": 1,
-      "weekday": "Domingo",
-      "week": "Semana 1",
-      "type": "guardia"
-    },
-    {
-      "store": "tienda6",
-      "storeName": "Oficina Colina",
-      "month": "Noviembre",
-      "year": 2026,
       "date": "2026-11-02",
       "dayNumber": 2,
       "weekday": "Lunes",
@@ -861,13 +850,11 @@
       "storeName": "Oficina Colina",
       "month": "Noviembre",
       "year": 2026,
-      "date": "2026-11-16",
-      "dayNumber": 16,
-      "weekday": "Lunes",
-      "week": "Semana 4",
-      "start": "08:00",
-      "end": "17:00",
-      "type": "normal"
+      "date": "2026-11-15",
+      "dayNumber": 15,
+      "weekday": "Domingo",
+      "week": "Semana 3",
+      "type": "guardia"
     },
     {
       "store": "tienda6",
@@ -933,6 +920,17 @@
       "start": "09:00",
       "end": "13:00",
       "type": "normal"
+    },
+    {
+      "store": "tienda6",
+      "storeName": "Oficina Colina",
+      "month": "Noviembre",
+      "year": 2026,
+      "date": "2026-11-22",
+      "dayNumber": 22,
+      "weekday": "Domingo",
+      "week": "Semana 4",
+      "type": "guardia"
     },
     {
       "store": "tienda6",
@@ -1008,8 +1006,8 @@
       "dayNumber": 28,
       "weekday": "Sábado",
       "week": "Semana 5",
-      "start": "09:00",
-      "end": "13:00",
+      "start": "08:00",
+      "end": "17:00",
       "type": "normal"
     },
     {

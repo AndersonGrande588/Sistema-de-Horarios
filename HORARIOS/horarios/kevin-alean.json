@@ -718,13 +718,11 @@
       "storeName": "C.C Colina",
       "month": "Noviembre",
       "year": 2026,
-      "date": "2026-11-02",
-      "dayNumber": 2,
-      "weekday": "Lunes",
-      "week": "Semana 2",
-      "start": "08:00",
-      "end": "17:00",
-      "type": "normal"
+      "date": "2026-11-01",
+      "dayNumber": 1,
+      "weekday": "Domingo",
+      "week": "Semana 1",
+      "type": "guardia"
     },
     {
       "store": "tienda1",
@@ -874,30 +872,6 @@
       "storeName": "C.C Colina",
       "month": "Noviembre",
       "year": 2026,
-      "date": "2026-11-15",
-      "dayNumber": 15,
-      "weekday": "Domingo",
-      "week": "Semana 3",
-      "type": "guardia"
-    },
-    {
-      "store": "tienda1",
-      "storeName": "C.C Colina",
-      "month": "Noviembre",
-      "year": 2026,
-      "date": "2026-11-16",
-      "dayNumber": 16,
-      "weekday": "Lunes",
-      "week": "Semana 4",
-      "start": "08:00",
-      "end": "17:00",
-      "type": "normal"
-    },
-    {
-      "store": "tienda1",
-      "storeName": "C.C Colina",
-      "month": "Noviembre",
-      "year": 2026,
       "date": "2026-11-17",
       "dayNumber": 17,
       "weekday": "Martes",
@@ -1033,7 +1007,7 @@
       "weekday": "Sábado",
       "week": "Semana 5",
       "start": "08:00",
-      "end": "12:00",
+      "end": "17:00",
       "type": "normal"
     },
     {

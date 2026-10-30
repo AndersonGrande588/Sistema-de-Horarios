@@ -831,19 +831,6 @@
       "type": "normal"
     },
     {
-      "store": "tienda4",
-      "storeName": "C.C Plaza Central",
-      "month": "Noviembre",
-      "year": 2026,
-      "date": "2026-11-02",
-      "dayNumber": 2,
-      "weekday": "Lunes",
-      "week": "Semana 2",
-      "start": "08:00",
-      "end": "17:00",
-      "type": "normal"
-    },
-    {
       "store": "tienda3",
       "storeName": "C.C Felicidad",
       "month": "Noviembre",
@@ -909,21 +896,19 @@
       "type": "normal"
     },
     {
-      "store": "tienda4",
-      "storeName": "C.C Plaza Central",
-      "month": "Noviembre",
-      "year": 2026,
-      "date": "2026-11-07",
-      "dayNumber": 7,
-      "weekday": "Sábado",
-      "week": "Semana 2",
-      "start": "08:00",
-      "end": "12:00",
-      "type": "normal"
-    },
-    {
       "store": "tienda3",
       "storeName": "C.C Felicidad",
+      "month": "Noviembre",
+      "year": 2026,
+      "date": "2026-11-08",
+      "dayNumber": 8,
+      "weekday": "Domingo",
+      "week": "Semana 2",
+      "type": "guardia"
+    },
+    {
+      "store": "tienda4",
+      "storeName": "C.C Plaza Central",
       "month": "Noviembre",
       "year": 2026,
       "date": "2026-11-08",
@@ -1011,32 +996,6 @@
       "type": "normal"
     },
     {
-      "store": "tienda4",
-      "storeName": "C.C Plaza Central",
-      "month": "Noviembre",
-      "year": 2026,
-      "date": "2026-11-14",
-      "dayNumber": 14,
-      "weekday": "Sábado",
-      "week": "Semana 3",
-      "start": "08:00",
-      "end": "12:00",
-      "type": "normal"
-    },
-    {
-      "store": "tienda4",
-      "storeName": "C.C Plaza Central",
-      "month": "Noviembre",
-      "year": 2026,
-      "date": "2026-11-16",
-      "dayNumber": 16,
-      "weekday": "Lunes",
-      "week": "Semana 4",
-      "start": "08:00",
-      "end": "17:00",
-      "type": "normal"
-    },
-    {
       "store": "tienda3",
       "storeName": "C.C Felicidad",
       "month": "Noviembre",
@@ -1091,19 +1050,6 @@
     {
       "store": "tienda3",
       "storeName": "C.C Felicidad",
-      "month": "Noviembre",
-      "year": 2026,
-      "date": "2026-11-21",
-      "dayNumber": 21,
-      "weekday": "Sábado",
-      "week": "Semana 4",
-      "start": "08:00",
-      "end": "12:00",
-      "type": "normal"
-    },
-    {
-      "store": "tienda4",
-      "storeName": "C.C Plaza Central",
       "month": "Noviembre",
       "year": 2026,
       "date": "2026-11-21",
@@ -1180,34 +1126,21 @@
       "type": "normal"
     },
     {
+      "store": "tienda4",
+      "storeName": "C.C Plaza Central",
+      "month": "Noviembre",
+      "year": 2026,
+      "date": "2026-11-28",
+      "dayNumber": 28,
+      "weekday": "Sábado",
+      "week": "Semana 5",
+      "start": "08:00",
+      "end": "17:00",
+      "type": "normal"
+    },
+    {
       "store": "tienda3",
       "storeName": "C.C Felicidad",
-      "month": "Noviembre",
-      "year": 2026,
-      "date": "2026-11-28",
-      "dayNumber": 28,
-      "weekday": "Sábado",
-      "week": "Semana 5",
-      "start": "08:00",
-      "end": "12:00",
-      "type": "normal"
-    },
-    {
-      "store": "tienda4",
-      "storeName": "C.C Plaza Central",
-      "month": "Noviembre",
-      "year": 2026,
-      "date": "2026-11-28",
-      "dayNumber": 28,
-      "weekday": "Sábado",
-      "week": "Semana 5",
-      "start": "08:00",
-      "end": "12:00",
-      "type": "normal"
-    },
-    {
-      "store": "tienda4",
-      "storeName": "C.C Plaza Central",
       "month": "Noviembre",
       "year": 2026,
       "date": "2026-11-30",
