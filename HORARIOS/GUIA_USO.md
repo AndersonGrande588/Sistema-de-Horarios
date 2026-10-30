@@ -133,10 +133,13 @@ Es una herramienta **solo para el administrador**, no hace parte de la web y no 
 
 1. Abre `herramientas/INICIAR_EDITOR.bat` (doble clic).
 2. Elige **técnico** y **mes**.
-3. Selecciona un turno de la tabla para editarlo, o pulsa **Nuevo turno**.
-4. Ajusta día, tienda, tipo (jornada normal o guardia) y horas; pulsa **Aplicar**.
+3. El mes se muestra como **calendario**: cada día trae sus turnos en azul
+   (jornada) o naranja (guardia). Clic en un día o en una tarjeta para editarlo;
+   con **☰ Tabla** ves la lista detallada y con **🗓 Calendario** vuelves al mes.
+4. Selecciona un turno, o pulsa **Nuevo turno**.
+5. Ajusta día, tienda, tipo (jornada normal o guardia) y horas; pulsa **Aplicar**.
    En **Tienda** puedes escribir para buscar (`felicidad`, `plaza`, `tienda3`…).
-5. Pulsa **Guardar (Ctrl+S)**. La web muestra el cambio al recargar.
+6. Pulsa **Guardar (Ctrl+S)**. La web muestra el cambio al recargar.
 
 Junto al desplegable de técnico están los botones **＋ Técnico** y **🗑 Técnico**:
 

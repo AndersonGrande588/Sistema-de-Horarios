@@ -51,6 +51,19 @@ STORE_NAMES = {
     "tienda9": "Bima",
 }
 
+# Nombres cortos para las tarjetas del calendario
+SHORT_STORES = {
+    "tienda1": "Colina",
+    "tienda2": "Calle 82",
+    "tienda3": "Felicidad",
+    "tienda4": "Plaza",
+    "tienda5": "Unicentro",
+    "tienda6": "Oficina",
+    "tienda7": "Titán",
+    "tienda8": "Fontanar",
+    "tienda9": "Bima",
+}
+
 HORA_RE = re.compile(r"^([01]\d|2[0-3]):([0-5]\d)$")
 
 
@@ -438,6 +451,10 @@ def run_gui(test=False):
             style.configure("TLabelframe", background="#f3f4f6")
             style.configure("TLabelframe.Label", background="#f3f4f6",
                             font=("Segoe UI", 10, "bold"))
+            style.configure("TFrame", background="#f3f4f6")
+            style.configure("CalHead.TLabel", background="#f3f4f6",
+                            foreground="#6b7280", font=("Segoe UI", 9, "bold"))
+            style.configure("Toolbutton", font=("Segoe UI", 9), padding=(10, 5))
 
             self._build_ui()
             self._load_docs()
@@ -493,14 +510,45 @@ def run_gui(test=False):
             main.columnconfigure(1, weight=0)
             main.rowconfigure(0, weight=1)
 
-            # --- tabla de turnos ---
+            # --- turnos del mes: calendario o tabla ---
             box = ttk.LabelFrame(main, text="Turnos del mes", padding=8)
             box.grid(row=0, column=0, sticky="nsew", padx=(0, 12))
-            box.rowconfigure(0, weight=1)
+            box.rowconfigure(1, weight=1)
             box.columnconfigure(0, weight=1)
 
+            vista = ttk.Frame(box)
+            vista.grid(row=0, column=0, sticky="ew", pady=(0, 6))
+            self.vista_var = tk.StringVar(value="calendario")
+            ttk.Radiobutton(vista, text="🗓 Calendario", value="calendario",
+                            variable=self.vista_var, style="Toolbutton",
+                            command=lambda: self._set_view("calendario")).pack(side="left")
+            ttk.Radiobutton(vista, text="☰ Tabla", value="tabla",
+                            variable=self.vista_var, style="Toolbutton",
+                            command=lambda: self._set_view("tabla")).pack(
+                side="left", padx=(4, 0))
+
+            leyenda = tk.Frame(vista, bg="#f3f4f6")
+            leyenda.pack(side="right")
+            for texto, fondo, color in ((" Jornada ", "#dbeafe", "#1e3a8a"),
+                                        (" Guardia ", "#ffe3c2", "#9a3412")):
+                tk.Label(leyenda, text=texto, bg=fondo, fg=color,
+                         font=("Segoe UI", 8, "bold"), padx=4,
+                         pady=1).pack(side="left", padx=(4, 0))
+
+            cont = ttk.Frame(box)
+            cont.grid(row=1, column=0, sticky="nsew")
+            cont.rowconfigure(0, weight=1)
+            cont.columnconfigure(0, weight=1)
+
+            # --- vista de tabla ---
+            self.view_table = ttk.Frame(cont)
+            self.view_table.grid(row=0, column=0, sticky="nsew")
+            self.view_table.rowconfigure(0, weight=1)
+            self.view_table.columnconfigure(0, weight=1)
+
             cols = ("fecha", "dia", "semana", "tienda", "tipo", "horario")
-            self.tree = ttk.Treeview(box, columns=cols, show="headings", selectmode="browse")
+            self.tree = ttk.Treeview(self.view_table, columns=cols, show="headings",
+                                     selectmode="browse")
             heads = {"fecha": ("Fecha", 92), "dia": ("Día", 92), "semana": ("Semana", 82),
                      "tienda": ("Tienda", 150), "tipo": ("Tipo", 92),
                      "horario": ("Horario", 120)}
@@ -515,15 +563,47 @@ def run_gui(test=False):
             self.tree.bind("<Return>", self._on_select)
             self.tree.bind("<Delete>", lambda e: self._delete())
 
-            sb = ttk.Scrollbar(box, orient="vertical", command=self.tree.yview)
+            sb = ttk.Scrollbar(self.view_table, orient="vertical", command=self.tree.yview)
             sb.grid(row=0, column=1, sticky="ns")
             self.tree.configure(yscrollcommand=sb.set)
 
+            # --- vista de calendario (mes en curso del técnico) ---
+            self.view_calendar = ttk.Frame(cont)
+            self.view_calendar.grid(row=0, column=0, sticky="nsew")
+            for c in range(7):
+                self.view_calendar.columnconfigure(c, weight=1, uniform="dias")
+            for c, nombre in enumerate(("Lun", "Mar", "Mié", "Jue", "Vie",
+                                        "Sáb", "Dom")):
+                ttk.Label(self.view_calendar, text=nombre, anchor="center",
+                          style="CalHead.TLabel").grid(
+                    row=0, column=c, sticky="ew", padx=1, pady=(0, 2))
+
+            self.cal_cells = []
+            for r in range(6):
+                for c in range(7):
+                    frame = tk.Frame(self.view_calendar, bd=0, highlightthickness=1,
+                                     highlightbackground="#e5e7eb", bg="#ffffff")
+                    frame.grid(row=r + 1, column=c, sticky="nsew", padx=1, pady=1)
+                    head = tk.Frame(frame, bg="#ffffff")
+                    head.pack(fill="x", padx=4, pady=(2, 0))
+                    lbl_dia = tk.Label(head, text="", anchor="w", bg="#ffffff",
+                                       fg="#374151", font=("Segoe UI", 9, "bold"))
+                    lbl_dia.pack(side="left")
+                    lbl_tag = tk.Label(head, text="", anchor="e", bg="#ffffff",
+                                       fg="#9a3412", font=("Segoe UI", 7, "bold"))
+                    lbl_tag.pack(side="right")
+                    body = tk.Frame(frame, bg="#ffffff")
+                    body.pack(fill="both", expand=True, padx=3, pady=(1, 3))
+                    self.cal_cells.append({"frame": frame, "head": head,
+                                           "day": lbl_dia, "tag": lbl_tag,
+                                           "body": body})
+
             self.lbl_count = ttk.Label(box, text="", style="Hint.TLabel")
-            self.lbl_count.grid(row=1, column=0, columnspan=2, sticky="w", pady=(6, 0))
-            ttk.Label(box, text="Doble clic o Enter sobre una fila para editarla",
-                      style="Hint.TLabel").grid(row=1, column=0, columnspan=2,
-                                                sticky="e", pady=(6, 0))
+            self.lbl_count.grid(row=2, column=0, sticky="w", pady=(6, 0))
+            self.lbl_hint = ttk.Label(box, text="", style="Hint.TLabel")
+            self.lbl_hint.grid(row=2, column=0, sticky="e", pady=(6, 0))
+
+            self._set_view("calendario")
 
             # --- formulario ---
             form = ttk.LabelFrame(main, text="Turno", padding=12)
@@ -853,8 +933,184 @@ def run_gui(test=False):
                          (self.current_pid, self.year))
                 self._update_dirty_label()
                 self._update_day_label()
+                self._render_calendar()
             finally:
                 self._suppress_events = False
+
+        # ---------- calendario ----------
+        def _set_view(self, modo):
+            """Muestra el calendario o la tabla sin perder el estado."""
+            self.view_mode = modo
+            if hasattr(self, "vista_var"):
+                self.vista_var.set(modo)
+            if modo == "calendario":
+                self.view_table.grid_remove()
+                self.view_calendar.grid()
+                self.lbl_hint.config(
+                    text="Clic en un día para cargarlo · clic en una tarjeta para editarla")
+                self._render_calendar()
+            else:
+                self.view_calendar.grid_remove()
+                self.view_table.grid()
+                self.lbl_hint.config(
+                    text="Doble clic o Enter sobre una fila para editarla")
+
+        def _calendar_entries(self):
+            """{día: [(índice, turno)]} de los turnos del mes mostrado."""
+            out = {}
+            for idx, s in enumerate(self._doc().get("shifts", [])):
+                if s.get("month") != self.current_month:
+                    continue
+                try:
+                    dia = int(s.get("dayNumber"))
+                except (TypeError, ValueError):
+                    continue
+                out.setdefault(dia, []).append((idx, s))
+            for filas in out.values():
+                filas.sort(key=lambda t: (t[1].get("type", ""),
+                                          t[1].get("store", "")))
+            return out
+
+        @staticmethod
+        def _short_store(s):
+            store = s.get("store")
+            if store in SHORT_STORES:
+                return SHORT_STORES[store]
+            nombre = s.get("storeName") or store or ""
+            for prefijo in ("C.C ", "Centro Comercial ", "Oficina "):
+                if nombre.startswith(prefijo):
+                    nombre = nombre[len(prefijo):]
+                    break
+            return nombre
+
+        @staticmethod
+        def _short_time(hora):
+            """'08:00' -> '08'; si hay minutos distintos de 00, deja HH:MM."""
+            hora = hora or ""
+            return hora[:2] if hora.endswith(":00") else hora
+
+        def _render_calendar(self):
+            if not getattr(self, "cal_cells", None) or not self.current_month:
+                return
+            m = MES_NUM[self.current_month]
+            dias = calendar.monthrange(self.year, m)[1]
+            primer = datetime.date(self.year, m, 1).weekday()   # lunes = 0
+            filas = (primer + dias + 6) // 7
+            entradas = self._calendar_entries()
+            hoy = datetime.date.today()
+            try:
+                dia_sel = int(self.dia_var.get())
+            except (TypeError, ValueError):
+                dia_sel = None
+
+            for r in range(6):
+                self.view_calendar.rowconfigure(
+                    r + 1, weight=1 if r < filas else 0)
+
+            for pos, cell in enumerate(self.cal_cells):
+                frame = cell["frame"]
+                if pos // 7 >= filas:
+                    frame.grid_remove()
+                    continue
+                frame.grid()
+
+                dia = pos - primer + 1
+                for w in cell["body"].winfo_children():
+                    w.destroy()
+
+                if not 1 <= dia <= dias:
+                    frame.config(bg="#f9fafb", highlightthickness=1,
+                                 highlightbackground="#eef0f2")
+                    cell["head"].config(bg="#f9fafb")
+                    cell["day"].config(text="", bg="#f9fafb")
+                    cell["tag"].config(text="", bg="#f9fafb")
+                    self._bind_cal_cell(cell, None)
+                    continue
+
+                es_hoy = (self.year == hoy.year and m == hoy.month
+                          and dia == hoy.day)
+                es_sel = (dia_sel == dia)
+                borde = "#0f766e" if es_sel else "#2563eb" if es_hoy else "#e5e7eb"
+                frame.config(bg="#ffffff", highlightbackground=borde,
+                             highlightthickness=2 if (es_sel or es_hoy) else 1)
+                cell["head"].config(bg="#ffffff")
+                cell["day"].config(
+                    text=str(dia), bg="#ffffff",
+                    fg="#0f766e" if es_sel else "#2563eb" if es_hoy else "#374151")
+
+                filas_dia = entradas.get(dia, [])
+                guardias = sum(1 for _, s in filas_dia
+                               if s.get("type") == "guardia")
+                cell["tag"].config(text=("🛡 %d" % guardias) if guardias else "",
+                                   bg="#ffffff")
+                self._bind_cal_cell(cell, dia)
+
+                for idx, s in (filas_dia if len(filas_dia) <= 2
+                               else filas_dia[:1]):
+                    if s.get("type") == "guardia":
+                        texto = "🛡 " + self._short_store(s)
+                        fondo, color = "#ffe3c2", "#9a3412"
+                    else:
+                        texto = "%s %s–%s" % (
+                            self._short_store(s),
+                            self._short_time(s.get("start", "")),
+                            self._short_time(s.get("end", "")))
+                        fondo, color = "#dbeafe", "#1e3a8a"
+                    chip = tk.Label(cell["body"], text=texto, anchor="w",
+                                    bg=fondo, fg=color, padx=3,
+                                    font=("Segoe UI", 7))
+                    chip.pack(fill="x", pady=(0, 1))
+                    chip.bind("<Button-1>",
+                              lambda e, i=idx: self._calendar_open(i))
+
+                if len(filas_dia) > 2:
+                    visibles = 1
+                    extra = len(filas_dia) - visibles
+                    mas = tk.Label(cell["body"], text="+%d más" % extra,
+                                   anchor="w", bg="#ffffff", fg="#6b7280",
+                                   padx=3, font=("Segoe UI", 7, "italic"))
+                    mas.pack(fill="x")
+                    mas.bind("<Button-1>",
+                             lambda e, i=filas_dia[visibles][0]:
+                             self._calendar_open(i))
+
+        def _bind_cal_cell(self, cell, dia):
+            def pick(_evt=None):
+                self._calendar_pick(dia)
+
+            for w in (cell["frame"], cell["head"], cell["day"],
+                      cell["tag"], cell["body"]):
+                w.bind("<Button-1>", pick)
+
+        def _calendar_pick(self, dia):
+            """Clic en una celda: elige el día (y edita si tiene un solo turno)."""
+            if not dia or not self.current_month:
+                return
+            filas_dia = self._calendar_entries().get(dia, [])
+            if len(filas_dia) == 1:
+                self._calendar_open(filas_dia[0][0])
+                return
+
+            self.dia_var.set(str(dia))
+            self.ignore_index = None
+            self.selected_shift = None
+            self.lbl_modo.config(text="Nuevo turno")
+            self._suggest_times()
+            self._update_day_label()
+            self._render_calendar()
+
+        def _calendar_open(self, idx):
+            doc = self._doc()
+            if not 0 <= idx < len(doc.get("shifts", [])):
+                return
+            if self.tree.exists(str(idx)):
+                self._suppress_events = True
+                try:
+                    self.tree.selection_set(str(idx))
+                    self.tree.see(str(idx))
+                finally:
+                    self._suppress_events = False
+            self._load_into_form(idx, doc["shifts"][idx])
 
         def _update_day_label(self):
             try:
@@ -907,6 +1163,7 @@ def run_gui(test=False):
             self._update_day_label()
             if self.ignore_index is None:
                 self._suggest_times()
+            self._render_calendar()
 
         def _on_type_change(self, _evt=None):
             guardia = self.tipo_var.get() == "Guardia"
@@ -974,6 +1231,7 @@ def run_gui(test=False):
             self.ent_fin.insert(0, s.get("end", ""))
             self._on_type_change()
             self._update_day_label()
+            self._render_calendar()
 
         def _new_shift(self):
             self.ignore_index = None
@@ -1008,6 +1266,7 @@ def run_gui(test=False):
             self._suggest_times()
             self._on_type_change()
             self._update_day_label()
+            self._render_calendar()
 
         def _form_values(self):
             """Devuelve (store, tipo, start, end) o lanza ValueError con mensaje."""
@@ -1378,6 +1637,33 @@ def ui_test():
         app._delete()
         app.update()
         assert len(app.docs[pid]["shifts"]) == n_before - 1, "no se eliminó"
+
+        # 6b) vista de calendario: celdas, cambio de vista y clic en un día
+        assert len(app.cal_cells) == 42
+        assert app.view_calendar.winfo_manager() == "grid"
+        app._set_view("tabla")
+        assert app.view_calendar.winfo_manager() == "" \
+            and app.view_table.winfo_manager() == "grid"
+        app._set_view("calendario")
+        assert app.view_calendar.winfo_manager() == "grid" \
+            and app.view_table.winfo_manager() == ""
+        # diciembre 2026 empieza martes y ocupa 5 filas: la 6.ª debe ocultarse
+        primer = datetime.date(2026, 12, 1).weekday()
+        assert app.cal_cells[35]["frame"].winfo_manager() == "", \
+            "no se ocultó la sexta fila"
+        doc_dic = app.docs[pid]
+        por_dia = {}
+        for i, s in enumerate(doc_dic["shifts"]):
+            if s["month"] == "Diciembre":
+                por_dia.setdefault(s["dayNumber"], []).append(i)
+        dia = sorted(d for d, v in por_dia.items() if len(v) == 1)[0]
+        app._calendar_pick(dia)
+        app.update()
+        assert app.dia_var.get() == str(dia)
+        assert app.ignore_index == por_dia[dia][0], "el clic no abrió el turno"
+        assert app.docs[pid]["shifts"][app.ignore_index]["dayNumber"] == dia
+        celda = app.cal_cells[primer + dia - 1]
+        assert celda["body"].winfo_children(), "la celda no dibujó el turno"
 
         # 7) alta de técnico con el diálogo simulado
         app._persona_dialog = lambda: {

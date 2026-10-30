@@ -25,12 +25,29 @@ normal de Windows). No necesita internet ni instalar paquetes.
 ### Uso rápido
 
 1. Elige el **técnico** y el **mes**.
-2. Selecciona un turno de la tabla para editarlo, o pulsa **Nuevo turno**.
+2. Selecciona un turno en el calendario o en la tabla para editarlo, o pulsa
+   **Nuevo turno**.
 3. Ajusta día, tienda, tipo y horas. Pulsa **Aplicar**.
    - En **Tienda** puedes escribir para buscar: `felicidad`, `plaza`,
      `unicentro`, `tienda3`, etc. La lista se filtra sola.
 4. Pulsa **Guardar (Ctrl+S)** para escribir el JSON. El cambio se ve en la web
    al recargar la página.
+
+### Vista de calendario
+
+La zona central abre en **🗓 Calendario**, un mes con los turnos del técnico
+elegido:
+
+- Cada día muestra sus turnos: **azul** = jornada normal, **naranja** =
+  guardia, con la tienda y el horario abreviados.
+- Clic en un día: lo selecciona. Si ese día tiene un solo turno, lo abre para
+  editar.
+- Clic en una tarjeta: abre ese turno en el formulario.
+- El día de hoy y el día seleccionado quedan resaltados con un borde.
+- Si un día tiene más de dos turnos verás **+N más**; el detalle completo está
+  en la tabla.
+- **☰ Tabla** muestra la lista detallada de siempre y **🗓 Calendario** regresa
+  al mes.
 
 ### Agregar y eliminar técnicos
 
