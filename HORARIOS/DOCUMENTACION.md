@@ -52,7 +52,7 @@ Todo el procesamiento ocurre en el navegador (**client-side rendering**). No hay
 | `tecnicos/` | Fotografías de los empleados (WebP optimizadas en `tecnicos/web/`). |
 | `backup_refactor/` | Respaldo de los archivos previos al refactor (no se usa en producción). |
 | `GoogleSites_Calendario.html`, `Horarios.html`, `BORRADOR.html` | Versiones antiguas / borradores; **no forman parte de la app actual**. |
-| `../herramientas/` | **Herramienta interna del administrador** (editor de escritorio en Python). No se publica ni se enlaza desde la web. |
+| `../herramientas/` | **Herramienta interna del administrador** (editor de escritorio en Python). Permite editar turnos y dar de alta/baja técnicos en `personas.json`. No se publica ni se enlaza desde la web. |
 
 ---
 
@@ -107,6 +107,10 @@ Lista (array) de objetos:
 | `photo` | string | Ruta de la foto (WebP). Si falta, se muestra un avatar con iniciales. |
 
 Actualmente hay **6 empleados únicos**.
+
+> El **editor local** (`herramientas/editor_horarios.py`) da de alta y de baja
+> técnicos: actualiza este archivo, crea `horarios/<id>.json` al agregar y
+> archiva ese JSON en `herramientas/.respaldos/` al eliminar.
 
 ### 4.3 `horarios/<id>.json` — un archivo por técnico
 

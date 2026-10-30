@@ -138,6 +138,15 @@ Es una herramienta **solo para el administrador**, no hace parte de la web y no 
    En **Tienda** puedes escribir para buscar (`felicidad`, `plaza`, `tienda3`…).
 5. Pulsa **Guardar (Ctrl+S)**. La web muestra el cambio al recargar.
 
+Junto al desplegable de técnico están los botones **＋ Técnico** y **🗑 Técnico**:
+
+- **＋ Técnico** abre un formulario con nombre, ID, correo, teléfono y foto. El
+  ID se genera solo desde el nombre. Al aceptar se agrega a `personas.json`, se
+  crea su `horarios/<id>.json` vacío y queda listo para cargarle turnos.
+- **🗑 Técnico** pide confirmación y mueve su archivo de horarios a
+  `herramientas/.respaldos/` antes de quitarlo de `personas.json`. No deja
+  borrar al último técnico.
+
 El editor calcula solo la fecha, el día de la semana y la semana del mes, e impide duplicados y que una guardia y una jornada normal coincidan el mismo día. Antes de guardar deja una copia en `herramientas/.respaldos/`.
 
 > Más detalle en `herramientas/LEEME.md`.
@@ -146,7 +155,10 @@ El editor calcula solo la fecha, el día de la semana y la semana del mes, e imp
 Si prefieres editar los archivos directamente:
 
 #### Añadir una persona (`personas.json`)
-Añade un objeto nuevo a la lista con: `id` (único), `name`, `email`, `phone`, `photo`.
+Lo más fácil es usar **＋ Técnico** en el editor local: crea la persona y su
+archivo de horarios. Si prefieres hacerlo a mano, añade un objeto nuevo a la
+lista con: `id` (único), `name`, `email`, `phone`, `photo`, y crea también
+`horarios/<id>.json`.
 ```json
 {
   "id": "juan-perez",

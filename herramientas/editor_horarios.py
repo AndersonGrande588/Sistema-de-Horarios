@@ -243,11 +243,161 @@ def save_doc(doc, hor_dir=HOR, backup_dir=RESPALDOS):
 
 
 # ─────────────────────────────────────────────────────────────
+#  Técnicos: alta y baja en personas.json
+# ─────────────────────────────────────────────────────────────
+ID_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
+def slugify(texto):
+    """'Juan Pérez' -> 'juan-perez' (ID seguro para el nombre del archivo)."""
+    base = re.sub(r"[^a-z0-9]+", "-", sin_acentos(texto)).strip("-")
+    return base or "tecnico"
+
+
+def validate_persona(data, personas):
+    """Errores de un técnico nuevo (lista vacía si todo está bien)."""
+    errors = []
+    name = (data.get("name") or "").strip()
+    pid = (data.get("id") or "").strip()
+    email = (data.get("email") or "").strip()
+
+    if not name:
+        errors.append("El nombre es obligatorio.")
+    if not pid:
+        errors.append("El ID es obligatorio.")
+    elif not ID_RE.match(pid):
+        errors.append("El ID solo admite minúsculas, números y guiones "
+                      "(ej. juan-perez).")
+    elif any((p.get("id") or "") == pid for p in personas):
+        errors.append("Ya existe un técnico con el ID «%s»." % pid)
+    if email and not EMAIL_RE.match(email):
+        errors.append("El correo no tiene un formato válido "
+                      "(ej. nombre@empresa.com).")
+    return errors
+
+
+def prepare_photo(texto, pid, horarios_dir):
+    """Devuelve la ruta relativa de la foto y la copia a tecnicos/web si hace falta."""
+    t = (texto or "").strip()
+    if not t:
+        return ""
+    p = Path(t)
+    if not p.is_absolute():
+        if (Path(horarios_dir) / p).exists():
+            return p.as_posix()
+        raise ValueError("No se encontró la foto: %s" % t)
+    if not p.exists():
+        raise ValueError("No se encontró la foto: %s" % t)
+
+    destino_dir = Path(horarios_dir) / "tecnicos" / "web"
+    destino_dir.mkdir(parents=True, exist_ok=True)
+    ext = p.suffix.lower() or ".webp"
+    destino = destino_dir / (pid + ext)
+    try:
+        if p.resolve() != destino.resolve():
+            shutil.copy2(p, destino)
+    except OSError as exc:
+        raise ValueError("No se pudo copiar la foto: %s" % exc)
+    return "tecnicos/web/%s%s" % (pid, ext)
+
+
+def save_personas(personas, personas_path, backup_dir):
+    """Escribe personas.json con respaldo previo y su mismo formato."""
+    personas_path = Path(personas_path)
+    backup_dir = Path(backup_dir)
+    personas_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if personas_path.exists():
+        backup_dir.mkdir(parents=True, exist_ok=True)
+        stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        shutil.copy2(personas_path, backup_dir / ("personas_%s.json" % stamp))
+
+    tmp = personas_path.with_suffix(".json.tmp")
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(personas, f, ensure_ascii=False, indent=2)
+    os.replace(tmp, personas_path)
+
+    for old in sorted(backup_dir.glob("personas_*.json"))[:-40]:
+        try:
+            old.unlink()
+        except OSError:
+            pass
+    return personas_path
+
+
+def create_persona(personas, personas_path, hor_dir, backup_dir, data):
+    """Agrega el técnico a personas.json y le crea su JSON de horarios vacío."""
+    errors = validate_persona(data, personas)
+    if errors:
+        raise ValueError("\n".join(errors))
+
+    persona = {
+        "id": (data.get("id") or "").strip(),
+        "name": (data.get("name") or "").strip(),
+        "email": (data.get("email") or "").strip(),
+        "phone": (data.get("phone") or "").strip(),
+        "photo": (data.get("photo") or "").strip(),
+    }
+
+    hor_dir = Path(hor_dir)
+    doc_path = hor_dir / (persona["id"] + ".json")
+    if doc_path.exists():
+        try:
+            viejo = json.loads(doc_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            viejo = {}
+        if viejo.get("shifts"):
+            raise ValueError("Ya existe horarios/%s.json con turnos. "
+                             "Usa otro ID." % persona["id"])
+
+    personas.append(persona)
+    creado = False
+    if not doc_path.exists():
+        hor_dir.mkdir(parents=True, exist_ok=True)
+        with open(doc_path, "w", encoding="utf-8") as f:
+            json.dump({"id": persona["id"], "name": persona["name"], "shifts": []},
+                      f, ensure_ascii=False, indent=2)
+        creado = True
+
+    try:
+        save_personas(personas, personas_path, backup_dir)
+    except Exception:
+        personas.remove(persona)
+        if creado:
+            try:
+                doc_path.unlink()
+            except OSError:
+                pass
+        raise
+    return persona
+
+
+def delete_persona(personas, personas_path, hor_dir, backup_dir, pid):
+    """Quita el técnico de personas.json y archiva/borra su JSON de horarios."""
+    persona = next((p for p in personas if p.get("id") == pid), None)
+    if not persona:
+        raise ValueError("No se encontró el técnico «%s»." % pid)
+
+    personas.remove(persona)
+    save_personas(personas, personas_path, backup_dir)
+
+    doc_path = Path(hor_dir) / ("%s.json" % pid)
+    if doc_path.exists():
+        backup_dir = Path(backup_dir)
+        backup_dir.mkdir(parents=True, exist_ok=True)
+        stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        shutil.copy2(doc_path, backup_dir / ("%s_eliminado_%s.json" % (pid, stamp)))
+        doc_path.unlink()
+    return persona
+
+
+# ─────────────────────────────────────────────────────────────
 #  Interfaz (Tkinter)
 # ─────────────────────────────────────────────────────────────
 def run_gui(test=False):
     import tkinter as tk
-    from tkinter import ttk, messagebox, simpledialog
+    from tkinter import ttk, messagebox, simpledialog, filedialog
 
     class EditorApp(tk.Tk):
         def __init__(self):
@@ -307,8 +457,14 @@ def run_gui(test=False):
             self.persona_var = tk.StringVar()
             self.cb_persona = ttk.Combobox(top, textvariable=self.persona_var,
                                            state="readonly", width=30)
-            self.cb_persona.pack(side="left", padx=(8, 18))
+            self.cb_persona.pack(side="left", padx=(8, 6))
             self.cb_persona.bind("<<ComboboxSelected>>", self._on_persona_change)
+            self.btn_add_persona = ttk.Button(top, text="＋ Técnico",
+                                              command=self._add_persona)
+            self.btn_add_persona.pack(side="left")
+            self.btn_del_persona = ttk.Button(top, text="🗑 Técnico",
+                                              command=self._delete_persona)
+            self.btn_del_persona.pack(side="left", padx=(4, 18))
 
             ttk.Label(top, text="📅 Mes").pack(side="left")
             self.mes_var = tk.StringVar()
@@ -445,13 +601,9 @@ def run_gui(test=False):
                 self.docs[p["id"]] = load_doc(HOR, p["id"], p.get("name", p["id"]))
 
         def _fill_personas(self):
-            labels = ["%s — %s" % (p.get("name", p["id"]), p["id"]) for p in self.personas]
-            self.cb_persona["values"] = labels
+            self._refresh_persona_choices()
             if not self.personas:
-                self.lbl_estado.config(text="No se encontraron técnicos en personas.json")
                 return
-            self.current_pid = self.personas[0]["id"]
-            self.cb_persona.current(0)
 
             hoy = datetime.date.today()
             default = MESES[hoy.month - 1] if hoy.year == self.year else "Septiembre"
@@ -459,6 +611,204 @@ def run_gui(test=False):
             self.mes_var.set(default)
             self._new_shift()
             self._refresh()
+
+        def _refresh_persona_choices(self, select_pid=None):
+            """Repinta el desplegable de técnicos y elige uno."""
+            labels = ["%s — %s" % (p.get("name", p["id"]), p["id"])
+                      for p in self.personas]
+            self.cb_persona["values"] = labels
+            if not self.personas:
+                self.current_pid = None
+                self.persona_var.set("")
+                self.lbl_estado.config(text="No hay técnicos en personas.json")
+                return
+            objetivo = select_pid or self.current_pid
+            idx = next((i for i, p in enumerate(self.personas)
+                        if p["id"] == objetivo), 0)
+            self.current_pid = self.personas[idx]["id"]
+            self.cb_persona.current(idx)
+
+        # ---------- alta y baja de técnicos ----------
+        def _persona_dialog(self):
+            """Formulario modal de alta. Devuelve los datos o None si se cancela."""
+            import tkinter as tk
+
+            dlg = tk.Toplevel(self)
+            dlg.title("Agregar técnico")
+            dlg.transient(self)
+            dlg.resizable(False, False)
+            dlg.configure(bg="#f3f4f6")
+            result = {"data": None}
+
+            body = ttk.Frame(dlg, padding=14)
+            body.pack(fill="both", expand=True)
+            body.columnconfigure(1, weight=1)
+
+            nombre_var = tk.StringVar()
+            pid_var = tk.StringVar()
+            email_var = tk.StringVar()
+            tel_var = tk.StringVar()
+            foto_var = tk.StringVar()
+            auto = {"on": True}
+
+            def on_name(*_args):
+                if auto["on"]:
+                    pid_var.set(slugify(nombre_var.get()))
+
+            def on_pid(*_args):
+                auto["on"] = False
+
+            def browse():
+                elegida = filedialog.askopenfilename(
+                    parent=dlg, title="Elegir foto",
+                    filetypes=[("Imágenes", "*.webp *.png *.jpg *.jpeg *.gif"),
+                               ("Todos los archivos", "*.*")])
+                if elegida:
+                    foto_var.set(elegida)
+
+            def cancel():
+                dlg.destroy()
+
+            def ok():
+                data = {
+                    "id": pid_var.get().strip(),
+                    "name": nombre_var.get().strip(),
+                    "email": email_var.get().strip(),
+                    "phone": tel_var.get().strip(),
+                    "photo": foto_var.get().strip(),
+                }
+                errs = validate_persona(data, self.personas)
+                if errs:
+                    messagebox.showerror("Datos del técnico", "\n".join(errs),
+                                         parent=dlg)
+                    return
+                result["data"] = data
+                dlg.destroy()
+
+            ttk.Label(body, text="Nombre completo").grid(row=0, column=0,
+                                                        sticky="w", pady=4)
+            ent_nombre = ttk.Entry(body, textvariable=nombre_var, width=34)
+            ent_nombre.grid(row=0, column=1, sticky="ew", padx=(10, 0), pady=4)
+
+            ttk.Label(body, text="ID (archivo)").grid(row=1, column=0,
+                                                      sticky="w", pady=4)
+            ent_pid = ttk.Entry(body, textvariable=pid_var, width=34)
+            ent_pid.grid(row=1, column=1, sticky="ew", padx=(10, 0), pady=4)
+
+            ttk.Label(body, text="Correo").grid(row=2, column=0, sticky="w", pady=4)
+            ent_email = ttk.Entry(body, textvariable=email_var, width=34)
+            ent_email.grid(row=2, column=1, sticky="ew", padx=(10, 0), pady=4)
+
+            ttk.Label(body, text="Teléfono").grid(row=3, column=0, sticky="w", pady=4)
+            ent_tel = ttk.Entry(body, textvariable=tel_var, width=34)
+            ent_tel.grid(row=3, column=1, sticky="ew", padx=(10, 0), pady=4)
+
+            ttk.Label(body, text="Foto").grid(row=4, column=0, sticky="w", pady=4)
+            fila_foto = ttk.Frame(body)
+            fila_foto.grid(row=4, column=1, sticky="ew", padx=(10, 0), pady=4)
+            fila_foto.columnconfigure(0, weight=1)
+            ent_foto = ttk.Entry(fila_foto, textvariable=foto_var, width=24)
+            ent_foto.grid(row=0, column=0, sticky="ew")
+            ttk.Button(fila_foto, text="Buscar…", command=browse).grid(
+                row=0, column=1, padx=(6, 0))
+
+            ttk.Label(body, text="El ID se usa para horarios/<id>.json y se genera "
+                                 "solo a partir del nombre.",
+                      style="Hint.TLabel", wraplength=380).grid(
+                row=5, column=0, columnspan=2, sticky="w", pady=(4, 10))
+
+            botones = ttk.Frame(body)
+            botones.grid(row=6, column=0, columnspan=2, sticky="e")
+            ttk.Button(botones, text="Cancelar", command=cancel).pack(side="left")
+            ttk.Button(botones, text="＋ Agregar", style="Accent.TButton",
+                       command=ok).pack(side="left", padx=(6, 0))
+
+            ent_nombre.bind("<KeyRelease>", on_name)
+            ent_pid.bind("<KeyRelease>", on_pid)
+            for w in (ent_nombre, ent_pid, ent_email, ent_tel, ent_foto):
+                w.bind("<Return>", lambda e: ok())
+            dlg.bind("<Escape>", lambda e: cancel())
+
+            dlg.update_idletasks()
+            x = self.winfo_rootx() + max(0, (self.winfo_width() - dlg.winfo_width()) // 2)
+            y = self.winfo_rooty() + max(0, (self.winfo_height() - dlg.winfo_height()) // 3)
+            dlg.geometry("+%d+%d" % (x, y))
+            dlg.grab_set()
+            ent_nombre.focus_set()
+            self.wait_window(dlg)
+            return result["data"]
+
+        def _add_persona(self):
+            data = self._persona_dialog()
+            if not data:
+                return
+
+            errs = validate_persona(data, self.personas)
+            if errs:
+                messagebox.showerror("Agregar técnico", "\n".join(errs), parent=self)
+                return
+            try:
+                data["photo"] = prepare_photo(data.get("photo"), data["id"], HORARIOS)
+            except ValueError as exc:
+                messagebox.showerror("Foto del técnico", str(exc), parent=self)
+                return
+            try:
+                persona = create_persona(self.personas, PERSONAS_JSON, HOR,
+                                         RESPALDOS, data)
+            except ValueError as exc:
+                messagebox.showerror("Agregar técnico", str(exc), parent=self)
+                return
+            except Exception as exc:
+                messagebox.showerror("Agregar técnico",
+                                     "No se pudo guardar: %s" % exc, parent=self)
+                return
+
+            pid = persona["id"]
+            self.docs[pid] = load_doc(HOR, pid, persona["name"])
+            self.dirty.discard(pid)
+            self._refresh_persona_choices(pid)
+            self._new_shift()
+            self._refresh()
+            self.lbl_estado.config(text="✔ Técnico agregado: %s" % persona["name"])
+
+        def _delete_persona(self):
+            if not self.current_pid:
+                return
+            if len(self.personas) <= 1:
+                messagebox.showwarning("Eliminar técnico",
+                                       "Debe quedar al menos un técnico.",
+                                       parent=self)
+                return
+
+            pid = self.current_pid
+            persona = next((p for p in self.personas if p["id"] == pid), None)
+            if persona is None:
+                return
+            n = len(self.docs.get(pid, {}).get("shifts", []))
+            aviso = "\n\n⚠ Tiene cambios sin guardar que se perderán." \
+                if pid in self.dirty else ""
+            if not messagebox.askyesno(
+                    "Eliminar técnico",
+                    "¿Eliminar a %s (%s)?\n\nSe quitará de personas.json y su "
+                    "archivo horarios/%s.json (%d turnos) se moverá a la carpeta "
+                    "de respaldos.%s"
+                    % (persona.get("name", pid), pid, pid, n, aviso),
+                    parent=self):
+                return
+            try:
+                delete_persona(self.personas, PERSONAS_JSON, HOR, RESPALDOS, pid)
+            except Exception as exc:
+                messagebox.showerror("Eliminar técnico", str(exc), parent=self)
+                return
+
+            self.docs.pop(pid, None)
+            self.dirty.discard(pid)
+            self.current_pid = None
+            self._refresh_persona_choices()
+            self._new_shift()
+            self._refresh()
+            self.lbl_estado.config(text="✔ Técnico eliminado: %s"
+                                         % persona.get("name", pid))
 
         def _doc(self):
             return self.docs.get(self.current_pid, {"id": self.current_pid, "shifts": []})
@@ -879,11 +1229,21 @@ def ui_test():
 
     real = HOR / "andres-garzon.json"
     before = hashlib.md5(real.read_bytes()).hexdigest()
+    before_personas = hashlib.md5(PERSONAS_JSON.read_bytes()).hexdigest()
 
     tmp = Path(tempfile.mkdtemp(prefix="editor_uitest_"))
     hor_tmp = tmp / "horarios"
-    hor_tmp.mkdir()
+    shutil.copytree(HOR, hor_tmp)
     resp_tmp = tmp / "respaldos"
+    personas_tmp = tmp / "personas.json"
+    shutil.copy2(PERSONAS_JSON, personas_tmp)
+
+    originales = {k: globals()[k] for k in
+                  ("PERSONAS_JSON", "HOR", "RESPALDOS", "HORARIOS")}
+    globals()["PERSONAS_JSON"] = personas_tmp
+    globals()["HOR"] = hor_tmp
+    globals()["RESPALDOS"] = resp_tmp
+    globals()["HORARIOS"] = tmp / "webroot"
 
     real_save = globals()["save_doc"]
     guardados = []
@@ -915,6 +1275,8 @@ def ui_test():
 
         # el desplegable de tiendas debe venir lleno
         assert len(app.cb_tienda["values"]) == len(STORE_NAMES), app.cb_tienda["values"]
+        # los botones de alta/baja de técnicos deben existir
+        assert app.btn_add_persona.winfo_exists() and app.btn_del_persona.winfo_exists()
 
         pid = "andres-garzon"
         idx = next(i for i, p in enumerate(app.personas) if p["id"] == pid)
@@ -1017,12 +1379,50 @@ def ui_test():
         app.update()
         assert len(app.docs[pid]["shifts"]) == n_before - 1, "no se eliminó"
 
+        # 7) alta de técnico con el diálogo simulado
+        app._persona_dialog = lambda: {
+            "id": "prueba-test", "name": "Prueba Test",
+            "email": "prueba@rsg.com.co", "phone": "300 1112233", "photo": ""}
+        app._add_persona()
+        app.update()
+        assert app.current_pid == "prueba-test", app.current_pid
+        assert any(p["id"] == "prueba-test" for p in app.personas), "no se agregó"
+        assert (hor_tmp / "prueba-test.json").exists(), "no se creó su JSON"
+        guardadas = json.loads(personas_tmp.read_text(encoding="utf-8"))
+        assert any(p["id"] == "prueba-test" for p in guardadas), "no se guardó personas.json"
+        assert len(app.cb_persona["values"]) == len(guardadas)
+
+        # 7b) un ID repetido debe rechazarse
+        app._persona_dialog = lambda: {
+            "id": pid, "name": "Repetido", "email": "", "phone": "", "photo": ""}
+        try:
+            app._add_persona()
+        except AssertionError:
+            pass
+        else:
+            raise AssertionError("debía rechazar un ID repetido")
+
+        # 8) baja del técnico (se archiva su JSON)
+        app._delete_persona()
+        app.update()
+        assert not any(p["id"] == "prueba-test" for p in app.personas), "no se quitó"
+        assert not (hor_tmp / "prueba-test.json").exists(), "no se quitó su JSON"
+        assert list(resp_tmp.glob("prueba-test_eliminado_*.json")), "sin respaldo"
+        assert app.current_pid and app.current_pid != "prueba-test"
+        guardadas = json.loads(personas_tmp.read_text(encoding="utf-8"))
+        assert not any(p["id"] == "prueba-test" for p in guardadas)
+
         after = hashlib.md5(real.read_bytes()).hexdigest()
         assert before == after, "¡se modificó el archivo real!"
+        assert hashlib.md5(
+            originales["PERSONAS_JSON"].read_bytes()).hexdigest() == before_personas, \
+            "¡se modificó personas.json real!"
         print("UITEST OK: tiendas, alta, edición, cambio de tienda, guardia,")
-        print("           conflicto, guardado y borrado (archivo real intacto)")
+        print("           conflicto, guardado, borrado y alta/baja de técnicos")
+        print("           (archivos reales intactos)")
     finally:
         globals()["save_doc"] = real_save
+        globals().update(originales)
         app.destroy()
         shutil.rmtree(tmp, ignore_errors=True)
 
@@ -1105,10 +1505,79 @@ def run_selftest():
         assert len(filter_store_labels("")) == len(STORE_NAMES)
         assert len(filter_store_labels("tienda")) == len(STORE_NAMES)
 
+        # 8) alta y baja de técnicos (personas.json + su JSON de horarios)
+        assert slugify("Juan Pérez Gómez") == "juan-perez-gomez"
+        assert slugify("  ÁNGELA  ") == "angela"
+        assert slugify("!!!") == "tecnico"
+        assert not validate_persona(
+            {"id": "juan-perez", "name": "Juan Pérez",
+             "email": "juan@rsg.com.co"}, personas)
+        assert validate_persona({"id": "", "name": ""}, personas)
+        assert validate_persona({"id": "Juan Perez", "name": "Juan"}, personas)
+        assert validate_persona({"id": "juan-perez", "name": "Juan",
+                                 "email": "correo-sin-arroba"}, personas)
+        assert validate_persona({"id": personas[0]["id"], "name": "Otro"}, personas)
+
+        hor_dir = tmp / "HORARIOS" / "horarios"
+        personas_path = tmp / "HORARIOS" / "personas.json"
+        respaldos_dir = tmp / ".respaldos"
+
+        nuevo = create_persona(
+            personas, personas_path, hor_dir, respaldos_dir,
+            {"id": "juan-perez", "name": "Juan Pérez",
+             "email": "juan@rsg.com.co", "phone": "300 0000000", "photo": ""})
+        assert nuevo["id"] == "juan-perez"
+        assert (hor_dir / "juan-perez.json").exists(), "no se creó el JSON"
+        doc_nuevo = json.loads((hor_dir / "juan-perez.json").read_text(encoding="utf-8"))
+        assert list(doc_nuevo) == ["id", "name", "shifts"] and not doc_nuevo["shifts"]
+        assert any(p["id"] == "juan-perez" for p in load_personas(tmp))
+        assert list(respaldos_dir.glob("personas_*.json")), "sin respaldo de personas.json"
+
+        # ID repetido y datos inválidos
+        try:
+            create_persona(personas, personas_path, hor_dir, respaldos_dir,
+                           {"id": "juan-perez", "name": "Juan Pérez 2"})
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("debía rechazar un ID repetido")
+
+        # la foto se copia a tecnicos/web/<id>.<ext>
+        foto = tmp / "foto.png"
+        foto.write_bytes(b"PNG")
+        rel = prepare_photo(str(foto), "juan-perez", tmp / "HORARIOS")
+        assert rel == "tecnicos/web/juan-perez.png", rel
+        assert (tmp / "HORARIOS" / rel).read_bytes() == b"PNG"
+        try:
+            prepare_photo(str(tmp / "no-existe.png"), "juan-perez", tmp / "HORARIOS")
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("debía avisar que la foto no existe")
+
+        # baja: se archiva el JSON con sus turnos
+        doc_juan = load_doc(hor_dir, "juan-perez", "Juan Pérez")
+        doc_juan["shifts"].append(
+            build_shift("tienda2", year, 12, 8, "normal", "08:00", "12:00"))
+        save_doc(doc_juan, hor_dir, respaldos_dir)
+        delete_persona(personas, personas_path, hor_dir, respaldos_dir, "juan-perez")
+        assert not (hor_dir / "juan-perez.json").exists(), "no se quitó el JSON"
+        assert not any(p["id"] == "juan-perez" for p in load_personas(tmp))
+        archivados = list(respaldos_dir.glob("juan-perez_eliminado_*.json"))
+        assert archivados, "no se archivó el JSON del técnico eliminado"
+        assert len(json.loads(archivados[0].read_text(encoding="utf-8"))["shifts"]) == 1
+        try:
+            delete_persona(personas, personas_path, hor_dir, respaldos_dir, "no-existe")
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("debía fallar al borrar un técnico inexistente")
+
         print("  ✓ alta de turno, esquema y orden de claves")
         print("  ✓ detección de duplicados y conflictos guardia/jornada")
         print("  ✓ respaldo automático y validación de horas")
         print("  ✓ búsqueda de tiendas por nombre, clave o texto parcial")
+        print("  ✓ alta y baja de técnicos con respaldo y copia de foto")
         print("Autoprueba OK (archivos reales intactos)")
 
 

@@ -6,8 +6,9 @@ Son utilidades de escritorio para el administrador.
 ## Editor de horarios
 
 `editor_horarios.py` es una ventana (Python + Tkinter) para **agregar, editar,
-eliminar y duplicar turnos** sin tocar los JSON a mano. Escribe directamente en
-`HORARIOS/horarios/<id>.json`, que es lo que lee la web.
+eliminar y duplicar turnos** sin tocar los JSON a mano, y también para **agregar
+y eliminar técnicos**. Escribe directamente en `HORARIOS/horarios/<id>.json` y
+en `HORARIOS/personas.json`, que es lo que lee la web.
 
 ### Cómo abrirlo
 
@@ -31,6 +32,26 @@ normal de Windows). No necesita internet ni instalar paquetes.
 4. Pulsa **Guardar (Ctrl+S)** para escribir el JSON. El cambio se ve en la web
    al recargar la página.
 
+### Agregar y eliminar técnicos
+
+Los botones **＋ Técnico** y **🗑 Técnico** están junto al desplegable de
+técnico, arriba a la izquierda.
+
+- **Agregar:** pide nombre, ID, correo, teléfono y foto.
+  - El **ID** se genera solo desde el nombre (`Juan Pérez` → `juan-perez`) y se
+    usa para el archivo `horarios/<id>.json`. Puedes cambiarlo mientras escribes.
+  - El correo es opcional, pero si lo escribes debe tener formato válido.
+  - La foto es opcional: al elegirla se copia a `HORARIOS/tecnicos/web/<id>.<ext>`.
+  - Al guardar, el técnico se añade a `personas.json`, se crea su archivo de
+    horarios vacío y queda seleccionado para empezar a cargarle turnos.
+- **Eliminar:** pide confirmación e indica cuántos turnos tiene.
+  - Se quita de `personas.json` y su `horarios/<id>.json` se mueve a
+    `herramientas/.respaldos/<id>_eliminado_AAAAMMDD-HHMMSS.json`.
+  - No permite borrar al último técnico.
+  - Si el técnico tiene cambios sin guardar, lo advierte antes de continuar.
+
+Después de agregar o eliminar, recarga la web para ver el cambio.
+
 ### Reglas que valida
 
 - La fecha, el día de la semana y el número de semana se calculan solos
@@ -46,7 +67,9 @@ normal de Windows). No necesita internet ni instalar paquetes.
 
 Antes de sobrescribir un JSON, el editor guarda una copia en
 `herramientas/.respaldos/<id>_AAAAMMDD-HHMMSS.json`. Conserva los 40 más
-recientes de cada técnico.
+recientes de cada técnico. `personas.json` se respalda como
+`personas_AAAAMMDD-HHMMSS.json` y, al eliminar un técnico, su archivo queda como
+`<id>_eliminado_AAAAMMDD-HHMMSS.json`.
 
 Para restaurar uno: copia el respaldo elegido sobre
 `HORARIOS/horarios/<id>.json` y recarga la web.
@@ -61,8 +84,9 @@ python -X utf8 herramientas\editor_horarios.py --uitest
 ```
 
 `--selftest` prueba la lógica de datos (esquema, duplicados, conflictos,
-respaldos, horas). `--uitest` abre la ventana de forma invisible y simula alta,
-edición, guardia, guardado y borrado.
+respaldos, horas, alta/baja de técnicos y copia de foto). `--uitest` abre la
+ventana de forma invisible y simula alta, edición, guardia, guardado, borrado y
+alta/baja de técnicos.
 
 ### Notas
 
