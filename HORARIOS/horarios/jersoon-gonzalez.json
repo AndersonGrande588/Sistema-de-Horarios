@@ -795,7 +795,7 @@
       "weekday": "Martes",
       "week": "Semana 2",
       "start": "08:00",
-      "end": "16:00",
+      "end": "17:00",
       "type": "normal"
     },
     {
@@ -821,7 +821,7 @@
       "weekday": "Jueves",
       "week": "Semana 2",
       "start": "08:00",
-      "end": "17:00",
+      "end": "16:00",
       "type": "normal"
     },
     {
@@ -951,7 +951,7 @@
       "weekday": "Jueves",
       "week": "Semana 4",
       "start": "08:00",
-      "end": "17:00",
+      "end": "16:00",
       "type": "normal"
     },
     {
