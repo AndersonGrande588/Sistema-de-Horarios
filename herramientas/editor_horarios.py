@@ -156,16 +156,47 @@ def load_personas(base=BASE):
         return json.load(f)
 
 
-def load_doc(hor_dir, pid, name):
+def load_doc(hor_dir, pid, name, avisos=None):
+    """Carga el JSON de un técnico sin romperse con archivos incompletos.
+
+    Un archivo vacío (0 bytes) es normal cuando el técnico acaba de crearse, y
+    un JSON dañado no debe impedir abrir el editor: en ambos casos se devuelve
+    un documento vacío. El archivo original no se toca; si luego se guarda,
+    save_doc() hace un respaldo antes de sobrescribirlo.
+    """
     path = Path(hor_dir) / ("%s.json" % pid)
-    if path.exists():
-        with open(path, encoding="utf-8") as f:
-            doc = json.load(f)
-        doc.setdefault("id", pid)
-        doc.setdefault("name", name)
-        doc.setdefault("shifts", [])
-        return doc
-    return {"id": pid, "name": name, "shifts": []}
+    if not path.exists():
+        return {"id": pid, "name": name, "shifts": []}
+
+    doc = {}
+    aviso = ""
+    try:
+        texto = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        aviso = "%s: no se pudo leer (%s)." % (path.name, exc)
+    else:
+        if texto.strip():
+            try:
+                datos = json.loads(texto)
+            except ValueError as exc:
+                aviso = "%s: JSON inválido (%s)." % (path.name, exc)
+            else:
+                if isinstance(datos, dict):
+                    doc = datos
+                else:
+                    aviso = "%s: no contiene un objeto JSON." % path.name
+
+    if aviso:
+        if avisos is None:
+            print("Aviso: %s Se abre sin turnos." % aviso, file=sys.stderr)
+        else:
+            avisos.append(aviso)
+
+    doc.setdefault("id", pid)
+    doc.setdefault("name", name)
+    if not isinstance(doc.get("shifts"), list):
+        doc["shifts"] = []
+    return doc
 
 
 def current_year(docs, fallback=2026):
@@ -677,8 +708,17 @@ def run_gui(test=False):
         # ---------- datos ----------
         def _load_docs(self):
             self.docs = {}
+            avisos = []
             for p in self.personas:
-                self.docs[p["id"]] = load_doc(HOR, p["id"], p.get("name", p["id"]))
+                self.docs[p["id"]] = load_doc(HOR, p["id"], p.get("name", p["id"]),
+                                              avisos=avisos)
+            if avisos:
+                messagebox.showwarning(
+                    "Horarios con problemas",
+                    "Estos archivos no se pudieron leer y se abrirán sin "
+                    "turnos:\n\n" + "\n".join("• " + a for a in avisos) +
+                    "\n\nNo se borró nada: al guardar se crea un respaldo.",
+                    parent=self)
 
         def _fill_personas(self):
             self._refresh_persona_choices()
@@ -1729,6 +1769,19 @@ def run_selftest():
                 for p in personas}
         print("  personas cargadas:", len(personas))
         assert len(personas) >= 1
+
+        # Un JSON vacío (técnico recién creado) no debe romper la carga.
+        hor_pruebas = tmp / "HORARIOS" / "horarios"
+        (hor_pruebas / "vacio.json").write_text("", encoding="utf-8")
+        vacio = load_doc(hor_pruebas, "vacio", "Vacío")
+        assert vacio == {"id": "vacio", "name": "Vacío", "shifts": []}, vacio
+
+        # Un JSON dañado tampoco: se abre vacío y deja un aviso.
+        (hor_pruebas / "roto.json").write_text("{no es json", encoding="utf-8")
+        avisos = []
+        roto = load_doc(hor_pruebas, "roto", "Roto", avisos)
+        assert roto["shifts"] == [] and roto["id"] == "roto", roto
+        assert avisos and "roto.json" in avisos[0], avisos
 
         doc = docs["brayan-sanchez"]
         before = len(doc["shifts"])
