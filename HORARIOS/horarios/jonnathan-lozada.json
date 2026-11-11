@@ -1,0 +1,19 @@
+{
+  "id": "jonnathan-lozada",
+  "name": "Jonnathan Camilo Lozada Salcedo",
+  "shifts": [
+    {
+      "store": "tienda2",
+      "storeName": "Zona Calle 82",
+      "month": "Noviembre",
+      "year": 2026,
+      "date": "2026-11-11",
+      "dayNumber": 11,
+      "weekday": "Miércoles",
+      "week": "Semana 3",
+      "start": "08:00",
+      "end": "16:00",
+      "type": "normal"
+    }
+  ]
+}
