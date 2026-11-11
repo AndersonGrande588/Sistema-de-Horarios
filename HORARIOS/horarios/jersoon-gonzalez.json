@@ -985,6 +985,19 @@
       "storeName": "C.C Unicentro",
       "month": "Noviembre",
       "year": 2026,
+      "date": "2026-11-23",
+      "dayNumber": 23,
+      "weekday": "Lunes",
+      "week": "Semana 5",
+      "start": "08:00",
+      "end": "17:00",
+      "type": "normal"
+    },
+    {
+      "store": "tienda5",
+      "storeName": "C.C Unicentro",
+      "month": "Noviembre",
+      "year": 2026,
       "date": "2026-11-24",
       "dayNumber": 24,
       "weekday": "Martes",
@@ -1016,7 +1029,7 @@
       "weekday": "Jueves",
       "week": "Semana 5",
       "start": "08:00",
-      "end": "16:00",
+      "end": "17:00",
       "type": "normal"
     },
     {

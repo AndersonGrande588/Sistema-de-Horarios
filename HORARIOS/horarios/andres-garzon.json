@@ -1061,6 +1061,19 @@
       "type": "normal"
     },
     {
+      "store": "tienda3",
+      "storeName": "C.C Felicidad",
+      "month": "Noviembre",
+      "year": 2026,
+      "date": "2026-11-23",
+      "dayNumber": 23,
+      "weekday": "Lunes",
+      "week": "Semana 5",
+      "start": "08:00",
+      "end": "17:00",
+      "type": "normal"
+    },
+    {
       "store": "tienda4",
       "storeName": "C.C Plaza Central",
       "month": "Noviembre",
@@ -1070,7 +1083,7 @@
       "weekday": "Martes",
       "week": "Semana 5",
       "start": "08:00",
-      "end": "17:00",
+      "end": "16:00",
       "type": "normal"
     },
     {
@@ -1096,7 +1109,7 @@
       "weekday": "Jueves",
       "week": "Semana 5",
       "start": "08:00",
-      "end": "16:00",
+      "end": "17:00",
       "type": "normal"
     },
     {
