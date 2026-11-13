@@ -7,13 +7,6 @@
     "photo": "tecnicos/unnamed (1).webp"
   },
   {
-    "id": "brayan-sanchez",
-    "name": "Brayan Sanchez",
-    "email": "brayan.sanchez@rsg.com.co",
-    "phone": "316 1914543",
-    "photo": ""
-  },
-  {
     "id": "jersoon-gonzalez",
     "name": "Jersoon Gonzalez",
     "email": "jersoon.gonzalez@rsg.com.co",
@@ -46,6 +39,13 @@
     "name": "Jonnathan Camilo Lozada Salcedo",
     "email": "jonnathan.lozada@rsg.com.co",
     "phone": "3017865310",
+    "photo": ""
+  },
+  {
+    "id": "juan-daza",
+    "name": "Juan Daza",
+    "email": "juan.daza@rsg.com.co",
+    "phone": "316 1914543",
     "photo": ""
   }
 ]
