@@ -1085,19 +1085,6 @@
       "weekday": "Sábado",
       "week": "Semana 1",
       "start": "08:00",
-      "end": "12:00",
-      "type": "normal"
-    },
-    {
-      "store": "tienda1",
-      "storeName": "C.C Colina",
-      "month": "Diciembre",
-      "year": 2026,
-      "date": "2026-12-07",
-      "dayNumber": 7,
-      "weekday": "Lunes",
-      "week": "Semana 2",
-      "start": "08:00",
       "end": "17:00",
       "type": "normal"
     },
@@ -1106,12 +1093,12 @@
       "storeName": "C.C Colina",
       "month": "Diciembre",
       "year": 2026,
-      "date": "2026-12-08",
-      "dayNumber": 8,
-      "weekday": "Martes",
-      "week": "Semana 2",
+      "date": "2026-12-06",
+      "dayNumber": 6,
+      "weekday": "Domingo",
+      "week": "Semana 1",
       "start": "08:00",
-      "end": "16:00",
+      "end": "17:00",
       "type": "normal"
     },
     {
@@ -1163,7 +1150,20 @@
       "weekday": "Sábado",
       "week": "Semana 2",
       "start": "08:00",
-      "end": "12:00",
+      "end": "17:00",
+      "type": "normal"
+    },
+    {
+      "store": "tienda1",
+      "storeName": "C.C Colina",
+      "month": "Diciembre",
+      "year": 2026,
+      "date": "2026-12-13",
+      "dayNumber": 13,
+      "weekday": "Domingo",
+      "week": "Semana 2",
+      "start": "08:00",
+      "end": "17:00",
       "type": "normal"
     },
     {
@@ -1187,19 +1187,6 @@
       "date": "2026-12-15",
       "dayNumber": 15,
       "weekday": "Martes",
-      "week": "Semana 3",
-      "start": "08:00",
-      "end": "16:00",
-      "type": "normal"
-    },
-    {
-      "store": "tienda1",
-      "storeName": "C.C Colina",
-      "month": "Diciembre",
-      "year": 2026,
-      "date": "2026-12-16",
-      "dayNumber": 16,
-      "weekday": "Miércoles",
       "week": "Semana 3",
       "start": "08:00",
       "end": "16:00",
@@ -1241,19 +1228,8 @@
       "weekday": "Sábado",
       "week": "Semana 3",
       "start": "08:00",
-      "end": "12:00",
+      "end": "17:00",
       "type": "normal"
-    },
-    {
-      "store": "tienda1",
-      "storeName": "C.C Colina",
-      "month": "Diciembre",
-      "year": 2026,
-      "date": "2026-12-20",
-      "dayNumber": 20,
-      "weekday": "Domingo",
-      "week": "Semana 3",
-      "type": "guardia"
     },
     {
       "store": "tienda1",
@@ -1312,25 +1288,12 @@
       "storeName": "C.C Colina",
       "month": "Diciembre",
       "year": 2026,
-      "date": "2026-12-25",
-      "dayNumber": 25,
-      "weekday": "Viernes",
-      "week": "Semana 4",
-      "start": "08:00",
-      "end": "17:00",
-      "type": "normal"
-    },
-    {
-      "store": "tienda1",
-      "storeName": "C.C Colina",
-      "month": "Diciembre",
-      "year": 2026,
       "date": "2026-12-26",
       "dayNumber": 26,
       "weekday": "Sábado",
       "week": "Semana 4",
       "start": "08:00",
-      "end": "12:00",
+      "end": "17:00",
       "type": "normal"
     },
     {
